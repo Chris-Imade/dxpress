@@ -1,0 +1,340 @@
+<%- include('../layouts/admin-header') %>
+
+<main id="main-content" class="ml-collapsed">
+
+<div class="dashboard-content">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/admin/shipments">Shipments</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Edit Shipment</li>
+    </ol>
+  </nav>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">
+        Edit Shipment <span class="text-muted">#<%= shipment.trackingId %></span>
+      </h5>
+    </div>
+    
+    <div class="card-body">
+      <form action="/admin/shipments/edit/<%= shipment._id %>" method="POST">
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="customerName" class="form-label">Customer Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              name="customerName"
+              value="<%= shipment.customerName %>"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="customerEmail" class="form-label">Customer Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="customerEmail"
+              name="customerEmail"
+              value="<%= shipment.customerEmail %>"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="customerPhone" class="form-label">Customer Phone</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="customerPhone"
+              name="customerPhone"
+              value="<%= shipment.customerPhone %>"
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="estimatedDelivery" class="form-label">Estimated Delivery Date</label>
+            <input
+              type="date"
+              class="form-control"
+              id="estimatedDelivery"
+              name="estimatedDelivery"
+              value="<%= shipment.estimatedDelivery ? shipment.estimatedDelivery.toISOString().split('T')[0] : '' %>"
+            />
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="origin" class="form-label">Origin</label>
+            <input
+              type="text"
+              class="form-control"
+              id="origin"
+              name="origin"
+              value="<%= shipment.origin %>"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="destination" class="form-label">Destination</label>
+            <input
+              type="text"
+              class="form-control"
+              id="destination"
+              name="destination"
+              value="<%= shipment.destination %>"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">
+            <label for="weight" class="form-label">Weight (kg)</label>
+            <input
+              type="number"
+              step="0.01"
+              class="form-control"
+              id="weight"
+              name="weight"
+              value="<%= shipment.weight %>"
+              required
+            />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="dimensions" class="form-label">Dimensions</label>
+            <div class="row g-2">
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Length"
+                  name="length"
+                  value="<%= shipment.dimensions?.length || '' %>"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Width"
+                  name="width"
+                  value="<%= shipment.dimensions?.width || '' %>"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Height"
+                  name="height"
+                  value="<%= shipment.dimensions?.height || '' %>"
+                />
+              </div>
+            </div>
+            <small class="text-muted">Length × Width × Height (cm)</small>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="packageType" class="form-label">Package Type</label>
+            <select class="form-select" id="packageType" name="packageType" required>
+              <option value="Document" <%= shipment.packageType === 'Document' ? 'selected' : '' %>>Document</option>
+              <option value="Parcel" <%= shipment.packageType === 'Parcel' ? 'selected' : '' %>>Parcel</option>
+              <option value="Freight" <%= shipment.packageType === 'Freight' ? 'selected' : '' %>>Freight</option>
+              <option value="Express" <%= shipment.packageType === 'Express' ? 'selected' : '' %>>Express</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="Pending" <%= shipment.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="In Transit" <%= shipment.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
+              <option value="Delivered" <%= shipment.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+              <option value="Delayed" <%= shipment.status === 'Delayed' ? 'selected' : '' %>>Delayed</option>
+              <option value="Cancelled" <%= shipment.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="carrierName" class="form-label">Carrier Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="carrierName"
+              name="carrierName"
+              value="<%= shipment.carrierName %>"
+            />
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea
+              class="form-control"
+              id="notes"
+              name="additionalNotes"
+              rows="3"
+            ><%= shipment.additionalNotes %></textarea>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="isFragile"
+              name="isFragile"
+              <%= shipment.fragile ? 'checked' : '' %>
+            />
+            <label class="form-check-label" for="isFragile">Fragile</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="insurance"
+              name="insurance"
+              <%= shipment.insuranceIncluded ? 'checked' : '' %>
+            />
+            <label class="form-check-label" for="insurance">Insurance</label>
+          </div>
+        </div>
+
+        <h5 class="mt-4 mb-3">Shipment History</h5>
+        <div id="statusHistory" class="mb-4">
+          <% if (shipment.statusHistory && shipment.statusHistory.length > 0) { %>
+            <% shipment.statusHistory.forEach((history, index) => { %>
+              <div class="status-history-item mb-3">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">Date</label>
+                    <input
+                      type="datetime-local"
+                      class="form-control"
+                      name="statusHistory[<%= index %>][date]"
+                      value="<%= (history.date && !isNaN(new Date(history.date).getTime())) ? new Date(history.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="statusHistory[<%= index %>][status]" required>
+                      <option value="Pending" <%= history.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                      <option value="Processing" <%= history.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                      <option value="In Transit" <%= history.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
+                      <option value="Out for Delivery" <%= history.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                      <option value="Delivered" <%= history.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                      <option value="Delayed" <%= history.status === 'Delayed' ? 'selected' : '' %>>Delayed</option>
+                      <option value="Failed Attempt" <%= history.status === 'Failed Attempt' ? 'selected' : '' %>>Failed Attempt</option>
+                      <option value="Cancelled" <%= history.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label">Location</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="statusHistory[<%= index %>][location]"
+                      value="<%= history.location %>"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-danger remove-history" <%= index === 0 ? 'disabled' : '' %>>
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="status-history-item mb-3">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Date</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    name="statusHistory[0][date]"
+                    value="<%= new Date().toISOString().slice(0, 16) %>"
+                    required
+                  />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Status</label>
+                  <select class="form-select" name="statusHistory[0][status]" required>
+                    <option value="Pending" selected>Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Delayed">Delayed</option>
+                    <option value="Failed Attempt">Failed Attempt</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Location</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="statusHistory[0][location]"
+                    value="<%= shipment.origin %>"
+                    required
+                  />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                  <button type="button" class="btn btn-outline-danger remove-history" disabled>
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+        
+        <button type="button" id="addStatusHistory" class="btn btn-outline-primary mb-4">
+          <i class="fas fa-plus"></i> Add Status Update
+        </button>
+
+        <div class="d-flex justify-content-between">
+          <a href="/admin/shipments" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> Cancel
+          </a>
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<%- include('../layouts/admin-footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function() {
+      // Disable the button
+      submitBtn.disabled = true;
+      
+      // Change button text to show loading
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    });
+  });
+</script>

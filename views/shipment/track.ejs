@@ -1,0 +1,180 @@
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1
+        class="tw-mb-15 text-white text-center"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+        data-aos-delay="100"
+      >
+        Track Your Shipment
+      </h1>
+      <nav
+        aria-label="breadcrumb"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+        data-aos-delay="200"
+      >
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Track</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Tracking Form Section start -->
+<section class="py-140">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="max-w-856-px mx-auto text-center tw-mb-14">
+          <span
+            class="splitTextStyleTwo cursor-small tw-text-xl fw-bold fst-italic text-decoration-underline text-main-600 tw-mb-305"
+            >Real-Time Tracking System</span
+          >
+          <h2 class="splitTextStyleOne cursor-big tw-mb-8">
+            Track Your Shipment Status
+          </h2>
+          <p class="cursor-small text-neutral-900">
+            Access instant updates on your shipment's location and status
+            through our advanced tracking system. Enter your tracking number for
+            detailed information about your package's journey.
+          </p>
+        </div>
+
+        <div
+          class="bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+          data-aos-delay="300"
+        >
+          <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+          <div class="alert alert-danger" role="alert"><%= errorMessage %></div>
+          <% } %> <% if (typeof successMessage !== 'undefined' &&
+          successMessage) { %>
+          <div class="alert alert-success" role="alert">
+            <%= successMessage %>
+          </div>
+          <% } %>
+
+          <form action="/track-shipment" method="POST" class="tw-py-12">
+            <div class="form-group mb-4">
+              <label for="trackingId" class="form-label fw-bold tw-text-lg"
+                >Tracking Number</label
+              >
+              <input
+                type="text"
+                class="form-control tw-py-3 tw-px-4 border border-neutral-200"
+                id="trackingId"
+                name="trackingId"
+                placeholder="Enter your tracking number (e.g., DX123456ABC)"
+                required
+              />
+            </div>
+            <div class="text-center">
+              <button
+                type="submit"
+                class="btn btn-main-two hover-style-two button--stroke d-inline-flex align-items-center justify-content-center tw-gap-2 group active--translate-y-2 rounded-0 tw-px-13 tw-py-505"
+              >
+                <span class="button__flair"></span>
+                <span class="button__label">Track Shipment</span>
+                <span
+                  class="tw-w-7 tw-h-7 bg-white text-main-600 tw-text-sm tw-rounded d-flex justify-content-center align-items-center position-relative tw-duration-500"
+                >
+                  <i class="ph-bold ph-magnifying-glass"></i>
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Tracking Form Section end -->
+
+<!-- Tracking Info Section start -->
+<section class="pb-140 tracking-info">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="max-w-856-px mx-auto text-center tw-mb-14">
+          <h2 class="splitTextStyleOne cursor-big tw-mb-8">How It Works</h2>
+        </div>
+
+        <div class="row gy-4">
+          <div
+            class="col-md-4"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            data-aos-delay="100"
+          >
+            <div class="text-center">
+              <div
+                class="tw-w-24 tw-h-24 bg-main-50 rounded-circle mx-auto d-flex justify-content-center align-items-center tw-mb-6"
+              >
+                <span class="tw-text-xl fw-bold text-main-600">01</span>
+              </div>
+              <h4 class="tw-mb-4">Enter Number</h4>
+              <p>Input your unique tracking number in the form above</p>
+            </div>
+          </div>
+          <div
+            class="col-md-4"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            data-aos-delay="200"
+          >
+            <div class="text-center">
+              <div
+                class="tw-w-24 tw-h-24 bg-main-50 rounded-circle mx-auto d-flex justify-content-center align-items-center tw-mb-6"
+              >
+                <span class="tw-text-xl fw-bold text-main-600">02</span>
+              </div>
+              <h4 class="tw-mb-4">Track Shipment</h4>
+              <p>View real-time location and current status of your package</p>
+            </div>
+          </div>
+          <div
+            class="col-md-4"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            data-aos-delay="300"
+          >
+            <div class="text-center">
+              <div
+                class="tw-w-24 tw-h-24 bg-main-50 rounded-circle mx-auto d-flex justify-content-center align-items-center tw-mb-6"
+              >
+                <span class="tw-text-xl fw-bold text-main-600">03</span>
+              </div>
+              <h4 class="tw-mb-4">Get Updates</h4>
+              <p>
+                Receive detailed progress updates through each stage of delivery
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="text-center">
+          <h4 class="tw-mb-4">Track & Monitor</h4>
+          <p>
+            Monitor your shipment's progress with our comprehensive tracking
+            system, providing real-time updates and estimated delivery times.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Tracking Info Section end -->

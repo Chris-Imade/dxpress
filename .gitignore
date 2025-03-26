@@ -1,0 +1,15 @@
+node_modules
+about.html
+contact.html
+index.html
+blog-details.html
+blog.html
+project-details.html
+project.html
+service-details.html
+service.html
+track-shipment.html
+team.html
+team-details.html
+assets
+.env

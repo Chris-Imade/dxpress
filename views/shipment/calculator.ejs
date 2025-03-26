@@ -1,0 +1,544 @@
+<%- include('../layouts/header') %>
+
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1 class="tw-mb-15 text-white text-center">Shipment Calculator</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Calculator</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Calculator Section start -->
+<section class="py-140">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl">
+          <!-- Step 1: Shipment Details -->
+          <div id="step1" class="calculator-step">
+            <h4 class="mb-4">Shipment Details</h4>
+            <form id="shipmentForm" class="needs-validation" novalidate>
+              <div class="row g-4">
+                <!-- Origin -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Origin Address</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="originAddress"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Origin Postal Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="originPostalCode"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Origin Country</label>
+                    <select class="form-select" name="originCountry" required>
+                      <option value="">Select Country</option>
+                      <option value="US">United States</option>
+                      <option value="GB">United Kingdom</option>
+                      <option value="CA">Canada</option>
+                      <!-- Add more countries as needed -->
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Destination -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Destination Address</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="destinationAddress"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Destination Postal Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="destinationPostalCode"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Destination Country</label>
+                    <select
+                      class="form-select"
+                      name="destinationCountry"
+                      required
+                    >
+                      <option value="">Select Country</option>
+                      <option value="US">United States</option>
+                      <option value="GB">United Kingdom</option>
+                      <option value="CA">Canada</option>
+                      <!-- Add more countries as needed -->
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Package Details -->
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Package Weight (kg)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="weight"
+                      step="0.1"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Package Type</label>
+                    <select class="form-select" name="packageType" required>
+                      <option value="">Select Type</option>
+                      <option value="box">Box</option>
+                      <option value="envelope">Envelope</option>
+                      <option value="tube">Tube</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Dimensions -->
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Length (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="length"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Width (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="width"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Height (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="height"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="col-12">
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="isFragile"
+                      id="isFragile"
+                    />
+                    <label class="form-check-label" for="isFragile"
+                      >Fragile Package</label
+                    >
+                  </div>
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="insuranceIncluded"
+                      id="insuranceIncluded"
+                    />
+                    <label class="form-check-label" for="insuranceIncluded"
+                      >Include Insurance</label
+                    >
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="expressDelivery"
+                      id="expressDelivery"
+                    />
+                    <label class="form-check-label" for="expressDelivery"
+                      >Express Delivery</label
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center mt-4">
+                <button type="submit" class="btn btn-main">
+                  Calculate Rates
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 2: Rate Comparison -->
+          <div id="step2" class="calculator-step" style="display: none">
+            <h4 class="mb-4">Available Shipping Rates</h4>
+            <div id="ratesContainer" class="row g-4">
+              <!-- Rates will be populated here -->
+            </div>
+            <div class="text-center mt-4">
+              <button
+                type="button"
+                class="btn btn-secondary me-2"
+                onclick="backToStep1()"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                class="btn btn-main"
+                onclick="proceedToPayment()"
+              >
+                Proceed to Payment
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment -->
+          <div id="step3" class="calculator-step" style="display: none">
+            <h4 class="mb-4">Payment Details</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-4">
+                  <div class="card-body">
+                    <h5 class="card-title">Selected Shipping Rate</h5>
+                    <div id="selectedRateDetails"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Payment Method</h5>
+                    <div class="form-check mb-3">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="stripe"
+                        value="stripe"
+                        checked
+                      />
+                      <label class="form-check-label" for="stripe">
+                        <i class="fab fa-stripe me-2"></i>Stripe
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="paypal"
+                        value="paypal"
+                      />
+                      <label class="form-check-label" for="paypal">
+                        <i class="fab fa-paypal me-2"></i>PayPal
+                      </label>
+                    </div>
+                    <div id="paymentButton" class="mt-4"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center mt-4">
+              <button
+                type="button"
+                class="btn btn-secondary me-2"
+                onclick="backToStep2()"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                class="btn btn-main"
+                onclick="completePayment()"
+              >
+                Complete Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Calculator Section end -->
+
+<script>
+  let selectedRate = null;
+  let shipmentData = null;
+
+  // Form validation
+  (function () {
+    "use strict";
+    const forms = document.querySelectorAll(".needs-validation");
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          } else {
+            event.preventDefault();
+            calculateRates(form);
+          }
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+  })();
+
+  async function calculateRates(form) {
+    const formData = new FormData(form);
+    const data = {
+      origin: {
+        address: formData.get("originAddress"),
+        postalCode: formData.get("originPostalCode"),
+        countryCode: formData.get("originCountry"),
+      },
+      destination: {
+        address: formData.get("destinationAddress"),
+        postalCode: formData.get("destinationPostalCode"),
+        countryCode: formData.get("destinationCountry"),
+      },
+      weight: parseFloat(formData.get("weight")),
+      dimensions: {
+        length: parseFloat(formData.get("length")),
+        width: parseFloat(formData.get("width")),
+        height: parseFloat(formData.get("height")),
+      },
+      packageType: formData.get("packageType"),
+      isFragile: formData.get("isFragile") === "on",
+      insuranceIncluded: formData.get("insuranceIncluded") === "on",
+      expressDelivery: formData.get("expressDelivery") === "on",
+    };
+
+    try {
+      const response = await fetch("/api/shipments/calculate-rates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": "your-api-key", // Replace with actual API key
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        displayRates(result.data);
+        shipmentData = data;
+        showStep(2);
+      } else {
+        alert("Error calculating rates: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error calculating rates. Please try again.");
+    }
+  }
+
+  function displayRates(rates) {
+    const container = document.getElementById("ratesContainer");
+    container.innerHTML = rates
+      .map(
+        (rate) => `
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">${rate.carrier}</h5>
+          <p class="card-text">
+            <strong>Service:</strong> ${rate.serviceLevel}<br>
+            <strong>Cost:</strong> ${rate.currency} ${rate.cost.toFixed(2)}<br>
+            <strong>Estimated Days:</strong> ${rate.estimatedDays}
+          </p>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="rate" value="${
+              rate.carrier
+            }-${rate.serviceLevel}" 
+                   onchange="selectRate(${JSON.stringify(rate)})">
+            <label class="form-check-label">Select this rate</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+      )
+      .join("");
+  }
+
+  function selectRate(rate) {
+    selectedRate = rate;
+    document.getElementById("selectedRateDetails").innerHTML = `
+    <p><strong>Carrier:</strong> ${rate.carrier}</p>
+    <p><strong>Service:</strong> ${rate.serviceLevel}</p>
+    <p><strong>Cost:</strong> ${rate.currency} ${rate.cost.toFixed(2)}</p>
+    <p><strong>Estimated Days:</strong> ${rate.estimatedDays}</p>
+  `;
+  }
+
+  function proceedToPayment() {
+    if (!selectedRate) {
+      alert("Please select a shipping rate");
+      return;
+    }
+    showStep(3);
+    setupPayment();
+  }
+
+  function setupPayment() {
+    const paymentMethod = document.querySelector(
+      'input[name="paymentMethod"]:checked'
+    ).value;
+    const paymentButton = document.getElementById("paymentButton");
+
+    if (paymentMethod === "stripe") {
+      paymentButton.innerHTML = `
+      <button id="stripe-button" class="btn btn-primary w-100">
+        <i class="fab fa-stripe me-2"></i>Pay with Stripe
+      </button>
+    `;
+      // Initialize Stripe payment
+      document.getElementById("stripe-button").addEventListener("click", () => {
+        // Implement Stripe payment flow
+        alert("Stripe payment integration would be implemented here");
+      });
+    } else {
+      paymentButton.innerHTML = `
+      <button id="paypal-button" class="btn btn-primary w-100">
+        <i class="fab fa-paypal me-2"></i>Pay with PayPal
+      </button>
+    `;
+      // Initialize PayPal payment
+      document.getElementById("paypal-button").addEventListener("click", () => {
+        // Implement PayPal payment flow
+        alert("PayPal payment integration would be implemented here");
+      });
+    }
+  }
+
+  async function completePayment() {
+    if (!selectedRate || !shipmentData) {
+      alert("Missing required information");
+      return;
+    }
+
+    const paymentMethod = document.querySelector(
+      'input[name="paymentMethod"]:checked'
+    ).value;
+
+    try {
+      // Create shipment
+      const shipmentResponse = await fetch("/api/shipments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": "your-api-key", // Replace with actual API key
+        },
+        body: JSON.stringify({
+          ...shipmentData,
+          selectedRate,
+        }),
+      });
+
+      const shipmentResult = await shipmentResponse.json();
+
+      if (shipmentResult.success) {
+        // Process payment
+        const paymentResponse = await fetch("/api/payments/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": "your-api-key", // Replace with actual API key
+          },
+          body: JSON.stringify({
+            shipmentId: shipmentResult.data.shipmentId,
+            provider: paymentMethod,
+          }),
+        });
+
+        const paymentResult = await paymentResponse.json();
+
+        if (paymentResult.success) {
+          alert(
+            "Payment successful! Your tracking number is: " +
+              shipmentResult.data.trackingId
+          );
+          window.location.href =
+            "/track?trackingId=" + shipmentResult.data.trackingId;
+        } else {
+          alert("Payment failed: " + paymentResult.message);
+        }
+      } else {
+        alert("Error creating shipment: " + shipmentResult.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error processing payment. Please try again.");
+    }
+  }
+
+  function showStep(step) {
+    document.querySelectorAll(".calculator-step").forEach((el, index) => {
+      el.style.display = index + 1 === step ? "block" : "none";
+    });
+  }
+
+  function backToStep1() {
+    showStep(1);
+  }
+
+  function backToStep2() {
+    showStep(2);
+  }
+</script>
+
+<%- include('../layouts/footer') %>

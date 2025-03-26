@@ -1,0 +1,196 @@
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1 class="tw-mb-15 text-white text-center"><%= member.name %></h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/team">Team</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= member.name %>
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Team Member Details Start -->
+<section class="py-140">
+  <div class="container">
+    <div class="team-member-details">
+      <div class="row">
+        <div class="col-lg-5 mb-5 mb-lg-0">
+          <div class="team-member-image position-relative">
+            <img
+              src="<%= member.image %>"
+              alt="<%= member.name %>"
+              class="img-fluid rounded-xl"
+            />
+            <div
+              class="social-links position-absolute bottom-0 start-0 w-100 p-4 bg-main-600 rounded-bottom-xl"
+            >
+              <ul class="list-unstyled d-flex justify-content-center mb-0">
+                <li class="mx-2">
+                  <a href="<%= member.social.facebook %>" class="text-white"
+                    ><i class="fab fa-facebook-f"></i
+                  ></a>
+                </li>
+                <li class="mx-2">
+                  <a href="<%= member.social.twitter %>" class="text-white"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                </li>
+                <li class="mx-2">
+                  <a href="<%= member.social.linkedin %>" class="text-white"
+                    ><i class="fab fa-linkedin-in"></i
+                  ></a>
+                </li>
+                <li class="mx-2">
+                  <a href="<%= member.social.instagram %>" class="text-white"
+                    ><i class="fab fa-instagram"></i
+                  ></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="team-member-info">
+            <h2 class="mb-3"><%= member.name %></h2>
+            <p class="designation text-main-600 fs-5 mb-4">
+              <%= member.position %>
+            </p>
+            <div class="contact-info mb-4">
+              <p>
+                <i class="fas fa-envelope text-main-600 me-2"></i>
+                <%= member.email %>
+              </p>
+              <p>
+                <i class="fas fa-phone-alt text-main-600 me-2"></i>
+                <%= member.phone %>
+              </p>
+            </div>
+            <div class="about-member mb-4">
+              <h4 class="mb-3">About Me</h4>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
+                tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Sed
+                do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+              <p>
+                Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                cupidatat non proident, sunt in culpa qui officia deserunt
+                mollit anim id est laborum.
+              </p>
+            </div>
+            <div class="skills mb-4">
+              <h4 class="mb-3">Skills</h4>
+              <div class="skill-item mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span>Logistics Management</span>
+                  <span>95%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div
+                    class="progress-bar bg-main-600"
+                    role="progressbar"
+                    style="width: 95%"
+                    aria-valuenow="95"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+              </div>
+              <div class="skill-item mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span>Strategic Planning</span>
+                  <span>85%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div
+                    class="progress-bar bg-main-600"
+                    role="progressbar"
+                    style="width: 85%"
+                    aria-valuenow="85"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+              </div>
+              <div class="skill-item">
+                <div class="d-flex justify-content-between mb-1">
+                  <span>Team Leadership</span>
+                  <span>90%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div
+                    class="progress-bar bg-main-600"
+                    role="progressbar"
+                    style="width: 90%"
+                    aria-valuenow="90"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div class="experience">
+              <h4 class="mb-3">Experience</h4>
+              <div class="experience-item mb-4">
+                <h5 class="mb-1"><%= member.position %></h5>
+                <p class="text-muted">DXpress Logistics • 2018 - Present</p>
+                <p>
+                  Leading the strategic direction and overall operations of the
+                  company. Responsible for business development, expansion
+                  strategies, and fostering innovation in logistics services.
+                </p>
+              </div>
+              <div class="experience-item">
+                <h5 class="mb-1">Previous Role</h5>
+                <p class="text-muted">Global Shipping Ltd • 2012 - 2018</p>
+                <p>
+                  Managed all aspects of operations including supply chain,
+                  fleet management, and warehouse logistics. Improved
+                  operational efficiency by 30% and reduced delivery times by
+                  25%.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Team Member Details End -->
+
+<script>
+  // When the page loads, fetch the team member details based on the memberSlug
+  document.addEventListener("DOMContentLoaded", function () {
+    // This is where you would typically fetch the specific team member data
+    // For now, we'll just simulate with some static data
+    // Example of dynamic data update (in a real app, you would fetch this from a server)
+    // const memberSlug = '<%= memberSlug %>';
+    // fetchTeamMemberDetails(memberSlug);
+  });
+
+  // Example function to fetch team member details (this would be implemented in a real app)
+  function fetchTeamMemberDetails(slug) {
+    // This would be an API call in a real application
+    console.log("Fetching details for team member with slug:", slug);
+  }
+</script>

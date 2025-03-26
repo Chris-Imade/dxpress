@@ -1,0 +1,517 @@
+<%- include('./layouts/header') %>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h1 class="h3 mb-0">DXPress API Documentation</h1>
+        </div>
+        <div class="card-body">
+          <p class="lead">
+            Welcome to the DXPress API documentation. This API provides you with
+            the tools to integrate shipping functionality into your e-commerce
+            platform or application.
+          </p>
+
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            To use the API, you'll need an API key. Contact our support team to
+            get your API key.
+          </div>
+
+          <div class="mb-4">
+            <a href="/api-integration" class="btn btn-primary">
+              <i class="fas fa-code me-2"></i> View E-commerce Integration Demo
+            </a>
+          </div>
+
+          <h2 class="h4 mt-4">Authentication</h2>
+          <p>
+            All API requests require authentication. Include your API key in the
+            request headers.
+          </p>
+
+          <div class="card bg-light mb-4">
+            <div class="card-body">
+              <pre><code>X-API-Key: dxp_test_12345678</code></pre>
+            </div>
+          </div>
+
+          <h2 class="h4 mt-4">Base URL</h2>
+          <p>All API endpoints are relative to the base URL:</p>
+          <div class="card bg-light mb-4">
+            <div class="card-body">
+              <pre><code>https://dxpress.uk/api</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Rates Endpoint -->
+      <div class="card shadow-sm mb-4" id="calculate-rates">
+        <div class="card-header bg-light">
+          <h2 class="h4 mb-0">Calculate Shipping Rates</h2>
+        </div>
+        <div class="card-body">
+          <p>
+            Returns available shipping rates from multiple carriers based on
+            shipment details.
+          </p>
+
+          <h3 class="h5">Endpoint</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>POST /shipments/calculate-rates</code></pre>
+            </div>
+          </div>
+
+          <h3 class="h5">Request Parameters</h3>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>origin</td>
+                <td>string</td>
+                <td>Pickup address</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>destination</td>
+                <td>string</td>
+                <td>Delivery address</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>weight</td>
+                <td>number</td>
+                <td>Package weight in kg</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>dimensions</td>
+                <td>object</td>
+                <td>Package dimensions (length, width, height) in cm</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>packageType</td>
+                <td>string</td>
+                <td>Type of package (Document, Parcel, Freight, Express)</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>carriers</td>
+                <td>array</td>
+                <td>
+                  Specific carriers to get rates from (DHL, FedEx, UPS, USPS)
+                </td>
+                <td>No</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="h5 mt-4">Example Request</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>{
+  "origin": "123 Sender St, New York, NY",
+  "destination": "456 Receiver Ave, Los Angeles, CA",
+  "weight": 5,
+  "dimensions": {
+    "length": 10,
+    "width": 8,
+    "height": 6
+  },
+  "packageType": "Parcel",
+  "carriers": ["DHL", "FedEx", "UPS"]
+}</code></pre>
+            </div>
+          </div>
+
+          <h3 class="h5 mt-4">Example Response</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>{
+  "success": true,
+  "data": {
+    "rates": [
+      {
+        "carrier": "FedEx",
+        "serviceLevel": "Ground",
+        "cost": 15.95,
+        "currency": "USD",
+        "estimatedDays": 3,
+        "selected": true
+      },
+      {
+        "carrier": "DHL",
+        "serviceLevel": "Express",
+        "cost": 29.99,
+        "currency": "USD",
+        "estimatedDays": 1,
+        "selected": false
+      },
+      {
+        "carrier": "UPS",
+        "serviceLevel": "Ground",
+        "cost": 18.50,
+        "currency": "USD",
+        "estimatedDays": 3,
+        "selected": false
+      }
+    ],
+    "estimatedDeliveryDates": [
+      {
+        "carrier": "FedEx",
+        "serviceLevel": "Ground",
+        "estimatedDeliveryDate": "2023-06-10T00:00:00.000Z"
+      },
+      {
+        "carrier": "DHL",
+        "serviceLevel": "Express",
+        "estimatedDeliveryDate": "2023-06-08T00:00:00.000Z"
+      },
+      {
+        "carrier": "UPS",
+        "serviceLevel": "Ground",
+        "estimatedDeliveryDate": "2023-06-10T00:00:00.000Z"
+      }
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Shipment Endpoint -->
+      <div class="card shadow-sm mb-4" id="create-shipment">
+        <div class="card-header bg-light">
+          <h2 class="h4 mb-0">Create Shipment</h2>
+        </div>
+        <div class="card-body">
+          <p>Creates a new shipment with the specified details.</p>
+
+          <h3 class="h5">Endpoint</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>POST /shipments</code></pre>
+            </div>
+          </div>
+
+          <h3 class="h5">Request Parameters</h3>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>customerName</td>
+                <td>string</td>
+                <td>Customer's full name</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>customerEmail</td>
+                <td>string</td>
+                <td>Customer's email address</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>customerPhone</td>
+                <td>string</td>
+                <td>Customer's phone number</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>origin</td>
+                <td>string</td>
+                <td>Pickup address</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>destination</td>
+                <td>string</td>
+                <td>Delivery address</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>weight</td>
+                <td>number</td>
+                <td>Package weight in kg</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>dimensions</td>
+                <td>object</td>
+                <td>Package dimensions (length, width, height) in cm</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>packageType</td>
+                <td>string</td>
+                <td>Type of package (Document, Parcel, Freight, Express)</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>selectedRate</td>
+                <td>object</td>
+                <td>Selected shipping rate details</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>isFragile</td>
+                <td>boolean</td>
+                <td>Whether the package contains fragile items</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>insuranceIncluded</td>
+                <td>boolean</td>
+                <td>Whether insurance is included</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>expressDelivery</td>
+                <td>boolean</td>
+                <td>Whether express delivery is required</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>additionalNotes</td>
+                <td>string</td>
+                <td>Additional notes for the shipment</td>
+                <td>No</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="h5 mt-4">Example Request</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>{
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",
+  "customerPhone": "+1234567890",
+  "origin": "123 Sender St, New York, NY",
+  "destination": "456 Receiver Ave, Los Angeles, CA",
+  "weight": 5,
+  "dimensions": {
+    "length": 10,
+    "width": 8,
+    "height": 6
+  },
+  "packageType": "Parcel",
+  "selectedRate": {
+    "carrier": "DHL",
+    "serviceLevel": "Express",
+    "cost": 29.99,
+    "estimatedDays": 1
+  },
+  "isFragile": true,
+  "insuranceIncluded": true,
+  "expressDelivery": false,
+  "additionalNotes": "Please handle with care."
+}</code></pre>
+            </div>
+          </div>
+
+          <h3 class="h5 mt-4">Example Response</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>{
+  "success": true,
+  "message": "Shipment created successfully",
+  "data": {
+    "shipmentId": "60a1b2c3d4e5f6g7h8i9j0k",
+    "trackingId": "DXP12345678",
+    "invoiceId": "INV-20230607-12345",
+    "paymentStatus": "Unpaid",
+    "estimatedDelivery": "2023-06-08T00:00:00.000Z"
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Track Shipment Endpoint -->
+      <div class="card shadow-sm mb-4" id="track-shipment">
+        <div class="card-header bg-light">
+          <h2 class="h4 mb-0">Track Shipment</h2>
+        </div>
+        <div class="card-body">
+          <p>Retrieves tracking information for a shipment.</p>
+
+          <h3 class="h5">Endpoint</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>GET /tracking/:id</code></pre>
+            </div>
+          </div>
+
+          <h3 class="h5">URL Parameters</h3>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>id</td>
+                <td>Tracking ID of the shipment</td>
+                <td>Yes</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="h5 mt-4">Example Response</h3>
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>{
+  "success": true,
+  "data": {
+    "trackingId": "DXP12345678",
+    "status": "In Transit",
+    "estimatedDelivery": "2023-06-08T00:00:00.000Z",
+    "origin": "123 Sender St, New York, NY",
+    "destination": "456 Receiver Ave, Los Angeles, CA",
+    "carrier": "DHL",
+    "lastUpdate": "2023-06-06T18:30:00.000Z",
+    "history": [
+      {
+        "status": "Pending",
+        "location": "123 Sender St, New York, NY",
+        "timestamp": "2023-06-05T12:00:00.000Z",
+        "note": "Shipment created"
+      },
+      {
+        "status": "Picked Up",
+        "location": "New York Sorting Facility",
+        "timestamp": "2023-06-05T16:45:00.000Z",
+        "note": "Package picked up by carrier"
+      },
+      {
+        "status": "In Transit",
+        "location": "Chicago Transfer Station",
+        "timestamp": "2023-06-06T18:30:00.000Z",
+        "note": "Package in transit to destination"
+      }
+    ]
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Endpoints -->
+      <div class="card shadow-sm mb-4" id="payments">
+        <div class="card-header bg-light">
+          <h2 class="h4 mb-0">Payment Endpoints</h2>
+        </div>
+        <div class="card-body">
+          <h3 class="h5">Create Payment</h3>
+          <p>Initiates a payment for a shipment.</p>
+
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>POST /payments/create</code></pre>
+            </div>
+          </div>
+
+          <h4 class="h6">Request Parameters</h4>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>shipmentId</td>
+                <td>string</td>
+                <td>ID or tracking number of the shipment</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>provider</td>
+                <td>string</td>
+                <td>Payment provider (stripe, paypal)</td>
+                <td>Yes</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="h5 mt-4">Complete Payment</h3>
+          <p>Completes a payment for a shipment.</p>
+
+          <div class="card bg-light mb-3">
+            <div class="card-body">
+              <pre><code>POST /payments/complete</code></pre>
+            </div>
+          </div>
+
+          <h4 class="h6">Request Parameters</h4>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>shipmentId</td>
+                <td>string</td>
+                <td>ID or tracking number of the shipment</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>provider</td>
+                <td>string</td>
+                <td>Payment provider (stripe, paypal)</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>paymentIntentId</td>
+                <td>string</td>
+                <td>For Stripe: Payment intent ID</td>
+                <td>Conditional</td>
+              </tr>
+              <tr>
+                <td>orderId</td>
+                <td>string</td>
+                <td>For PayPal: Order ID</td>
+                <td>Conditional</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('./layouts/footer') %>

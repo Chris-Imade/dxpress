@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - DXpress</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #f5f7fb;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Inter", sans-serif;
+        color: #1a1f36;
+      }
+
+      .login-container {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+      }
+
+      .login-box {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .login-logo {
+        max-width: 150px;
+        height: auto;
+        margin-bottom: 16px;
+      }
+
+      .login-header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .login-header h1 .highlight {
+        color: #1b51ff;
+        font-size: 28px;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .form-control:focus {
+        border-color: #1b51ff;
+        box-shadow: 0 0 0 3px rgba(27, 81, 255, 0.1);
+        outline: none;
+      }
+
+      .btn-primary {
+        display: block;
+        width: 100%;
+        background: #1b51ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        background: #0041f0;
+      }
+
+      .login-footer {
+        margin-top: 24px;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      .login-footer a {
+        color: #1b51ff;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .login-footer a:hover {
+        text-decoration: underline;
+      }
+
+      .alert {
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .alert-danger {
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-header">
+          <img
+            src="/assets/images/logo/logo2.png"
+            alt="DXpress Admin"
+            class="login-logo"
+            onerror="this.src='/assets/images/logo/logo.png';"
+          />
+          <h1><span class="highlight">A</span>dmin Login</h1>
+        </div>
+
+        <% if (errorMessage) { %>
+        <div class="alert alert-danger"><%= errorMessage %></div>
+        <% } %>
+
+        <form action="/admin/login" method="POST" class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+
+        <div class="login-footer">
+          <p><a href="/">Back to Website</a></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Simple validation
+      document
+        .querySelector(".login-form")
+        .addEventListener("submit", function (e) {
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          if (!email || !password) {
+            e.preventDefault();
+            let errorDiv = document.querySelector(".alert-danger");
+            if (!errorDiv) {
+              errorDiv = document.createElement("div");
+              errorDiv.className = "alert alert-danger";
+              const form = document.querySelector(".login-form");
+              form.parentNode.insertBefore(errorDiv, form);
+            }
+            errorDiv.textContent = "Please fill in all fields.";
+          }
+        });
+    </script>
+  </body>
+</html>

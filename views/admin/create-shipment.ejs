@@ -1,0 +1,244 @@
+<%- include('../layouts/admin-header') %>
+
+<main id="main-content" class="ml-collapsed">
+<div class="dashboard-content">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/admin/shipments">Shipments</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Create New Shipment</li>
+    </ol>
+  </nav>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">Create New Shipment</h5>
+    </div>
+    
+    <div class="card-body">
+      <form action="/admin/shipments/create" method="POST">
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="customerName" class="form-label">Customer Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="customerName" 
+              name="customerName" 
+              value="<%= formData.customerName || '' %>" 
+              required
+            >
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label for="customerEmail" class="form-label">Customer Email</label>
+            <input 
+              type="email" 
+              class="form-control" 
+              id="customerEmail" 
+              name="customerEmail" 
+              value="<%= formData.customerEmail || '' %>" 
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="customerPhone" class="form-label">Customer Phone</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              id="customerPhone" 
+              name="customerPhone" 
+              value="<%= formData.customerPhone || '' %>"
+            >
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label for="estimatedDelivery" class="form-label">Estimated Delivery Date</label>
+            <input 
+              type="date" 
+              class="form-control" 
+              id="estimatedDelivery" 
+              name="estimatedDelivery" 
+              value="<%= formData.estimatedDelivery || '' %>"
+            >
+          </div>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="origin" class="form-label">Origin</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="origin" 
+              name="origin" 
+              value="<%= formData.origin || '' %>" 
+              required
+            >
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <label for="destination" class="form-label">Destination</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="destination" 
+              name="destination" 
+              value="<%= formData.destination || '' %>" 
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-4 mb-3">
+            <label for="weight" class="form-label">Weight (kg)</label>
+            <input 
+              type="number" 
+              step="0.01" 
+              class="form-control" 
+              id="weight" 
+              name="weight" 
+              value="<%= formData.weight || '' %>" 
+              required
+            >
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label for="dimensions" class="form-label">Dimensions</label>
+            <div class="row g-2">
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Length"
+                  name="length"
+                  value="<%= formData.length || '' %>"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Width"
+                  name="width"
+                  value="<%= formData.width || '' %>"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="Height"
+                  name="height"
+                  value="<%= formData.height || '' %>"
+                />
+              </div>
+            </div>
+            <small class="text-muted">Length × Width × Height (cm)</small>
+          </div>
+          
+          <div class="col-md-4 mb-3">
+            <label for="packageType" class="form-label">Package Type</label>
+            <select class="form-select" id="packageType" name="packageType" required>
+              <option value="" disabled <%= !formData.packageType ? 'selected' : '' %>>Select package type</option>
+              <option value="Document" <%= formData.packageType === 'Document' ? 'selected' : '' %>>Document</option>
+              <option value="Parcel" <%= formData.packageType === 'Parcel' ? 'selected' : '' %>>Parcel</option>
+              <option value="Freight" <%= formData.packageType === 'Freight' ? 'selected' : '' %>>Freight</option>
+              <option value="Express" <%= formData.packageType === 'Express' ? 'selected' : '' %>>Express</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-6 mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="Pending" selected>Pending</option>
+              <option value="In Transit">In Transit</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Delayed">Delayed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="carrierName" class="form-label">Carrier Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="carrierName" 
+              name="carrierName" 
+              value="<%= formData.carrierName || '' %>"
+            >
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <div class="form-check form-check-inline">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="isFragile" 
+              name="isFragile" 
+              <%= formData.isFragile ? 'checked' : '' %>
+            >
+            <label class="form-check-label" for="isFragile">Fragile</label>
+          </div>
+          
+          <div class="form-check form-check-inline">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="insurance" 
+              name="insurance" 
+              <%= formData.insurance ? 'checked' : '' %>
+            >
+            <label class="form-check-label" for="insurance">Insurance</label>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea 
+            class="form-control" 
+            id="notes" 
+            name="additionalNotes" 
+            rows="3"
+          ><%= formData.additionalNotes || '' %></textarea>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="/admin/shipments" class="btn btn-light">
+            <i class="fas fa-arrow-left"></i> Cancel
+          </a>
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Shipment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</main>
+
+<%- include('../layouts/admin-footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function() {
+      // Disable the button
+      submitBtn.disabled = true;
+      
+      // Change button text to show loading
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+    });
+  });
+</script>

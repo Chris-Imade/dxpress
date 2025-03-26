@@ -1,0 +1,379 @@
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1
+        class="tw-mb-15 text-white text-center"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+        data-aos-delay="100"
+      >
+        <%= service.title %>
+      </h1>
+      <nav
+        aria-label="breadcrumb"
+        data-aos="fade-up"
+        data-aos-duration="1000"
+        data-aos-delay="200"
+      >
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/services">Services</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= service.title %>
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Service Details Section start -->
+<section class="py-140">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-8">
+        <div class="service-details">
+          <div
+            class="service-details-image mb-5"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            data-aos-delay="100"
+          >
+            <img
+              src="<%= service.banner %>"
+              alt="<%= service.title %>"
+              class="img-fluid tw-rounded-xl"
+            />
+          </div>
+
+          <div
+            class="service-details-content"
+            data-aos="fade-up"
+            data-aos-duration="1000"
+            data-aos-delay="200"
+          >
+            <h2 class="tw-mb-6">About <%= service.title %></h2>
+            <div class="tw-mb-10"><%- service.description %></div>
+
+            <h3 class="tw-mb-5">Key Benefits</h3>
+            <ul class="benefits-list tw-mb-10">
+              <% service.benefits.forEach(benefit => { %>
+              <li class="mb-3">
+                <div class="d-flex">
+                  <span class="me-3 text-main-600">
+                    <i class="ph-bold ph-check-circle"></i>
+                  </span>
+                  <span><%= benefit %></span>
+                </div>
+              </li>
+              <% }); %>
+            </ul>
+
+            <h3 class="tw-mb-5">Service Features</h3>
+            <div class="row gy-4 tw-mb-10">
+              <% service.features.forEach((feature, index) => { %>
+              <div
+                class="col-md-6"
+                data-aos="fade-up"
+                data-aos-duration="1000"
+                data-aos-delay="<%= 300 + (index * 100) %>"
+              >
+                <div class="feature-box bg-main-50 p-4 tw-rounded-lg h-100">
+                  <div class="d-flex align-items-center mb-3">
+                    <span class="feature-icon me-3">
+                      <img
+                        src="<%= feature.icon %>"
+                        alt="<%= feature.title %>"
+                      />
+                    </span>
+                    <h4 class="mb-0 tw-text-xl"><%= feature.title %></h4>
+                  </div>
+                  <p class="mb-0"><%= feature.description %></p>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+
+            <h3 class="tw-mb-5">How It Works</h3>
+            <div class="process-timeline tw-mb-10">
+              <% service.process.forEach((process, index) => { %>
+              <div
+                class="process-step"
+                data-aos="fade-up"
+                data-aos-duration="1000"
+                data-aos-delay="<%= 300 + (index * 100) %>"
+              >
+                <div class="process-number"><%= index + 1 %></div>
+                <div class="process-content">
+                  <h5><%= process.step %></h5>
+                  <p><%= process.description %></p>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+
+            <div class="cta-box bg-main-600 p-5 tw-rounded-xl text-white">
+              <h3 class="mb-4">
+                Ready to Get Started with Our <%= service.title %> Service?
+              </h3>
+              <p class="mb-4">
+                Contact our team today to discuss your specific requirements and
+                receive a customized quote.
+              </p>
+              <a
+                href="/contact"
+                class="btn btn-white hover-style-three button--stroke d-inline-flex align-items-center justify-content-center tw-gap-2 group active--translate-y-2 rounded-0 tw-px-8 tw-py-4"
+              >
+                <span class="button__flair"></span>
+                <span class="button__label">Contact Us</span>
+                <span
+                  class="tw-w-7 tw-h-7 bg-main-600 text-white tw-text-sm tw-rounded d-flex justify-content-center align-items-center position-relative tw-duration-500"
+                >
+                  <i class="ph-bold ph-phone"></i>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div
+          class="sidebar"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+          data-aos-delay="300"
+        >
+          <div
+            class="sidebar-widget bg-white p-4 tw-rounded-xl common-shadow-three mb-5"
+          >
+            <h4 class="widget-title tw-mb-5">Our Services</h4>
+            <ul class="service-list">
+              <li class="<%= service.id === 'air-freight' ? 'active' : '' %>">
+                <a href="/services/air-freight">Air Freight</a>
+              </li>
+              <li class="<%= service.id === 'ocean-freight' ? 'active' : '' %>">
+                <a href="/services/ocean-freight">Ocean Freight</a>
+              </li>
+              <li
+                class="<%= service.id === 'road-transport' ? 'active' : '' %>"
+              >
+                <a href="/services/road-transport">Road Transport</a>
+              </li>
+              <li class="<%= service.id === 'rail-freight' ? 'active' : '' %>">
+                <a href="/services/rail-freight">Rail Freight</a>
+              </li>
+              <li class="<%= service.id === 'warehousing' ? 'active' : '' %>">
+                <a href="/services/warehousing">Warehousing</a>
+              </li>
+              <li
+                class="<%= service.id === 'customs-clearance' ? 'active' : '' %>"
+              >
+                <a href="/services/customs-clearance">Customs Clearance</a>
+              </li>
+            </ul>
+          </div>
+
+          <div
+            class="sidebar-widget bg-white p-4 tw-rounded-xl common-shadow-three mb-5"
+          >
+            <h4 class="widget-title tw-mb-5">Need Help?</h4>
+            <div class="d-flex mb-4">
+              <span class="me-3 text-main-600 fs-3">
+                <i class="ph-bold ph-phone"></i>
+              </span>
+              <div>
+                <p class="mb-1 text-neutral-500">Call Us Anytime</p>
+                <a href="tel:+447506323070" class="fs-5 fw-bold"
+                  >+44 7506 323070</a
+                >
+              </div>
+            </div>
+            <div class="d-flex">
+              <span class="me-3 text-main-600 fs-3">
+                <i class="ph-bold ph-envelope"></i>
+              </span>
+              <div>
+                <p class="mb-1 text-neutral-500">Email Us</p>
+                <a href="mailto:support@dxpress.uk" class="fs-5 fw-bold"
+                  >support@dxpress.uk</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-widget bg-main-50 p-4 tw-rounded-xl">
+            <h4 class="widget-title tw-mb-5">Track Your Shipment</h4>
+            <form action="/shipment/track" method="POST" class="tracking-form">
+              <div class="form-group mb-3">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="trackingId"
+                  placeholder="Enter tracking number"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-main-two hover-style-two button--stroke d-inline-flex align-items-center justify-content-center tw-gap-2 group active--translate-y-2 rounded-0 tw-px-5 tw-py-3 w-100"
+              >
+                <span class="button__flair"></span>
+                <span class="button__label">Track Now</span>
+                <span
+                  class="tw-w-7 tw-h-7 bg-white text-main-600 tw-text-sm tw-rounded d-flex justify-content-center align-items-center position-relative tw-duration-500"
+                >
+                  <i class="ph-bold ph-magnifying-glass"></i>
+                </span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Services -->
+    <div class="related-services mt-5 pt-5 border-top">
+      <h2 class="tw-mb-10 text-center">Related Services</h2>
+      <div class="row gy-5">
+        <% relatedServices.forEach((relService, index) => { %>
+        <div
+          class="col-lg-4 col-md-6"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+          data-aos-delay="<%= 100 + (index * 100) %>"
+        >
+          <div
+            class="group bg-white common-shadow-three tw-rounded-xl p-lg-4 tw-p-5 d-flex flex-column h-100 hover-shadow-main-two-600-20 tw-duration-500"
+          >
+            <img
+              src="<%= relService.image %>"
+              alt="<%= relService.title %>"
+              class="tw-mb-5"
+            />
+            <h3 class="tw-mb-3 tw-text-xl"><%= relService.title %></h3>
+            <a
+              href="/services/<%= relService.id %>"
+              class="btn btn-main-two btn-sm hover-style-two button--stroke d-inline-flex align-items-center justify-content-center tw-gap-2 group active--translate-y-2 rounded-0 tw-px-5 tw-py-2 mt-auto align-self-start"
+            >
+              <span class="button__flair"></span>
+              <span class="button__label">Learn More</span>
+            </a>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Service Details Section end -->
+
+<style>
+  .service-list {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .service-list li {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 0;
+  }
+
+  .service-list li:last-child {
+    border-bottom: none;
+  }
+
+  .service-list li a {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    transition: 0.3s;
+    padding: 5px 10px 5px 15px;
+    position: relative;
+  }
+
+  .service-list li a:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    transition: 0.3s;
+  }
+
+  .service-list li a:hover,
+  .service-list li.active a {
+    color: #00aeef;
+    transform: translateX(5px);
+  }
+
+  .benefits-list {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .process-timeline {
+    position: relative;
+  }
+
+  .process-timeline:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 19px;
+    width: 2px;
+    background-color: #00aeef;
+    z-index: 0;
+  }
+
+  .process-step {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 30px;
+  }
+
+  .process-step:last-child {
+    margin-bottom: 0;
+  }
+
+  .process-number {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background-color: #00aeef;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 1;
+  }
+
+  .process-content {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #00aeef;
+  }
+
+  .process-content h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .process-content p {
+    margin-bottom: 0;
+  }
+</style>

@@ -1,0 +1,1130 @@
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1 class="tw-mb-15 text-white text-center">Create Shipment</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Create Shipment
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Create Shipment Section start -->
+<section class="py-100">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <div
+          class="create-shipment-wrapper bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl"
+          style="margin-top: 4rem; margin-bottom: 3rem"
+        >
+          <!-- Step Navigation -->
+          <div class="step-navigation mb-5">
+            <div class="step-progress">
+              <div class="progress" style="height: 10px">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  style="width: 0%"
+                  id="stepProgressBar"
+                  aria-valuenow="0"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <div class="step-labels">
+                <span class="step-label active" data-step="1"
+                  >Shipment Details</span
+                >
+                <span class="step-label" data-step="2">Compare Rates</span>
+                <span class="step-label" data-step="3">Payment</span>
+                <span class="step-label" data-step="4">Confirmation</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1: Shipment Details Form -->
+          <div class="step-content" id="step1">
+            <h3 class="mb-4">Shipment Details</h3>
+            <form id="shipmentDetailsForm">
+              <!-- Customer Information -->
+              <div class="mb-4">
+                <h5 class="mb-3">Customer Information</h5>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="customerName" class="form-label"
+                      >Full Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="customerName"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="customerEmail" class="form-label"
+                      >Email Address</label
+                    >
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="customerEmail"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="customerPhone" class="form-label"
+                      >Phone Number</label
+                    >
+                    <input
+                      type="tel"
+                      class="form-control"
+                      id="customerPhone"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Origin Address -->
+              <div class="mb-4">
+                <h5 class="mb-3">Origin Address</h5>
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label for="originAddress" class="form-label"
+                      >Street Address</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="originAddress"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="originCity" class="form-label">City</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="originCity"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="originPostalCode" class="form-label"
+                      >Postal Code</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="originPostalCode"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="originCountry" class="form-label"
+                      >Country</label
+                    >
+                    <select class="form-select" id="originCountry" required>
+                      <option value="">Select Country</option>
+                      <option value="UK">United Kingdom</option>
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                      <option value="AU">Australia</option>
+                      <option value="FR">France</option>
+                      <option value="DE">Germany</option>
+                      <option value="IT">Italy</option>
+                      <option value="ES">Spain</option>
+                      <option value="NL">Netherlands</option>
+                      <option value="JP">Japan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destination Address -->
+              <div class="mb-4">
+                <h5 class="mb-3">Destination Address</h5>
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label for="destAddress" class="form-label"
+                      >Street Address</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="destAddress"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="destCity" class="form-label">City</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="destCity"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="destPostalCode" class="form-label"
+                      >Postal Code</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="destPostalCode"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="destCountry" class="form-label">Country</label>
+                    <select class="form-select" id="destCountry" required>
+                      <option value="">Select Country</option>
+                      <option value="UK">United Kingdom</option>
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                      <option value="AU">Australia</option>
+                      <option value="FR">France</option>
+                      <option value="DE">Germany</option>
+                      <option value="IT">Italy</option>
+                      <option value="ES">Spain</option>
+                      <option value="NL">Netherlands</option>
+                      <option value="JP">Japan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Package Details -->
+              <div class="mb-4">
+                <h5 class="mb-3">Package Details</h5>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="packageType" class="form-label"
+                      >Package Type</label
+                    >
+                    <select class="form-select" id="packageType" required>
+                      <option value="">Select Package Type</option>
+                      <option value="envelope">Envelope</option>
+                      <option value="small_box">Small Box</option>
+                      <option value="medium_box">Medium Box</option>
+                      <option value="large_box">Large Box</option>
+                      <option value="pallet">Pallet</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="weight" class="form-label">Weight (kg)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="weight"
+                      min="0.1"
+                      step="0.1"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="length" class="form-label">Length (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="length"
+                      min="1"
+                      step="0.1"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="width" class="form-label">Width (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="width"
+                      min="1"
+                      step="0.1"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="height" class="form-label">Height (cm)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="height"
+                      min="1"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Options -->
+              <div class="mb-4">
+                <h5 class="mb-3">Additional Options</h5>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="isFragile"
+                      />
+                      <label class="form-check-label" for="isFragile">
+                        Fragile Handling
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="insuranceRequired"
+                      />
+                      <label class="form-check-label" for="insuranceRequired">
+                        Insurance Required
+                      </label>
+                    </div>
+                  </div>
+                  <div
+                    class="col-md-12 insurance-details"
+                    style="display: none"
+                  >
+                    <label for="declaredValue" class="form-label"
+                      >Declared Value (£)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="declaredValue"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-main hover-style-two">
+                  Compare Rates <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 2: Compare Rates -->
+          <div class="step-content" id="step2" style="display: none">
+            <h3 class="mb-4">Compare Shipping Rates</h3>
+            <div id="loadingRates" class="text-center py-5">
+              <div class="spinner-border text-main-600" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-3">
+                Calculating shipping rates from multiple carriers...
+              </p>
+            </div>
+            <div id="shippingRates" class="mt-4" style="display: none">
+              <!-- Shipping rates will be displayed here -->
+              <div class="row" id="ratesContainer">
+                <!-- Rates cards will be inserted here by JavaScript -->
+              </div>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+              <button
+                type="button"
+                class="btn btn-outline-secondary back-btn"
+                data-step="1"
+              >
+                <i class="fas fa-arrow-left me-2"></i> Back
+              </button>
+              <button
+                type="button"
+                class="btn btn-main hover-style-two continue-btn"
+                id="selectRateBtn"
+                disabled
+              >
+                Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment -->
+          <div class="step-content" id="step3" style="display: none">
+            <h3 class="mb-4">Payment | Shipment Summary</h3>
+            <div class="selected-rate-summary mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="summary-item">
+                        <i class="fas fa-truck text-main-600 me-2"></i>
+                        <span
+                          ><strong>Carrier:</strong>
+                          <span id="summaryCarrier"></span
+                        ></span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="fas fa-box text-main-600 me-2"></i>
+                        <span
+                          ><strong>Service:</strong>
+                          <span id="summaryService"></span
+                        ></span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="fas fa-calendar-alt text-main-600 me-2"></i>
+                        <span
+                          ><strong>Delivery Estimate:</strong>
+                          <span id="summaryDelivery"></span
+                        ></span>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="summary-item">
+                        <i class="fas fa-pound-sign text-main-600 me-2"></i>
+                        <span
+                          ><strong>Base Rate:</strong> £<span
+                            id="summaryBaseRate"
+                          ></span
+                        ></span>
+                      </div>
+                      <div class="summary-item">
+                        <i class="fas fa-plus-circle text-main-600 me-2"></i>
+                        <span
+                          ><strong>Additional Services:</strong> £<span
+                            id="summaryAdditional"
+                          ></span
+                        ></span>
+                      </div>
+                      <div class="summary-item total">
+                        <i class="fas fa-receipt text-main-600 me-2"></i>
+                        <span
+                          ><strong>Total:</strong> £<span
+                            id="summaryTotal"
+                          ></span
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-methods mb-4">
+              <h5 class="mb-3">Select Payment Method</h5>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="card payment-card cursor-pointer">
+                    <div class="card-body">
+                      <div
+                        class="form-check"
+                        style="display: flex; align-items: center"
+                      >
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="paymentMethod"
+                          id="paymentStripe"
+                          value="stripe"
+                          checked
+                        />
+                        <label
+                          class="form-check-label d-flex align-items-center"
+                          for="paymentStripe"
+                        >
+                          <img
+                            src="/assets/images/payment/stripe.png"
+                            alt="Stripe"
+                            height="30"
+                            class="me-2"
+                            style="width: 70px; margin-left: 10px"
+                          />
+                          Pay with Stripe
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="card payment-card cursor-pointer">
+                    <div class="card-body">
+                      <div
+                        class="form-check"
+                        style="display: flex; align-items: center"
+                      >
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="paymentMethod"
+                          id="paymentPaypal"
+                          value="paypal"
+                        />
+                        <label
+                          class="form-check-label d-flex align-items-center"
+                          for="paymentPaypal"
+                        >
+                          <img
+                            src="/assets/images/payment/paypal.png"
+                            alt="PayPal"
+                            height="30"
+                            class="me-2"
+                            style="width: 70px; margin-left: 10px"
+                          />
+                          Pay with PayPal
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="stripePaymentForm">
+              <div class="card">
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="cardNumber" class="form-label"
+                      >Card Number</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text"
+                        ><i class="fas fa-credit-card"></i
+                      ></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="cardNumber"
+                        placeholder="1234 5678 9012 3456"
+                      />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="cardExpiry" class="form-label"
+                        >Expiration Date</label
+                      >
+                      <div class="input-group">
+                        <span class="input-group-text"
+                          ><i class="fas fa-calendar"></i
+                        ></span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="cardExpiry"
+                          placeholder="MM/YY"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="cardCvc" class="form-label">CVC</label>
+                      <div class="input-group">
+                        <span class="input-group-text"
+                          ><i class="fas fa-lock"></i
+                        ></span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="cardCvc"
+                          placeholder="123"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="paypalPaymentForm" style="display: none">
+              <div class="card">
+                <div class="card-body text-center">
+                  <i
+                    class="fab fa-paypal text-main-600"
+                    style="font-size: 48px"
+                  ></i>
+                  <p class="mt-3">
+                    You will be redirected to PayPal to complete your payment.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <button
+                type="button"
+                class="btn btn-outline-secondary back-btn"
+                data-step="2"
+              >
+                <i class="fas fa-arrow-left me-2"></i> Back
+              </button>
+              <button
+                type="button"
+                class="btn btn-main hover-style-two"
+                id="processPaymentBtn"
+              >
+                Process Payment <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div class="step-content" id="step4" style="display: none">
+            <div class="text-center py-5">
+              <div class="confirmation-icon mb-4">
+                <i
+                  class="fas fa-check-circle text-success"
+                  style="font-size: 80px"
+                ></i>
+              </div>
+              <h3 class="mb-3">Shipment Created Successfully!</h3>
+              <p class="mb-4">
+                Your shipment has been created and payment processed. You will
+                receive an email confirmation shortly.
+              </p>
+
+              <div
+                class="shipment-details card mx-auto"
+                style="max-width: 500px"
+              >
+                <div class="card-body">
+                  <h5 class="card-title">Shipment Details</h5>
+                  <div class="mt-3">
+                    <p>
+                      <strong>Shipment ID:</strong>
+                      <span id="confirmShipmentId"></span>
+                    </p>
+                    <p>
+                      <strong>Tracking Number:</strong>
+                      <span id="confirmTrackingId"></span>
+                    </p>
+                    <p>
+                      <strong>Carrier:</strong>
+                      <span id="confirmCarrier"></span>
+                    </p>
+                    <p>
+                      <strong>Estimated Delivery:</strong>
+                      <span id="confirmDelivery"></span>
+                    </p>
+                  </div>
+                  <div class="d-grid gap-2 mt-4">
+                    <a
+                      href="/track"
+                      class="btn btn-outline-primary"
+                      style="color: #212529"
+                    >
+                      <i class="fas fa-search me-2"></i> Track Shipment
+                    </a>
+                    <a
+                      href="/create-shipment"
+                      class="btn btn-main hover-style-two"
+                    >
+                      <i class="fas fa-plus me-2"></i> Create Another Shipment
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Create Shipment Section end -->
+
+<style>
+  .step-progress {
+    position: relative;
+    padding: 0 40px;
+  }
+  .step-progress::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 1;
+  }
+  .step-progress .progress {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+  }
+  .step-progress .progress-bar {
+    background: var(--color-main-600);
+    transition: width 0.3s ease;
+  }
+  .step-labels {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+  .step-label {
+    position: relative;
+    padding: 8px 16px;
+    background: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    color: #6c757d;
+    border: 2px solid #e9ecef;
+  }
+  .step-label:hover {
+    border-color: var(--color-main-600);
+    color: var(--color-main-600);
+  }
+  .step-label.active {
+    background: var(--color-main-600);
+    color: white;
+    border-color: var(--color-main-600);
+  }
+  .step-label.completed {
+    background: var(--color-main-600);
+    color: white;
+    border-color: var(--color-main-600);
+  }
+  .step-label.completed::after {
+    content: "✓";
+    margin-left: 5px;
+  }
+  .step-label.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .carrier-logo {
+    height: 40px;
+    object-fit: contain;
+  }
+  .rate-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .rate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  .rate-card.selected {
+    border-color: var(--color-main-600);
+    background-color: rgba(var(--color-main-600-rgb), 0.05);
+  }
+  .rate-card.selected::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 40px 40px 0;
+    border-color: var(--color-main-600) transparent transparent transparent;
+  }
+  .rate-card.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    color: white;
+    font-size: 14px;
+  }
+  .rate-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+  }
+  .rate-details p {
+    margin-bottom: 8px;
+  }
+  .rate-details p:last-child {
+    margin-bottom: 0;
+    font-size: 1.2em;
+    color: var(--color-main-600);
+  }
+  .select-rate-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  .select-rate-btn:hover {
+    background-color: var(--color-main-600);
+    color: white;
+  }
+  .payment-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .payment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  .paymentMethod:checked + .payment-card {
+    border-color: var(--color-main-600);
+  }
+  .loading-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .loading-animation .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+  .loading-animation p {
+    margin-top: 20px;
+    color: #6c757d;
+    font-size: 1.1em;
+  }
+  .rate-card .delivery-info {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    color: #6c757d;
+    font-size: 0.9em;
+  }
+  .rate-card .delivery-info i {
+    margin-right: 5px;
+    color: var(--color-main-600);
+  }
+  .summary-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+  .summary-item:last-child {
+    margin-bottom: 0;
+  }
+  .summary-item.total {
+    background: var(--color-main-600);
+    color: white;
+    font-size: 1.2em;
+  }
+  .summary-item.total i {
+    color: white;
+  }
+  .input-group-text {
+    background: #f8f9fa;
+    border-right: none;
+  }
+  .input-group .form-control {
+    border-left: none;
+  }
+  .input-group .form-control:focus {
+    border-color: #ced4da;
+  }
+  .input-group:focus-within {
+    box-shadow: 0 0 0 0.2rem rgba(var(--color-main-600-rgb), 0.25);
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get elements
+    const stepProgressBar = document.getElementById("stepProgressBar");
+    const stepLabels = document.querySelectorAll(".step-label");
+    const stepContents = document.querySelectorAll(".step-content");
+    const shipmentDetailsForm = document.getElementById("shipmentDetailsForm");
+    const insuranceRequired = document.getElementById("insuranceRequired");
+    const insuranceDetails = document.querySelector(".insurance-details");
+    const backButtons = document.querySelectorAll(".back-btn");
+    const selectRateBtn = document.getElementById("selectRateBtn");
+    const processPaymentBtn = document.getElementById("processPaymentBtn");
+    const paymentMethodRadios = document.querySelectorAll(
+      'input[name="paymentMethod"]'
+    );
+    const stripePaymentForm = document.getElementById("stripePaymentForm");
+    const paypalPaymentForm = document.getElementById("paypalPaymentForm");
+
+    // Current step
+    let currentStep = 1;
+
+    // Selected rate/carrier
+    let selectedRate = null;
+
+    // Show insurance fields if insurance is checked
+    insuranceRequired.addEventListener("change", function () {
+      insuranceDetails.style.display = this.checked ? "block" : "none";
+    });
+
+    // Handle step navigation
+    function goToStep(step) {
+      currentStep = step;
+
+      // Update progress bar
+      const progress = ((step - 1) / 3) * 100;
+      stepProgressBar.style.width = `${progress}%`;
+      stepProgressBar.setAttribute("aria-valuenow", progress);
+
+      // Update step labels
+      stepLabels.forEach((label, index) => {
+        const stepNum = index + 1;
+        if (stepNum < step) {
+          label.classList.add("completed");
+          label.classList.remove("active", "disabled");
+        } else if (stepNum === step) {
+          label.classList.add("active");
+          label.classList.remove("completed", "disabled");
+        } else {
+          label.classList.add("disabled");
+          label.classList.remove("active", "completed");
+        }
+      });
+
+      // Show current step content, hide others
+      stepContents.forEach((content, index) => {
+        if (index + 1 === step) {
+          content.style.display = "block";
+        } else {
+          content.style.display = "none";
+        }
+      });
+    }
+
+    // Add click handlers to step labels
+    stepLabels.forEach((label) => {
+      label.addEventListener("click", function () {
+        if (!this.classList.contains("disabled")) {
+          const targetStep = parseInt(this.getAttribute("data-step"));
+          goToStep(targetStep);
+        }
+      });
+    });
+
+    // Handle form submission (Step 1)
+    shipmentDetailsForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Show loading animation
+      document.getElementById("loadingRates").style.display = "block";
+      document.getElementById("shippingRates").style.display = "none";
+
+      // Move to Step 2
+      goToStep(2);
+
+      // Simulate API call to get rates
+      setTimeout(function () {
+        // Hide loading, show rates
+        document.getElementById("loadingRates").style.display = "none";
+        document.getElementById("shippingRates").style.display = "block";
+
+        // Populate rates
+        populateShippingRates();
+      }, 2000);
+    });
+
+    // Populate shipping rates
+    function populateShippingRates() {
+      const ratesContainer = document.getElementById("ratesContainer");
+      ratesContainer.innerHTML = "";
+
+      // Sample shipping rates
+      const rates = [
+        {
+          id: "dhl-express",
+          carrier: "DHL",
+          logo: "/assets/images/carrier/dhl.png",
+          service: "Express",
+          deliveryDays: "1-2 Business Days",
+          deliveryDate: "2023-04-15",
+          baseRate: 45.99,
+          additionalFees: 5,
+          totalRate: 50.99,
+        },
+        {
+          id: "fedex-standard",
+          carrier: "FedEx",
+          logo: "/assets/images/carrier/fedex.png",
+          service: "Standard",
+          deliveryDays: "2-3 Business Days",
+          deliveryDate: "2023-04-16",
+          baseRate: 35.5,
+          additionalFees: 3.5,
+          totalRate: 39.0,
+        },
+        {
+          id: "ups-express",
+          carrier: "UPS",
+          logo: "/assets/images/carrier/ups.png",
+          service: "Express Saver",
+          deliveryDays: "1-3 Business Days",
+          deliveryDate: "2023-04-16",
+          baseRate: 40.75,
+          additionalFees: 4.25,
+          totalRate: 45.0,
+        },
+      ];
+
+      // Create rate cards
+      rates.forEach((rate) => {
+        const rateCard = document.createElement("div");
+        rateCard.className = "col-md-4 mb-4";
+        rateCard.innerHTML = `
+          <div class="card rate-card" data-rate-id="${rate.id}">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <img src="${rate.logo}" alt="${
+          rate.carrier
+        }" class="carrier-logo me-3">
+                <div>
+                  <h5 class="mb-1">${rate.carrier} ${rate.service}</h5>
+                  <div class="delivery-info">
+                    <i class="fas fa-truck"></i>
+                    <span>${rate.deliveryDays}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rate-details">
+                <p class="mb-2"><strong>Base Rate:</strong> £${rate.baseRate.toFixed(
+                  2
+                )}</p>
+                <p class="mb-2"><strong>Additional Fees:</strong> £${rate.additionalFees.toFixed(
+                  2
+                )}</p>
+                <p class="mb-0"><strong>Total:</strong> £${rate.totalRate.toFixed(
+                  2
+                )}</p>
+              </div>
+              <div class="mt-3 d-grid">
+                <button class="btn btn-outline-primary select-rate-btn">
+                  Select Rate
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        ratesContainer.appendChild(rateCard);
+
+        // Store rate data for later use
+        rateCard.querySelector(".card").dataset.rate = JSON.stringify(rate);
+      });
+
+      // Add event listeners to rate cards
+      document.querySelectorAll(".rate-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          // Remove selected class from all cards
+          document.querySelectorAll(".rate-card").forEach((c) => {
+            c.classList.remove("selected");
+          });
+
+          // Add selected class to clicked card
+          this.classList.add("selected");
+
+          // Enable continue button
+          selectRateBtn.disabled = false;
+
+          // Store selected rate
+          selectedRate = JSON.parse(this.dataset.rate);
+        });
+      });
+    }
+
+    // Handle selecting a rate
+    selectRateBtn.addEventListener("click", function () {
+      if (selectedRate) {
+        // Populate summary
+        document.getElementById("summaryCarrier").textContent =
+          selectedRate.carrier;
+        document.getElementById("summaryService").textContent =
+          selectedRate.service;
+        document.getElementById("summaryDelivery").textContent =
+          selectedRate.deliveryDays;
+        document.getElementById("summaryBaseRate").textContent =
+          selectedRate.baseRate.toFixed(2);
+        document.getElementById("summaryAdditional").textContent =
+          selectedRate.additionalFees.toFixed(2);
+        document.getElementById("summaryTotal").textContent =
+          selectedRate.totalRate.toFixed(2);
+
+        // Go to payment step
+        goToStep(3);
+      }
+    });
+
+    // Handle payment method change
+    paymentMethodRadios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        if (this.value === "stripe") {
+          stripePaymentForm.style.display = "block";
+          paypalPaymentForm.style.display = "none";
+        } else if (this.value === "paypal") {
+          stripePaymentForm.style.display = "none";
+          paypalPaymentForm.style.display = "block";
+        }
+      });
+    });
+
+    // Handle payment processing
+    processPaymentBtn.addEventListener("click", function () {
+      // Simulate payment processing
+      this.disabled = true;
+      this.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+
+      setTimeout(function () {
+        // Generate random IDs
+        const shipmentId =
+          "SHP" +
+          Math.floor(Math.random() * 1000000)
+            .toString()
+            .padStart(6, "0");
+        const trackingId =
+          selectedRate.carrier.substring(0, 2).toUpperCase() +
+          Math.floor(Math.random() * 10000000000)
+            .toString()
+            .padStart(10, "0");
+
+        // Populate confirmation details
+        document.getElementById("confirmShipmentId").textContent = shipmentId;
+        document.getElementById("confirmTrackingId").textContent = trackingId;
+        document.getElementById("confirmCarrier").textContent =
+          selectedRate.carrier;
+        document.getElementById("confirmDelivery").textContent =
+          selectedRate.deliveryDays;
+
+        // Go to confirmation step
+        goToStep(4);
+
+        // Re-enable button for next time
+        processPaymentBtn.disabled = false;
+        processPaymentBtn.innerHTML =
+          'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
+      }, 3000);
+    });
+  });
+
+  // Use Javascript to make this document body's color #212529
+  document.body.style.backgroundColor = "#212529";
+</script>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Dxpress Transportation" />
+    <meta name="keywords" content="Dxpress Transportation" />
+    <meta name="robots" content="INDEX,FOLLOW" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      <%= typeof title !== 'undefined' ? title + ' | ' : '' %>Dxpress Logistics
+    </title>
+
+    <!-- Assets -->
+    <link rel="shortcut icon" href="/assets/images/logo/favicon.png" />
+    <%- include('../partials/head') %>
+  </head>
+  <body>
+    <!--==================== Preloader Start ====================-->
+    <div
+      class="preloader bg-white tw-h-screen justify-content-center align-items-center tw-z-999 position-fixed top-0 tw-start-0 w-100 h-100"
+    >
+      <div class="car-road">
+        <div class="car">
+          <div class="car-top">
+            <div class="window"></div>
+          </div>
+          <div class="car-base"></div>
+          <div class="wheel-left wheel">
+            <div class="wheel-spike"></div>
+            <div class="wheel-center"></div>
+          </div>
+          <div class="wheel-right wheel">
+            <div class="wheel-spike"></div>
+            <div class="wheel-center"></div>
+          </div>
+          <div class="head-light"></div>
+        </div>
+        <div class="road"></div>
+      </div>
+    </div>
+    <!--==================== Preloader End ====================-->
+
+    <!--==================== Overlay Start ====================-->
+    <div class="overlay"></div>
+    <!--==================== Overlay End ====================-->
+
+    <!--==================== Sidebar Overlay End ====================-->
+    <div class="side-overlay"></div>
+    <!--==================== Sidebar Overlay End ====================-->
+
+    <!-- ==================== Scroll to Top End Here ==================== -->
+    <div class="progress-wrap cursor-big">
+      <svg
+        class="progress-circle svg-content"
+        width="100%"
+        height="100%"
+        viewBox="-1 -1 102 102"
+      >
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+      </svg>
+    </div>
+    <!-- ==================== Scroll to Top End Here ==================== -->
+
+    <!-- Custom Cursor Start -->
+    <div class="cursor"></div>
+    <span class="dot"></span>
+    <!-- Custom Cursor End -->
+
+    <!-- Dynamic Navigation based on page -->
+    <% const currentPage = typeof page !== 'undefined' ? page : 'other'; %> <%
+    if (currentPage === 'home') { %> <%- include('nav-home') %> <% } else { %>
+    <%- include('nav-other') %> <% } %>
+
+    <!-- Main Content -->
+    <%- body %>
+
+    <!-- Footer -->
+    <%- include('../partials/footer') %>
+
+    <!-- Scripts -->
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <%- include('../partials/scripts') %>
+  </body>
+</html>

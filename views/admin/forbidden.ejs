@@ -1,0 +1,25 @@
+<%- include('../layouts/admin-header') %>
+
+<div class="dashboard-content">
+  <div class="text-center py-5">
+    <div class="display-1 text-danger mb-4">
+      <i class="fas fa-ban"></i>
+    </div>
+    <h1 class="display-4 mb-4">Access Denied</h1>
+    <p class="lead mb-5">
+      <%= message || "You don't have permission to access this resource" %>
+    </p>
+    <div class="d-flex justify-content-center">
+      <a href="/admin/dashboard" class="btn btn-primary mx-2">
+        <i class="fas fa-home me-2"></i>
+        Go to Dashboard
+      </a>
+      <a href="/admin/logout" class="btn btn-outline-secondary mx-2">
+        <i class="fas fa-sign-out-alt me-2"></i>
+        Logout
+      </a>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/admin-footer') %>

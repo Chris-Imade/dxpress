@@ -1,0 +1,384 @@
+<!-- Banner start -->
+<section
+  class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+>
+  <div
+    class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+    data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+  ></div>
+  <div class="container position-relative tw-pb-21 tw-pt-400-px">
+    <div
+      class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+    >
+      <h1 class="tw-mb-15 text-white text-center">Tracking Result</h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb justify-content-center">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/track">Track</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Result</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+<!-- Banner end -->
+
+<!-- Tracking Result Section start -->
+<section class="py-140">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl">
+          <div class="tracking-info mb-5">
+            <h4 class="mb-4">Tracking Number: <%= shipment.id %></h4>
+
+            <!-- Shipment Progress Bar -->
+            <div class="shipment-progress-wrapper mb-4">
+              <% // Define progress based on status let statusStages =
+              ['Pending', 'Processing', 'In Transit', 'Out for Delivery',
+              'Delivered']; let currentStatusIndex =
+              statusStages.indexOf(shipment.status); if (currentStatusIndex ===
+              -1) currentStatusIndex = 0; let statusProgress =
+              (currentStatusIndex / (statusStages.length - 1)) * 100; %>
+
+              <div class="progress-status d-flex justify-content-between mb-1">
+                <% statusStages.forEach((stage, index) => { %>
+                <div
+                  class="progress-point text-center <%= index <= currentStatusIndex ? 'active' : '' %>"
+                  style="width: <%= 100 / statusStages.length %>%"
+                >
+                  <div class="point-label small"><%= stage %></div>
+                </div>
+                <% }); %>
+              </div>
+
+              <div class="progress" style="height: 8px">
+                <div
+                  class="progress-bar bg-main-600"
+                  role="progressbar"
+                  style="width: <%= statusProgress %>%"
+                  aria-valuenow="<%= statusProgress %>"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+            </div>
+
+            <div class="status-box bg-light p-4 rounded">
+              <div class="row">
+                <div class="col-md-6">
+                  <p>
+                    <strong>Status:</strong>
+                    <span class="text-main-600"><%= shipment.status %></span>
+                  </p>
+                  <p>
+                    <strong>Current Location:</strong> <%=
+                    shipment.currentLocation %>
+                  </p>
+                  <p>
+                    <strong>Destination:</strong> <%= shipment.destination %>
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <p>
+                    <strong>Last Update:</strong> <%= shipment.lastUpdate %>
+                  </p>
+                  <p>
+                    <strong>Estimated Delivery:</strong> <%=
+                    shipment.estimatedDelivery %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tracking-history">
+            <h5 class="mb-4">Tracking History</h5>
+            <div class="timeline">
+              <% shipment.trackingHistory.forEach((event, index) => { %>
+              <div class="timeline-item <%= index === 0 ? 'first' : '' %>">
+                <div class="timeline-marker bg-main-600"></div>
+                <div class="timeline-content">
+                  <h6 class="mb-2"><%= event.status %></h6>
+                  <p class="mb-1"><%= event.location %></p>
+                  <small class="text-muted"><%= event.timestamp %></small>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+
+          <div class="text-center mt-5">
+            <a href="/track" class="btn btn-main-two hover-style-two">
+              Track Another Shipment
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Tracking Result Section end -->
+
+<style>
+    .timeline-wrapper {
+      position: relative;
+      padding: 20px 0;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 50px;
+    }
+    .timeline:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15px;
+      height: 100%;
+      width: 2px;
+      background: #e0e0e0;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #007bff;
+      left: -50px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      border: 4px solid white;
+      box-shadow: 0 0 0 2px #e0e0e0;
+    }
+    .timeline-date {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .timeline-content {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #007bff;
+    }
+    .timeline-content h5 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    /* Progress Bar Styles */
+    .shipment-progress-wrapper {
+      padding: 10px 0 20px;
+    }
+    .progress-point {
+      position: relative;
+    }
+    .progress-point:before {
+      content: '';
+      width: 15px;
+      height: 15px;
+      background: #dee2e6;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto 8px;
+      z-index: 1;
+      position: relative;
+    }
+    .progress-point.active:before {
+      background: var(--color-main-600, #0d6efd);
+    }
+    .point-label {
+      font-size: 11px;
+      color: #6c757d;
+      font-weight: 500;
+    }
+    .progress-point.active .point-label {
+      color: var(--color-main-600, #0d6efd);
+  <!-- Banner start -->
+  <section
+    class="banner-inner d-flex align-items-center position-relative overflow-hidden z-1"
+  >
+    <div
+      class="banner-bg position-absolute top-0 tw-start-0 h-100 w-100 bg-img z-n1"
+      data-background-image="/assets/images/thumbs/banner-inner-bg1.png"
+    ></div>
+    <div class="container position-relative tw-pb-21 tw-pt-400-px">
+      <div
+        class="banner-inner__content max-w-850-px tw-mx-auto position-absolute top-50 tw-start-50 tw--translate-x-50 tw--translate-y-50 w-100 h-100 d-flex flex-column justify-content-center"
+      >
+        <h1 class="tw-mb-15 text-white text-center">Tracking Result</h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-center">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/track">Track</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Result</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </section>
+  <!-- Banner end -->
+
+  <!-- Tracking Result Section start -->
+  <section class="py-140">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div class="bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl">
+            <div class="tracking-info mb-5">
+              <h4 class="mb-4">Tracking Number: <%= shipment.id %></h4>
+
+              <!-- Shipment Progress Bar -->
+              <div class="shipment-progress-wrapper mb-4">
+                <% // Define progress based on status let statusStages =
+                ['Pending', 'Processing', 'In Transit', 'Out for Delivery',
+                'Delivered']; let currentStatusIndex =
+                statusStages.indexOf(shipment.status); if (currentStatusIndex ===
+                -1) currentStatusIndex = 0; let statusProgress =
+                (currentStatusIndex / (statusStages.length - 1)) * 100; %>
+
+                <div class="progress-status d-flex justify-content-between mb-1">
+                  <% statusStages.forEach((stage, index) => { %>
+                  <div
+                    class="progress-point text-center <%= index <= currentStatusIndex ? 'active' : '' %>"
+                    style="width: <%= 100 / statusStages.length %>%"
+                  >
+                    <div class="point-label small"><%= stage %></div>
+                  </div>
+                  <% }); %>
+                </div>
+
+                <div class="progress" style="height: 8px">
+                  <div
+                    class="progress-bar bg-main-600"
+                    role="progressbar"
+                    style="width: <%= statusProgress %>%"
+                    aria-valuenow="<%= statusProgress %>"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="status-box bg-light p-4 rounded">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p>
+                      <strong>Status:</strong>
+                      <span class="text-main-600"><%= shipment.status %></span>
+                    </p>
+                    <p>
+                      <strong>Current Location:</strong> <%=
+                      shipment.currentLocation %>
+                    </p>
+                    <p>
+                      <strong>Destination:</strong> <%= shipment.destination %>
+                    </p>
+                  </div>
+                  <div class="col-md-6">
+                    <p>
+                      <strong>Last Update:</strong> <%= shipment.lastUpdate %>
+                    </p>
+                    <p>
+                      <strong>Estimated Delivery:</strong> <%=
+                      shipment.estimatedDelivery %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tracking-history">
+              <h5 class="mb-4">Tracking History</h5>
+              <div class="timeline">
+                <% shipment.trackingHistory.forEach((event, index) => { %>
+                <div class="timeline-item <%= index === 0 ? 'first' : '' %>">
+                  <div class="timeline-marker bg-main-600"></div>
+                  <div class="timeline-content">
+                    <h6 class="mb-2"><%= event.status %></h6>
+                    <p class="mb-1"><%= event.location %></p>
+                    <small class="text-muted"><%= event.timestamp %></small>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+            </div>
+
+            <div class="text-center mt-5">
+              <a href="/track" class="btn btn-main-two hover-style-two">
+                Track Another Shipment
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Tracking Result Section end -->
+
+  <style>
+    .timeline-wrapper {
+      position: relative;
+      padding: 20px 0;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 50px;
+    }
+    .timeline:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15px;
+      height: 100%;
+      width: 2px;
+      background: #e0e0e0;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #007bff;
+      left: -50px;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      border: 4px solid white;
+      box-shadow: 0 0 0 2px #e0e0e0;
+    }
+    .timeline-date {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .timeline-content {
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #007bff;
+    }
+    .timeline-content h5 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+</style>

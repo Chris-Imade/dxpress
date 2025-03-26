@@ -1,0 +1,731 @@
+<%- include('./layouts/header') %>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h1 class="h3 mb-0">DXPress E-commerce Integration</h1>
+        </div>
+        <div class="card-body">
+          <p class="lead">
+            This is a demo page showing how to integrate DXPress shipping API
+            with your e-commerce platform. Below you can see live examples of
+            calculating shipping rates, creating shipments, and processing
+            payments.
+          </p>
+
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            This is a demo environment. No real shipments will be created or
+            charged.
+          </div>
+
+          <div class="api-key-header">
+            <span><strong>Your API Key:</strong></span>
+            <span class="api-key-display">dxp_test_12345678</span>
+            <button class="btn btn-sm btn-outline-secondary" id="copyApiKey">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculate Shipping Rates Section -->
+      <div class="api-integration-container" id="calculate-rates">
+        <div class="api-section">
+          <h3>1. Calculate Shipping Rates</h3>
+          <p>
+            First, you'll need to calculate available shipping rates for your
+            customer's order.
+          </p>
+
+          <form id="calculateRatesForm" class="rate-calculate-form">
+            <div class="form-group">
+              <label for="origin">Origin Address</label>
+              <input
+                type="text"
+                class="form-control"
+                id="origin"
+                value="123 Sender St, New York, NY"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="destination">Destination Address</label>
+              <input
+                type="text"
+                class="form-control"
+                id="destination"
+                value="456 Receiver Ave, Los Angeles, CA"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="weight">Weight (kg)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="weight"
+                value="5"
+                min="0.1"
+                step="0.1"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="packageType">Package Type</label>
+              <select class="form-control" id="packageType">
+                <option value="Document">Document</option>
+                <option value="Parcel" selected>Parcel</option>
+                <option value="Freight">Freight</option>
+                <option value="Express">Express</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Dimensions (cm)</label>
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="length"
+                    placeholder="Length"
+                    value="10"
+                    min="1"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="width"
+                    placeholder="Width"
+                    value="8"
+                    min="1"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="height"
+                    placeholder="Height"
+                    value="6"
+                    min="1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Carriers</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="dhl"
+                  checked
+                />
+                <label class="form-check-label" for="dhl">DHL</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="fedex"
+                  checked
+                />
+                <label class="form-check-label" for="fedex">FedEx</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="ups"
+                  checked
+                />
+                <label class="form-check-label" for="ups">UPS</label>
+              </div>
+            </div>
+
+            <div class="form-group col-span-2 text-end">
+              <button type="submit" class="btn btn-api" id="calculateRatesBtn">
+                Calculate Rates
+              </button>
+            </div>
+          </form>
+
+          <div id="shippingRatesResults" class="mt-4" style="display: none">
+            <h4>Available Shipping Options</h4>
+            <div class="shipping-options" id="shippingOptions">
+              <!-- Shipping options will be inserted here via JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Shipment Section -->
+        <div class="api-section">
+          <h3>2. Create Shipment</h3>
+          <p>
+            Once your customer selects a shipping option, you can create the
+            shipment.
+          </p>
+
+          <form id="createShipmentForm" class="create-shipment-form">
+            <div class="form-group">
+              <label for="customerName">Customer Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="customerName"
+                value="John Doe"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="customerEmail">Customer Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="customerEmail"
+                value="john@example.com"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="customerPhone">Customer Phone</label>
+              <input
+                type="text"
+                class="form-control"
+                id="customerPhone"
+                value="+1234567890"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Additional Options</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="isFragile"
+                />
+                <label class="form-check-label" for="isFragile"
+                  >Fragile Package</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="insuranceIncluded"
+                  checked
+                />
+                <label class="form-check-label" for="insuranceIncluded"
+                  >Include Insurance</label
+                >
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="additionalNotes">Additional Notes</label>
+              <textarea
+                class="form-control"
+                id="additionalNotes"
+                rows="2"
+                placeholder="Special handling instructions, etc."
+              ></textarea>
+            </div>
+
+            <div class="form-group col-span-2 text-end">
+              <button
+                type="submit"
+                class="btn btn-api"
+                id="createShipmentBtn"
+                disabled
+              >
+                Create Shipment
+              </button>
+            </div>
+          </form>
+
+          <div id="shipmentResults" class="mt-4" style="display: none">
+            <div class="alert alert-success">
+              <strong>Shipment Created!</strong> Below are the details of your
+              shipment.
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Shipment Details</h5>
+                    <ul class="list-unstyled">
+                      <li>
+                        <strong>Shipment ID:</strong>
+                        <span id="shipmentId"></span>
+                      </li>
+                      <li>
+                        <strong>Tracking ID:</strong>
+                        <span id="trackingId"></span>
+                      </li>
+                      <li>
+                        <strong>Invoice ID:</strong>
+                        <span id="invoiceId"></span>
+                      </li>
+                      <li>
+                        <strong>Payment Status:</strong>
+                        <span id="paymentStatus"></span>
+                      </li>
+                      <li>
+                        <strong>Estimated Delivery:</strong>
+                        <span id="estimatedDelivery"></span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Process Payment Section -->
+        <div class="api-section">
+          <h3>3. Process Payment</h3>
+          <p>Finally, process the payment for the shipment.</p>
+
+          <div class="payment-methods">
+            <div class="payment-method" data-provider="stripe">
+              <div class="payment-method-icon">
+                <i class="fab fa-cc-stripe"></i>
+              </div>
+              <div class="payment-method-details">
+                <div class="payment-method-name">Stripe</div>
+                <div class="payment-method-description">
+                  Pay with credit or debit card
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-method" data-provider="paypal">
+              <div class="payment-method-icon">
+                <i class="fab fa-paypal"></i>
+              </div>
+              <div class="payment-method-details">
+                <div class="payment-method-name">PayPal</div>
+                <div class="payment-method-description">
+                  Pay with your PayPal account
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-end mt-4">
+            <button class="btn btn-api" id="processPaymentBtn" disabled>
+              Process Payment
+            </button>
+          </div>
+
+          <div id="paymentResults" class="mt-4" style="display: none">
+            <div class="alert alert-success">
+              <strong>Payment Successful!</strong> The shipment has been paid
+              for.
+            </div>
+          </div>
+        </div>
+
+        <!-- API Response Section -->
+        <div class="api-section">
+          <h3>API Response</h3>
+          <p>
+            This section shows the raw API responses for educational purposes.
+          </p>
+
+          <div class="api-response" id="apiResponse">
+            <em>API responses will appear here when you make requests.</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Link to the API client JavaScript -->
+<script src="/assets/js/api-client.js"></script>
+
+<!-- Link to custom CSS for this demo -->
+<link rel="stylesheet" href="/assets/css/api-integration.css" />
+
+<!-- Demo integration JavaScript -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize the API client
+    const apiClient = new DXPressAPI("dxp_test_12345678");
+
+    // UI elements
+    const calculateRatesForm = document.getElementById("calculateRatesForm");
+    const shippingRatesResults = document.getElementById(
+      "shippingRatesResults"
+    );
+    const shippingOptions = document.getElementById("shippingOptions");
+    const createShipmentBtn = document.getElementById("createShipmentBtn");
+    const createShipmentForm = document.getElementById("createShipmentForm");
+    const shipmentResults = document.getElementById("shipmentResults");
+    const processPaymentBtn = document.getElementById("processPaymentBtn");
+    const paymentResults = document.getElementById("paymentResults");
+    const apiResponse = document.getElementById("apiResponse");
+
+    // Selected rate and shipment data
+    let selectedRate = null;
+    let createdShipment = null;
+    let selectedPaymentProvider = null;
+
+    // Calculate rates form submission
+    calculateRatesForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      // Get form values
+      const origin = document.getElementById("origin").value;
+      const destination = document.getElementById("destination").value;
+      const weight = parseFloat(document.getElementById("weight").value);
+      const packageType = document.getElementById("packageType").value;
+      const length = parseFloat(document.getElementById("length").value);
+      const width = parseFloat(document.getElementById("width").value);
+      const height = parseFloat(document.getElementById("height").value);
+
+      // Get selected carriers
+      const carriers = [];
+      if (document.getElementById("dhl").checked) carriers.push("DHL");
+      if (document.getElementById("fedex").checked) carriers.push("FedEx");
+      if (document.getElementById("ups").checked) carriers.push("UPS");
+
+      // Prepare request data
+      const shipmentDetails = {
+        origin,
+        destination,
+        weight,
+        packageType,
+        dimensions: { length, width, height },
+        carriers,
+      };
+
+      try {
+        // Show loading state
+        document.getElementById("calculateRatesBtn").innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Calculating...';
+
+        // For demo purposes, simulate API call with mock data
+        setTimeout(() => {
+          const mockResponse = {
+            success: true,
+            data: {
+              rates: [
+                {
+                  carrier: "FedEx",
+                  serviceLevel: "Ground",
+                  cost: 15.95,
+                  currency: "USD",
+                  estimatedDays: 3,
+                },
+                {
+                  carrier: "DHL",
+                  serviceLevel: "Express",
+                  cost: 29.99,
+                  currency: "USD",
+                  estimatedDays: 1,
+                },
+                {
+                  carrier: "UPS",
+                  serviceLevel: "Ground",
+                  cost: 18.5,
+                  currency: "USD",
+                  estimatedDays: 3,
+                },
+              ],
+              estimatedDeliveryDates: [
+                {
+                  carrier: "FedEx",
+                  serviceLevel: "Ground",
+                  estimatedDeliveryDate: "2023-06-10T00:00:00.000Z",
+                },
+                {
+                  carrier: "DHL",
+                  serviceLevel: "Express",
+                  estimatedDeliveryDate: "2023-06-08T00:00:00.000Z",
+                },
+                {
+                  carrier: "UPS",
+                  serviceLevel: "Ground",
+                  estimatedDeliveryDate: "2023-06-10T00:00:00.000Z",
+                },
+              ],
+            },
+          };
+
+          // Display the API response
+          apiResponse.classList.add("success");
+          apiResponse.innerHTML = JSON.stringify(mockResponse, null, 2);
+
+          // Display shipping options
+          renderShippingOptions(mockResponse.data.rates);
+
+          // Reset button
+          document.getElementById("calculateRatesBtn").innerHTML =
+            "Calculate Rates";
+
+          // Show results
+          shippingRatesResults.style.display = "block";
+        }, 1500);
+      } catch (error) {
+        console.error("Error calculating rates:", error);
+        apiResponse.classList.remove("success");
+        apiResponse.classList.add("error");
+        apiResponse.innerHTML = JSON.stringify(
+          { success: false, message: error.message },
+          null,
+          2
+        );
+        document.getElementById("calculateRatesBtn").innerHTML =
+          "Calculate Rates";
+      }
+    });
+
+    // Render shipping options
+    function renderShippingOptions(rates) {
+      shippingOptions.innerHTML = "";
+
+      rates.forEach((rate) => {
+        const option = document.createElement("div");
+        option.className = "shipping-option";
+        option.dataset.carrier = rate.carrier;
+        option.dataset.serviceLevel = rate.serviceLevel;
+        option.dataset.cost = rate.cost;
+        option.dataset.days = rate.estimatedDays;
+
+        option.innerHTML = `
+          <div class="carrier">${rate.carrier}</div>
+          <div class="service-level">${rate.serviceLevel}</div>
+          <div class="price">$${rate.cost.toFixed(2)}</div>
+          <div class="estimated-days">${rate.estimatedDays} day${
+          rate.estimatedDays > 1 ? "s" : ""
+        }</div>
+          <div class="radio-marker"></div>
+        `;
+
+        option.addEventListener("click", function () {
+          // Deselect all options
+          document.querySelectorAll(".shipping-option").forEach((el) => {
+            el.classList.remove("selected");
+          });
+
+          // Select this option
+          this.classList.add("selected");
+
+          // Store selected rate
+          selectedRate = {
+            carrier: this.dataset.carrier,
+            serviceLevel: this.dataset.serviceLevel,
+            cost: parseFloat(this.dataset.cost),
+            estimatedDays: parseInt(this.dataset.days),
+          };
+
+          // Enable create shipment button
+          createShipmentBtn.disabled = false;
+        });
+
+        shippingOptions.appendChild(option);
+      });
+    }
+
+    // Create shipment form submission
+    createShipmentForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!selectedRate) {
+        alert("Please select a shipping rate first");
+        return;
+      }
+
+      // Get form values
+      const customerName = document.getElementById("customerName").value;
+      const customerEmail = document.getElementById("customerEmail").value;
+      const customerPhone = document.getElementById("customerPhone").value;
+      const isFragile = document.getElementById("isFragile").checked;
+      const insuranceIncluded =
+        document.getElementById("insuranceIncluded").checked;
+      const additionalNotes = document.getElementById("additionalNotes").value;
+
+      // Get shipping details from the calculate rates form
+      const origin = document.getElementById("origin").value;
+      const destination = document.getElementById("destination").value;
+      const weight = parseFloat(document.getElementById("weight").value);
+      const packageType = document.getElementById("packageType").value;
+      const dimensions = {
+        length: parseFloat(document.getElementById("length").value),
+        width: parseFloat(document.getElementById("width").value),
+        height: parseFloat(document.getElementById("height").value),
+      };
+
+      // Prepare shipment data
+      const shipmentData = {
+        customerName,
+        customerEmail,
+        customerPhone,
+        origin,
+        destination,
+        weight,
+        dimensions,
+        packageType,
+        selectedRate,
+        isFragile,
+        insuranceIncluded,
+        additionalNotes,
+      };
+
+      try {
+        // Show loading state
+        createShipmentBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Creating...';
+
+        // For demo purposes, simulate API call with mock data
+        setTimeout(() => {
+          const mockResponse = {
+            success: true,
+            message: "Shipment created successfully",
+            data: {
+              shipmentId: "60a1b2c3d4e5f6g7h8i9j0k",
+              trackingId: "DXP12345678",
+              invoiceId: "INV-20230607-12345",
+              paymentStatus: "Unpaid",
+              estimatedDelivery: "2023-06-10T00:00:00.000Z",
+            },
+          };
+
+          // Store created shipment
+          createdShipment = mockResponse.data;
+
+          // Display the API response
+          apiResponse.classList.add("success");
+          apiResponse.innerHTML = JSON.stringify(mockResponse, null, 2);
+
+          // Populate shipment details
+          document.getElementById("shipmentId").textContent =
+            createdShipment.shipmentId;
+          document.getElementById("trackingId").textContent =
+            createdShipment.trackingId;
+          document.getElementById("invoiceId").textContent =
+            createdShipment.invoiceId;
+          document.getElementById("paymentStatus").textContent =
+            createdShipment.paymentStatus;
+          document.getElementById("estimatedDelivery").textContent = new Date(
+            createdShipment.estimatedDelivery
+          ).toLocaleDateString();
+
+          // Reset button and show results
+          createShipmentBtn.innerHTML = "Create Shipment";
+          shipmentResults.style.display = "block";
+
+          // Enable payment button
+          processPaymentBtn.disabled = false;
+        }, 1500);
+      } catch (error) {
+        console.error("Error creating shipment:", error);
+        apiResponse.classList.remove("success");
+        apiResponse.classList.add("error");
+        apiResponse.innerHTML = JSON.stringify(
+          { success: false, message: error.message },
+          null,
+          2
+        );
+        createShipmentBtn.innerHTML = "Create Shipment";
+      }
+    });
+
+    // Payment method selection
+    document.querySelectorAll(".payment-method").forEach((method) => {
+      method.addEventListener("click", function () {
+        // Deselect all methods
+        document.querySelectorAll(".payment-method").forEach((el) => {
+          el.classList.remove("selected");
+        });
+
+        // Select this method
+        this.classList.add("selected");
+
+        // Store selected provider
+        selectedPaymentProvider = this.dataset.provider;
+      });
+    });
+
+    // Process payment button click
+    processPaymentBtn.addEventListener("click", async function () {
+      if (!createdShipment) {
+        alert("Please create a shipment first");
+        return;
+      }
+
+      if (!selectedPaymentProvider) {
+        alert("Please select a payment method");
+        return;
+      }
+
+      try {
+        // Show loading state
+        processPaymentBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        // For demo purposes, simulate API call with mock data
+        setTimeout(() => {
+          const mockResponse = {
+            success: true,
+            message: "Payment processed successfully",
+            data: {
+              paymentId: "PAY-20230607-12345",
+              status: "Completed",
+              amount: selectedRate.cost,
+              currency: "USD",
+              provider: selectedPaymentProvider,
+            },
+          };
+
+          // Display the API response
+          apiResponse.classList.add("success");
+          apiResponse.innerHTML = JSON.stringify(mockResponse, null, 2);
+
+          // Update payment status
+          document.getElementById("paymentStatus").textContent = "Paid";
+
+          // Reset button and show results
+          processPaymentBtn.innerHTML = "Process Payment";
+          paymentResults.style.display = "block";
+        }, 1500);
+      } catch (error) {
+        console.error("Error processing payment:", error);
+        apiResponse.classList.remove("success");
+        apiResponse.classList.add("error");
+        apiResponse.innerHTML = JSON.stringify(
+          { success: false, message: error.message },
+          null,
+          2
+        );
+        processPaymentBtn.innerHTML = "Process Payment";
+      }
+    });
+
+    // Copy API key button
+    document
+      .getElementById("copyApiKey")
+      .addEventListener("click", function () {
+        const apiKey = document.querySelector(".api-key-display").textContent;
+        navigator.clipboard.writeText(apiKey).then(() => {
+          this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => {
+            this.innerHTML = '<i class="fas fa-copy"></i> Copy';
+          }, 2000);
+        });
+      });
+  });
+</script>
+
+<%- include('./layouts/footer') %>
