@@ -74,7 +74,7 @@ router.get("/team/:slug", (req, res) => {
       name: "John Smith",
       position: "CEO & Founder",
       image: "/assets/images/thumbs/team-img1.png",
-      email: "john.smith@dxpress.uk",
+      email: "",
       phone: "+44 7123 456789",
       social: {
         facebook: "https://facebook.com",
@@ -85,10 +85,10 @@ router.get("/team/:slug", (req, res) => {
     },
     {
       id: 2,
-      name: "Sarah Johnson",
+      name: "Klaus Weber",
       position: "Operations Manager",
       image: "/assets/images/thumbs/team-img2.png",
-      email: "sarah.johnson@dxpress.uk",
+      email: "",
       phone: "+44 7234 567890",
       social: {
         facebook: "https://facebook.com",
@@ -102,7 +102,7 @@ router.get("/team/:slug", (req, res) => {
       name: "Michael Brown",
       position: "Logistics Director",
       image: "/assets/images/thumbs/team-img3.png",
-      email: "michael.brown@dxpress.uk",
+      email: "",
       phone: "+44 7345 678901",
       social: {
         facebook: "https://facebook.com",
@@ -116,7 +116,7 @@ router.get("/team/:slug", (req, res) => {
       name: "Emily Davis",
       position: "Customer Service Manager",
       image: "/assets/images/thumbs/team-img4.png",
-      email: "emily.davis@dxpress.uk",
+      email: "",
       phone: "+44 7456 789012",
       social: {
         facebook: "https://facebook.com",
@@ -130,7 +130,7 @@ router.get("/team/:slug", (req, res) => {
       name: "Robert Wilson",
       position: "Transportation Specialist",
       image: "/assets/images/thumbs/team-img5.png",
-      email: "robert.wilson@dxpress.uk",
+      email: "",
       phone: "+44 7567 890123",
       social: {
         facebook: "https://facebook.com",
@@ -144,7 +144,7 @@ router.get("/team/:slug", (req, res) => {
       name: "Jennifer Taylor",
       position: "Supply Chain Manager",
       image: "/assets/images/thumbs/team-img6.png",
-      email: "jennifer.taylor@dxpress.uk",
+      email: "",
       phone: "+44 7678 901234",
       social: {
         facebook: "https://facebook.com",
@@ -158,7 +158,7 @@ router.get("/team/:slug", (req, res) => {
       name: "David Martinez",
       position: "Fleet Manager",
       image: "/assets/images/thumbs/team-img7.png",
-      email: "david.martinez@dxpress.uk",
+      email: "",
       phone: "+44 7789 012345",
       social: {
         facebook: "https://facebook.com",
@@ -172,7 +172,7 @@ router.get("/team/:slug", (req, res) => {
       name: "Jessica Anderson",
       position: "International Shipping Coordinator",
       image: "/assets/images/thumbs/team-img8.png",
-      email: "jessica.anderson@dxpress.uk",
+      email: "",
       phone: "+44 7890 123456",
       social: {
         facebook: "https://facebook.com",

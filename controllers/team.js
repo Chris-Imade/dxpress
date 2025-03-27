@@ -16,7 +16,7 @@ exports.getTeamPage = (req, res) => {
     },
     {
       id: "sarah-johnson",
-      name: "Sarah Johnson",
+      name: "Klaus Weber",
       position: "Operations Director",
       image:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=988&q=80",
@@ -130,7 +130,7 @@ exports.getTeamDetailsPage = (req, res) => {
       ],
       education:
         "MBA from Harvard Business School, BS in Business Administration from University of Michigan",
-      email: "john.smith@dxpress.uk",
+      email: "",
       phone: "+44 7506 323071",
       socialLinks: {
         twitter: "https://twitter.com",
@@ -139,13 +139,13 @@ exports.getTeamDetailsPage = (req, res) => {
         linkedin: "https://linkedin.com",
       },
     },
-    "sarah-johnson": {
-      id: "sarah-johnson",
-      name: "Sarah Johnson",
+    "klaus-weber": {
+      id: "klaus-weber",
+      name: "Klaus Weber",
       position: "Operations Director",
       image:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=988&q=80",
-      bio: `Sarah Johnson oversees all operational aspects of Dxpress Logistics, ensuring seamless execution across our global network. With her strategic vision and operational expertise, Sarah has been instrumental in optimizing our processes and expanding our service capabilities.
+      bio: `Klaus Weber oversees all operational aspects of Dxpress Logistics, ensuring seamless execution across our global network. With her strategic vision and operational expertise, Sarah has been instrumental in optimizing our processes and expanding our service capabilities.
       
       Sarah joined Dxpress in 2010 after a successful career at major logistics companies in Europe and Asia. Her international experience and deep understanding of complex supply chains have helped Dxpress develop tailored solutions for clients across industries.
       
@@ -158,7 +158,7 @@ exports.getTeamDetailsPage = (req, res) => {
       ],
       education:
         "MS in Supply Chain Management from MIT, BS in Logistics from University of Manchester",
-      email: "sarah.johnson@dxpress.uk",
+      email: "",
       phone: "+44 7506 323072",
       socialLinks: {
         twitter: "https://twitter.com",
