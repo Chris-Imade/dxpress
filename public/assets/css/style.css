@@ -1,0 +1,124 @@
+/* Custom styles for DXPress */
+
+/* General styles */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+  max-height: 40px;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  background-color: #343a40;
+}
+
+.footer a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: #fff !important;
+}
+
+/* Cards */
+.card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* Forms */
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* API Documentation */
+.api-endpoint {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.api-method {
+  font-weight: bold;
+  color: #0d6efd;
+}
+
+.api-path {
+  font-family: monospace;
+  color: #212529;
+}
+
+.api-description {
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+/* Tracking Progress */
+.progress {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.progress-bar {
+  background-color: #0d6efd;
+}
+
+/* Status Badges */
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+}
+
+.badge-pending {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.badge-transit {
+  background-color: #0dcaf0;
+  color: #fff;
+}
+
+.badge-delivered {
+  background-color: #198754;
+  color: #fff;
+}
+
+.badge-delayed {
+  background-color: #fd7e14;
+  color: #fff;
+}
+
+.badge-cancelled {
+  background-color: #dc3545;
+  color: #fff;
+}
