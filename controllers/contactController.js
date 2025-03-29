@@ -1,4 +1,3 @@
-const Contact = require("../models/Contact");
 const nodemailer = require("nodemailer");
 
 // Create a transporter using SMTP
@@ -10,10 +9,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  // Add timeout settings to give more time for connection
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000, // 30 seconds
-  socketTimeout: 60000, // 60 seconds
 });
 
 // Email templates
@@ -85,119 +80,44 @@ const adminNotificationTemplate = (formData) => `
 </html>
 `;
 
-exports.getContactPage = (req, res) => {
-  res.render("contact", {
-    title: "Contact Us",
-    path: "/contact",
-    successMessage: null,
-    errorMessage: null,
-    formData: {},
-  });
-};
-
 exports.submitContactForm = async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-    // Check if the request is expecting JSON (AJAX)
-    const isAjax = req.xhr || req.headers.accept.indexOf("json") > -1;
-
     // Validate input
     if (!name || !email || !phone || !subject || !message) {
-      if (isAjax) {
-        return res.status(400).json({
-          success: false,
-          message: "Please fill in all required fields",
-        });
-      } else {
-        return res.render("contact", {
-          title: "Contact Us",
-          path: "/contact",
-          successMessage: null,
-          errorMessage: "Please fill in all required fields",
-          formData: req.body,
-        });
-      }
+      return res.status(400).json({
+        success: false,
+        message: "Please fill in all required fields",
+      });
     }
 
-    // Create new contact
-    const contact = new Contact({
-      name,
-      email,
-      phone,
-      subject,
-      message,
+    // Send receipt to user
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: "Thank You for Contacting DXpress",
+      html: userReceiptTemplate(name),
     });
 
-    // Save to database
-    await contact.save();
+    // Send notification to admin
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: "support@dxpress.uk",
+      subject: "New Contact Form Submission",
+      html: adminNotificationTemplate({ name, email, phone, subject, message }),
+    });
 
-    try {
-      // Send receipt to user
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: email,
-        subject: "Thank You for Contacting DXpress",
-        html: userReceiptTemplate(name),
-      });
-
-      // Send notification to admin
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: "support@dxpress.uk",
-        subject: "New Contact Form Submission",
-        html: adminNotificationTemplate({
-          name,
-          email,
-          phone,
-          subject,
-          message,
-        }),
-      });
-    } catch (emailError) {
-      console.error("Error sending email:", emailError);
-      // Continue processing even if email fails
-      // Don't throw the error here, just log it and continue
-    }
-
-    if (isAjax) {
-      return res.status(200).json({
-        success: true,
-        message:
-          "Your message has been sent successfully! We will contact you soon.",
-      });
-    } else {
-      // Render contact page with success message
-      return res.render("contact", {
-        title: "Contact Us",
-        path: "/contact",
-        successMessage:
-          "Your message has been sent successfully! We will contact you soon.",
-        errorMessage: null,
-        formData: {},
-      });
-    }
+    res.status(200).json({
+      success: true,
+      message: "Your message has been sent successfully",
+    });
   } catch (error) {
-    console.error("Error submitting contact form:", error);
-
-    // Check if the request is expecting JSON (AJAX)
-    const isAjax = req.xhr || req.headers.accept.indexOf("json") > -1;
-
-    if (isAjax) {
-      return res.status(500).json({
-        success: false,
-        message:
-          "An error occurred while sending your message. Please try again.",
-      });
-    } else {
-      return res.render("contact", {
-        title: "Contact Us",
-        path: "/contact",
-        successMessage: null,
-        errorMessage:
-          "An error occurred while sending your message. Please try again.",
-        formData: req.body,
-      });
-    }
+    console.error("Error sending email:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        "There was an error sending your message. Please try again later.",
+    });
   }
 };
