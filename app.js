@@ -40,14 +40,10 @@ const initializeAdminUser = async () => {
       // Get admin email from environment or use default
       const adminEmail = process.env.ADMIN_EMAIL || "admin@dxpress.uk";
 
-      // Check if we should use test email instead
-      const useTestEmail = process.env.NODE_ENV !== "production";
-      const testEmail = "imadechriswebdev@gmail.com";
-
       // Create default admin user
       const admin = new User({
-        email: useTestEmail ? testEmail : adminEmail,
-        password: process.env.ADMIN_PASSWORD || "$IamtheAdmin11",
+        email: adminEmail,
+        password: process.env.ADMIN_PASSWORD || "$IamtheAdmin11", 
         fullName: "Admin User",
         role: "admin",
         isActive: true,
