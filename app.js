@@ -39,11 +39,12 @@ const initializeAdminUser = async () => {
 
       // Get admin email from environment or use default
       const adminEmail = process.env.ADMIN_EMAIL || "admin@dxpress.uk";
+      const adminPassword = process.env.ADMIN_PASSWORD || "$IamtheAdmin11";
 
       // Create default admin user
       const admin = new User({
         email: adminEmail,
-        password: process.env.ADMIN_PASSWORD || "$IamtheAdmin11", 
+        password: adminPassword, // The pre-save hook will hash this
         fullName: "Admin User",
         role: "admin",
         isActive: true,
@@ -78,16 +79,9 @@ mongoose
 
 // Function to determine which database URI to use based on environment
 function getDatabaseUri() {
-  // Use different database connections based on environment
-  if (process.env.NODE_ENV === "production") {
-    console.log("Using production database connection");
-    return process.env.MONGODB_URI;
-  } else {
-    console.log("Using development database connection");
-    return (
-      process.env.MONGODB_DEV_URI || "mongodb://localhost:27017/dxpress_dev"
-    );
-  }
+  // Always use MONGODB_URI for all environments
+  console.log("Using database connection from MONGODB_URI");
+  return process.env.MONGODB_URI;
 }
 
 // Set view engine
