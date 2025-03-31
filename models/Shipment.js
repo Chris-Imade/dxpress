@@ -131,28 +131,72 @@ shipmentSchema.pre("save", async function (next) {
   try {
     // If trackingId is already set manually (e.g. by admin), use it
     if (this.trackingId) {
+      // Still need to check for uniqueness even if set manually
+      const Shipment = mongoose.model("Shipment");
+      const existingWithId = await Shipment.findOne({
+        trackingId: this.trackingId,
+      });
+
+      if (existingWithId && !existingWithId._id.equals(this._id)) {
+        throw new Error(
+          `Tracking ID ${this.trackingId} already exists. Please use a different ID.`
+        );
+      }
       return next();
     }
 
-    // Generate a new tracking ID with format DX123456ABC
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const randomChars = Math.random()
-      .toString(36)
-      .substring(2, 5)
-      .toUpperCase();
-    let candidate = `DX${timestamp}${randomChars}`;
-
-    // Check if this ID already exists, if so, try again with a different random part
+    // Generate a unique tracking ID with format DX123456ABC
     const Shipment = mongoose.model("Shipment");
-    let existingShipment = await Shipment.findOne({ trackingId: candidate });
+    let isUnique = false;
+    let candidate = "";
+    let attempts = 0;
+    const maxAttempts = 5;
 
-    if (existingShipment) {
-      // If collision, generate a new random part
-      const newRandomChars = Math.random()
+    // Keep trying until we get a unique ID or max attempts reached
+    while (!isUnique && attempts < maxAttempts) {
+      // Generate a timestamp part that includes milliseconds for more uniqueness
+      const timestamp = new Date().getTime().toString().slice(-6);
+
+      // Generate random characters (3 chars, uppercase)
+      const randomChars = Math.random()
         .toString(36)
         .substring(2, 5)
         .toUpperCase();
-      candidate = `DX${timestamp}${newRandomChars}`;
+
+      candidate = `DX${timestamp}${randomChars}`;
+
+      // Check if this ID already exists
+      const existingShipment = await Shipment.findOne({
+        trackingId: candidate,
+      });
+
+      if (!existingShipment) {
+        isUnique = true;
+      } else {
+        attempts++;
+        // Add small delay to ensure timestamp changes
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    }
+
+    // If we couldn't generate a unique ID after max attempts, add more random data
+    if (!isUnique) {
+      const extraRandom = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      const timestamp = new Date().getTime().toString().slice(-6);
+      candidate = `DX${timestamp}${extraRandom}`;
+
+      // Check one more time
+      const existingShipment = await Shipment.findOne({
+        trackingId: candidate,
+      });
+      if (existingShipment) {
+        throw new Error(
+          "Could not generate a unique tracking ID after multiple attempts"
+        );
+      }
     }
 
     this.trackingId = candidate;

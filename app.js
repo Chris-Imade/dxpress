@@ -67,13 +67,32 @@ const initializeAdminUser = async () => {
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/dxpress")
+  .connect(getDatabaseUri())
   .then(() => {
-    console.log("MongoDB connected...");
+    console.log(
+      "MongoDB connected to",
+      process.env.NODE_ENV === "production"
+        ? "production database"
+        : "development database"
+    );
     // Initialize admin user after connecting to the database
     initializeAdminUser();
   })
   .catch((err) => console.error("MongoDB connection error:", err));
+
+// Function to determine which database URI to use based on environment
+function getDatabaseUri() {
+  // Use different database connections based on environment
+  if (process.env.NODE_ENV === "production") {
+    console.log("Using production database connection");
+    return process.env.MONGODB_URI;
+  } else {
+    console.log("Using development database connection");
+    return (
+      process.env.MONGODB_DEV_URI || "mongodb://localhost:27017/dxpress_dev"
+    );
+  }
+}
 
 // Set view engine
 //app.engine("ejs", ejsLocals); // Use ejs-locals for layout, partial and block templates
