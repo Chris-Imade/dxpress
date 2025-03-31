@@ -278,48 +278,14 @@ router.get("/track", (req, res) => {
 });
 
 router.post("/track-shipment", (req, res) => {
-  const { trackingId } = req.body;
-
-  if (!trackingId) {
-    return res.render("shipment/track", {
-      page: "track",
-      title: "Track Shipment",
-      layout: "layouts/main",
-      errorMessage: "Please enter a tracking number",
-      successMessage: null,
-      trackingResult: null,
-    });
+  // Redirect POST requests with the form data
+  const trackingId = req.body.trackingId;
+  if (trackingId) {
+    // If there's tracking data, forward it to the correct route
+    res.redirect(307, "/shipment/track"); // 307 preserves the POST method
+  } else {
+    res.redirect("/shipment/track");
   }
-
-  // Mock shipment data
-  const shipment = {
-    id: trackingId,
-    status: "In Transit",
-    currentLocation: "London Distribution Center",
-    destination: "Manchester",
-    estimatedDelivery: "March 20, 2024",
-    lastUpdate: new Date().toLocaleString(),
-    trackingHistory: [
-      {
-        status: "Package Received",
-        location: "London Warehouse",
-        timestamp: "2024-03-18 09:00:00",
-      },
-      {
-        status: "In Transit",
-        location: "London Distribution Center",
-        timestamp: "2024-03-19 14:30:00",
-      },
-    ],
-  };
-
-  res.render("shipment/track-result", {
-    page: "track",
-    title: "Tracking Result",
-    layout: "layouts/main",
-    shipment,
-    errorMessage: null,
-  });
 });
 
 router.get("/track-result", (req, res) => {
@@ -413,6 +379,11 @@ router.get("/create-shipment", (req, res) => {
     title: "Create Shipment",
     layout: "layouts/main",
   });
+});
+
+// Add a redirect for the old track-shipment URL
+router.get("/track-shipment", (req, res) => {
+  res.redirect("/shipment/track");
 });
 
 module.exports = router;

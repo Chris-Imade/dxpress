@@ -366,6 +366,10 @@
           <!-- Step 3: Payment -->
           <div class="step-content" id="step3" style="display: none">
             <h3 class="mb-4">Payment | Shipment Summary</h3>
+
+            <!-- Add status message container -->
+            <div id="paymentStatus" class="mb-4"></div>
+
             <div class="selected-rate-summary mb-4">
               <div class="card">
                 <div class="card-body">
@@ -591,9 +595,32 @@
               </div>
               <h3 class="mb-3">Shipment Created Successfully!</h3>
               <p class="mb-4">
-                Your shipment has been created and payment processed. You will
-                receive an email confirmation shortly.
+                Your shipment has been created. If you provided a valid email
+                address, you should receive a confirmation email shortly.
               </p>
+
+              <!-- Email Warning Message (only shown if there was an email error) -->
+              <div
+                id="emailWarning"
+                style="display: none"
+                class="alert alert-warning mx-auto mb-4"
+                style="max-width: 500px"
+              >
+                <div class="d-flex align-items-center">
+                  <i
+                    class="fas fa-envelope me-3 text-warning"
+                    style="font-size: 24px"
+                  ></i>
+                  <div class="text-start">
+                    <strong>Email Delivery Notice:</strong>
+                    <p class="mb-0">
+                      There might be a delay in receiving your confirmation
+                      email. Please save your tracking information for
+                      reference.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <div
                 class="shipment-details card mx-auto"
@@ -608,7 +635,10 @@
                     </p>
                     <p>
                       <strong>Tracking Number:</strong>
-                      <span id="confirmTrackingId"></span>
+                      <span
+                        id="confirmTrackingId"
+                        class="text-main-600 fw-bold"
+                      ></span>
                     </p>
                     <p>
                       <strong>Carrier:</strong>
@@ -621,7 +651,7 @@
                   </div>
                   <div class="d-grid gap-2 mt-4">
                     <a
-                      href="/track"
+                      href="/shipment/track"
                       class="btn btn-outline-primary"
                       style="color: #212529"
                     >
@@ -1088,40 +1118,228 @@
 
     // Handle payment processing
     processPaymentBtn.addEventListener("click", function () {
-      // Simulate payment processing
+      // Show status message container and clean previous messages
+      const statusElement = document.getElementById("paymentStatus");
+      statusElement.innerHTML = `
+        <div class="alert alert-info">
+          <div class="d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm me-3" role="status"></div>
+            <div>
+              <strong>Processing your shipment...</strong>
+              <p class="mb-0 small">This may take a few moments. Please don't refresh the page.</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Disable button during processing
       this.disabled = true;
       this.innerHTML =
         '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
 
       setTimeout(function () {
-        // Generate random IDs
-        const shipmentId =
-          "SHP" +
-          Math.floor(Math.random() * 1000000)
-            .toString()
-            .padStart(6, "0");
-        const trackingId =
-          selectedRate.carrier.substring(0, 2).toUpperCase() +
-          Math.floor(Math.random() * 10000000000)
-            .toString()
-            .padStart(10, "0");
+        // Collect shipment data
+        const shipmentData = {
+          shipmentId:
+            "SHP" +
+            Math.floor(Math.random() * 1000000)
+              .toString()
+              .padStart(6, "0"),
+          trackingId:
+            "TRK" +
+            Math.floor(Math.random() * 10000000000)
+              .toString()
+              .padStart(10, "0"),
+          customerName: document.getElementById("customerName").value,
+          customerEmail: document.getElementById("customerEmail").value,
+          customerPhone: document.getElementById("customerPhone").value,
+          origin:
+            document.getElementById("originAddress").value +
+            ", " +
+            document.getElementById("originCity").value +
+            ", " +
+            document.getElementById("originPostalCode").value +
+            ", " +
+            document.getElementById("originCountry").value,
+          destination:
+            document.getElementById("destAddress").value +
+            ", " +
+            document.getElementById("destCity").value +
+            ", " +
+            document.getElementById("destPostalCode").value +
+            ", " +
+            document.getElementById("destCountry").value,
+          packageType: document.getElementById("packageType").value,
+          weight: document.getElementById("weight").value,
+          dimensions: {
+            length: document.getElementById("length").value,
+            width: document.getElementById("width").value,
+            height: document.getElementById("height").value,
+          },
+          carrier: selectedRate.carrier,
+          service: selectedRate.service,
+          estimatedDelivery: selectedRate.deliveryDate,
+          deliveryDays: selectedRate.deliveryDays,
+          status: "Pending",
+          fragile: document.getElementById("isFragile").checked,
+          insuranceRequired:
+            document.getElementById("insuranceRequired").checked,
+          price: selectedRate.totalRate,
+        };
 
-        // Populate confirmation details
-        document.getElementById("confirmShipmentId").textContent = shipmentId;
-        document.getElementById("confirmTrackingId").textContent = trackingId;
+        // Set carrier and delivery information for confirmation page
+        document.getElementById("confirmShipmentId").textContent =
+          shipmentData.shipmentId;
         document.getElementById("confirmCarrier").textContent =
-          selectedRate.carrier;
+          shipmentData.carrier;
         document.getElementById("confirmDelivery").textContent =
-          selectedRate.deliveryDays;
+          shipmentData.deliveryDays;
+        document.getElementById("confirmTrackingId").textContent =
+          shipmentData.trackingId;
 
-        // Go to confirmation step
-        goToStep(4);
+        // Send shipment data to server for email notification and database storage
+        fetch("/api/shipments/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(shipmentData),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Server responded with status: ${response.status}`
+              );
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Shipment created:", data);
 
-        // Re-enable button for next time
-        processPaymentBtn.disabled = false;
-        processPaymentBtn.innerHTML =
-          'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
-      }, 3000);
+            // Use the tracking ID from the server response if available
+            if (data.shipment && data.shipment.trackingId) {
+              document.getElementById("confirmTrackingId").textContent =
+                data.shipment.trackingId;
+            }
+
+            // Check if there was an email error and show warning in confirmation step if needed
+            if (data.message.includes("error sending emails")) {
+              document.getElementById("emailWarning").style.display = "block";
+            }
+
+            // Show success message
+            if (data.message.includes("emails sent successfully")) {
+              statusElement.innerHTML = `
+                <div class="alert alert-success">
+                  <div class="d-flex">
+                    <div class="me-3">
+                      <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <div>
+                      <strong>Success!</strong>
+                      <p class="mb-0">Your shipment has been created and a confirmation email has been sent to your inbox.</p>
+                    </div>
+                  </div>
+                </div>
+              `;
+            } else if (data.message.includes("error sending emails")) {
+              statusElement.innerHTML = `
+                <div class="alert alert-warning">
+                  <div class="d-flex">
+                    <div class="me-3">
+                      <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <div>
+                      <strong>Shipment Created</strong>
+                      <p class="mb-0">Your shipment has been created, but we could not send the confirmation email. Please save your tracking information.</p>
+                    </div>
+                  </div>
+                </div>
+              `;
+            } else {
+              statusElement.innerHTML = `
+                <div class="alert alert-success">
+                  <div class="d-flex">
+                    <div class="me-3">
+                      <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <div>
+                      <strong>Success!</strong>
+                      <p class="mb-0">${data.message}</p>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }
+
+            // Continue to confirmation step
+            goToStep(4);
+          })
+          .catch((error) => {
+            console.error("Error creating shipment:", error);
+
+            // Show the email warning in the confirmation page
+            document.getElementById("emailWarning").style.display = "block";
+
+            // Show detailed error message
+            statusElement.innerHTML = `
+              <div class="alert alert-danger">
+                <div class="d-flex">
+                  <div class="me-3">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                  </div>
+                  <div>
+                    <strong>There was a problem processing your shipment</strong>
+                    <p class="mb-0">We've saved your tracking information, but encountered an error: ${error.message}</p>
+                    <p class="mb-0 mt-2">Please contact customer support if you need assistance.</p>
+                  </div>
+                </div>
+              </div>
+            `;
+
+            // Add option to retry or continue
+            statusElement.innerHTML += `
+              <div class="d-flex justify-content-end mt-3">
+                <button id="retryBtn" class="btn btn-outline-secondary me-2">
+                  <i class="fas fa-sync-alt me-2"></i> Retry
+                </button>
+                <button id="continueAnywayBtn" class="btn btn-main">
+                  Continue Anyway <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+              </div>
+            `;
+
+            // Add event listeners for retry and continue buttons
+            setTimeout(() => {
+              const retryBtn = document.getElementById("retryBtn");
+              const continueAnywayBtn =
+                document.getElementById("continueAnywayBtn");
+
+              if (retryBtn) {
+                retryBtn.addEventListener("click", function () {
+                  // Re-enable the process payment button and reset its text
+                  processPaymentBtn.disabled = false;
+                  processPaymentBtn.innerHTML =
+                    'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
+                  // Clear status message
+                  statusElement.innerHTML = "";
+                });
+              }
+
+              if (continueAnywayBtn) {
+                continueAnywayBtn.addEventListener("click", function () {
+                  goToStep(4);
+                });
+              }
+            }, 100);
+          })
+          .finally(() => {
+            // Re-enable button for next time
+            processPaymentBtn.disabled = false;
+            processPaymentBtn.innerHTML =
+              'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
+          });
+      }, 2000);
     });
   });
 

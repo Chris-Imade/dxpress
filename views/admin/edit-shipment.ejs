@@ -222,7 +222,7 @@
                       type="datetime-local"
                       class="form-control"
                       name="statusHistory[<%= index %>][date]"
-                      value="<%= (history.date && !isNaN(new Date(history.date).getTime())) ? new Date(history.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>"
+                      value="<%= (history.timestamp && !isNaN(new Date(history.timestamp).getTime())) ? new Date(history.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>"
                       required
                     />
                   </div>
@@ -253,6 +253,18 @@
                     <button type="button" class="btn btn-outline-danger remove-history" <%= index === 0 ? 'disabled' : '' %>>
                       <i class="fas fa-trash"></i>
                     </button>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-11">
+                    <label class="form-label">Notes</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="statusHistory[<%= index %>][note]"
+                      value="<%= history.note || '' %>"
+                      placeholder="Optional notes about this status"
+                    />
                   </div>
                 </div>
               </div>
@@ -299,6 +311,18 @@
                   </button>
                 </div>
               </div>
+              <div class="row mt-2">
+                <div class="col-md-11">
+                  <label class="form-label">Notes</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="statusHistory[0][note]"
+                    value=""
+                    placeholder="Optional notes about this status"
+                  />
+                </div>
+              </div>
             </div>
           <% } %>
         </div>
@@ -336,5 +360,110 @@
       // Change button text to show loading
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
     });
+
+    // Status history functionality
+    const statusHistoryContainer = document.getElementById('statusHistory');
+    const addStatusButton = document.getElementById('addStatusHistory');
+    
+    if (addStatusButton && statusHistoryContainer) {
+      addStatusButton.addEventListener('click', function() {
+        // Count existing history items
+        const historyItems = statusHistoryContainer.querySelectorAll('.status-history-item');
+        const newIndex = historyItems.length;
+        
+        // Create new status history entry
+        const newHistoryItem = document.createElement('div');
+        newHistoryItem.className = 'status-history-item mb-3';
+        newHistoryItem.innerHTML = `
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Date</label>
+              <input
+                type="datetime-local"
+                class="form-control"
+                name="statusHistory[${newIndex}][date]"
+                value="${new Date().toISOString().slice(0, 16)}"
+                required
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="statusHistory[${newIndex}][status]" required>
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="In Transit" selected>In Transit</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Failed Attempt">Failed Attempt</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Location</label>
+              <input
+                type="text"
+                class="form-control"
+                name="statusHistory[${newIndex}][location]"
+                placeholder="Enter location"
+                required
+              />
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-outline-danger remove-history">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-11">
+              <label class="form-label">Notes</label>
+              <input
+                type="text"
+                class="form-control"
+                name="statusHistory[${newIndex}][note]"
+                value=""
+                placeholder="Optional notes about this status"
+              />
+            </div>
+          </div>
+        `;
+        
+        // Add to container
+        statusHistoryContainer.appendChild(newHistoryItem);
+        
+        // Add event listener to new remove button
+        const newRemoveButton = newHistoryItem.querySelector('.remove-history');
+        if (newRemoveButton) {
+          newRemoveButton.addEventListener('click', function() {
+            statusHistoryContainer.removeChild(newHistoryItem);
+          });
+        }
+      });
+      
+      // Add event listeners to existing remove buttons
+      const removeButtons = statusHistoryContainer.querySelectorAll('.remove-history:not([disabled])');
+      removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const historyItem = this.closest('.status-history-item');
+          if (historyItem) {
+            statusHistoryContainer.removeChild(historyItem);
+          }
+        });
+      });
+      
+      // Add submit event listener to handle form data
+      form.addEventListener('submit', function(e) {
+        // Don't remove this if you already have a submit handler above
+        // e.preventDefault();
+        
+        // If there are no status history items, make sure to add at least one
+        const historyItems = statusHistoryContainer.querySelectorAll('.status-history-item');
+        if (historyItems.length === 0) {
+          // If no status history, add a default one with current status
+          addStatusButton.click();
+        }
+      });
+    }
   });
 </script>

@@ -2,6 +2,218 @@ const Shipment = require("../models/Shipment");
 const Newsletter = require("../models/Newsletter");
 const User = require("../models/User");
 const Contact = require("../models/Contact");
+const nodemailer = require("nodemailer");
+
+// Create a transporter using SMTP
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: process.env.SMTP_PORT || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+  // Add timeout settings to give more time for connection
+  connectionTimeout: 60000, // 60 seconds
+  greetingTimeout: 30000, // 30 seconds
+  socketTimeout: 60000, // 60 seconds
+});
+
+// Email templates
+const customerShipmentConfirmationTemplate = (shipment) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1a237e; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { text-align: center; padding: 20px; background-color: #f5f5f5; }
+        .shipment-details { background-color: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .tracking-number { font-size: 18px; font-weight: bold; color: #1a237e; }
+        .button { display: inline-block; background-color: #1a237e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your Shipment is Confirmed!</h1>
+        </div>
+        <div class="content">
+            <p>Dear ${shipment.customerName},</p>
+            <p>Thank you for choosing DXpress for your shipping needs. Your shipment has been confirmed and is now being processed.</p>
+            
+            <div class="shipment-details">
+                <p><strong>Tracking Number:</strong> <span class="tracking-number">${
+                  shipment.trackingId
+                }</span></p>
+                <p><strong>Origin:</strong> ${shipment.origin}</p>
+                <p><strong>Destination:</strong> ${shipment.destination}</p>
+                <p><strong>Package Type:</strong> ${shipment.packageType}</p>
+                <p><strong>Weight:</strong> ${shipment.weight} kg</p>
+                <p><strong>Estimated Delivery:</strong> ${new Date(
+                  shipment.estimatedDelivery
+                ).toDateString()}</p>
+                <p><strong>Status:</strong> ${shipment.status}</p>
+            </div>
+            
+            <p>You can track your shipment at any time by visiting our website and entering your tracking number.</p>
+            
+            <a href="https://www.dxpress.uk/shipment/track?id=${
+              shipment.trackingId
+            }" class="button">Track Shipment</a>
+            
+            <p>If you have any questions about your shipment, please contact our customer service team at support@dxpress.uk or call +44 7506 323070.</p>
+        </div>
+        <div class="footer">
+            <p>Best regards,<br>The DXpress Team</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+const adminShipmentNotificationTemplate = (shipment) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1a237e; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { text-align: center; padding: 20px; background-color: #f5f5f5; }
+        .shipment-details { background-color: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .customer-info { background-color: #eff6ff; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Shipment Created</h1>
+        </div>
+        <div class="content">
+            <p>A new shipment has been created in the system by an administrator:</p>
+            
+            <div class="customer-info">
+                <h3>Customer Information</h3>
+                <p><strong>Name:</strong> ${shipment.customerName}</p>
+                <p><strong>Email:</strong> ${shipment.customerEmail}</p>
+                <p><strong>Phone:</strong> ${shipment.customerPhone}</p>
+            </div>
+            
+            <div class="shipment-details">
+                <h3>Shipment Details</h3>
+                <p><strong>Tracking Number:</strong> ${shipment.trackingId}</p>
+                <p><strong>Origin:</strong> ${shipment.origin}</p>
+                <p><strong>Destination:</strong> ${shipment.destination}</p>
+                <p><strong>Package Type:</strong> ${shipment.packageType}</p>
+                <p><strong>Weight:</strong> ${shipment.weight} kg</p>
+                <p><strong>Dimensions:</strong> ${
+                  shipment.dimensions.length || "N/A"
+                } x ${shipment.dimensions.width || "N/A"} x ${
+  shipment.dimensions.height || "N/A"
+} cm</p>
+                <p><strong>Estimated Delivery:</strong> ${new Date(
+                  shipment.estimatedDelivery
+                ).toDateString()}</p>
+                <p><strong>Status:</strong> ${shipment.status}</p>
+                <p><strong>Fragile:</strong> ${
+                  shipment.fragile ? "Yes" : "No"
+                }</p>
+                <p><strong>Insurance Included:</strong> ${
+                  shipment.insuranceIncluded ? "Yes" : "No"
+                }</p>
+                <p><strong>Express Delivery:</strong> ${
+                  shipment.expressDelivery ? "Yes" : "No"
+                }</p>
+                ${
+                  shipment.additionalNotes
+                    ? `<p><strong>Additional Notes:</strong> ${shipment.additionalNotes}</p>`
+                    : ""
+                }
+            </div>
+            
+            <p>Please log in to the admin dashboard to manage this shipment.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from the DXpress shipping system.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+// Email template for shipment status update
+const statusUpdateTemplate = (
+  shipment,
+  newStatus,
+  statusLocation,
+  statusNote
+) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1a237e; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { text-align: center; padding: 20px; background-color: #f5f5f5; }
+        .shipment-details { background-color: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .status-update { background-color: #e8f5e9; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .status { font-weight: bold; font-size: 16px; }
+        .tracking-number { font-weight: bold; color: #1a237e; }
+        .button { display: inline-block; background-color: #1a237e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Shipment Status Update</h1>
+        </div>
+        <div class="content">
+            <p>Dear ${shipment.customerName},</p>
+            <p>Your shipment with DXpress has been updated:</p>
+            
+            <div class="status-update">
+                <p><strong>New Status:</strong> <span class="status">${newStatus}</span></p>
+                <p><strong>Location:</strong> ${statusLocation}</p>
+                ${
+                  statusNote
+                    ? `<p><strong>Notes:</strong> ${statusNote}</p>`
+                    : ""
+                }
+                <p><strong>Updated:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <div class="shipment-details">
+                <p><strong>Tracking Number:</strong> <span class="tracking-number">${
+                  shipment.trackingId
+                }</span></p>
+                <p><strong>Origin:</strong> ${shipment.origin}</p>
+                <p><strong>Destination:</strong> ${shipment.destination}</p>
+                <p><strong>Estimated Delivery:</strong> ${new Date(
+                  shipment.estimatedDelivery
+                ).toDateString()}</p>
+            </div>
+            
+            <p>You can track your shipment at any time by visiting our website.</p>
+            
+            <a href="https://www.dxpress.uk/shipment/track?id=${
+              shipment.trackingId
+            }" class="button">Track Shipment</a>
+            
+            <p>If you have any questions about your shipment, please contact our customer service team at support@dxpress.uk or call +44 7506 323070.</p>
+        </div>
+        <div class="footer">
+            <p>Best regards,<br>The DXpress Team</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
 // Dashboard
 exports.getDashboard = async (req, res) => {
@@ -193,6 +405,28 @@ exports.createShipment = async (req, res) => {
     // Save to database
     await shipment.save();
 
+    // Send email notifications
+    try {
+      // Send confirmation to customer
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: customerEmail,
+        subject: "Your Shipment Confirmation - DXpress",
+        html: customerShipmentConfirmationTemplate(shipment),
+      });
+
+      // Send notification to admin
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: "support@dxpress.uk",
+        subject: `New Shipment Created - ${shipment.trackingId}`,
+        html: adminShipmentNotificationTemplate(shipment),
+      });
+    } catch (emailError) {
+      console.error("Error sending shipment emails:", emailError);
+      // Continue processing even if email fails
+    }
+
     // Redirect to shipments page with success message
     res.redirect(
       "/admin/shipments?message=Shipment created successfully! Tracking ID: " +
@@ -238,6 +472,10 @@ exports.getEditShipment = async (req, res) => {
 exports.updateShipment = async (req, res) => {
   try {
     const shipmentId = req.params.id;
+
+    // Debug: Log form data
+    console.log("Form data received:", JSON.stringify(req.body, null, 2));
+
     const {
       customerName,
       customerEmail,
@@ -257,6 +495,7 @@ exports.updateShipment = async (req, res) => {
       insurance,
       expressDelivery,
       additionalNotes,
+      statusHistory,
     } = req.body;
 
     const shipment = await Shipment.findById(shipmentId);
@@ -264,6 +503,9 @@ exports.updateShipment = async (req, res) => {
     if (!shipment) {
       return res.status(404).redirect("/admin/shipments");
     }
+
+    // Store previous status to check if it changed
+    const previousStatus = shipment.status;
 
     // Update shipment
     shipment.customerName = customerName;
@@ -283,19 +525,106 @@ exports.updateShipment = async (req, res) => {
     shipment.insuranceIncluded = insurance === "on";
     shipment.expressDelivery = expressDelivery === "on";
     shipment.additionalNotes = additionalNotes;
+    shipment.status = status;
 
-    // If status changed, add to history
-    if (status !== shipment.status) {
-      shipment.status = status;
-      shipment.statusHistory.unshift({
-        status,
-        location: statusLocation,
-        note: statusNote,
-        timestamp: new Date(),
-      });
+    // Handle status history entries from the form
+    try {
+      // Get all the statusHistory entries from the request body
+      const historyEntries = {};
+
+      // Process form fields to collect status history entries
+      for (const key in req.body) {
+        // Check if this is a status history field (e.g., statusHistory[0][date])
+        if (key.startsWith("statusHistory[") && key.includes("][")) {
+          // Parse the index and field name from the key
+          // Example: statusHistory[0][date] -> index=0, field=date
+          const indexMatch = key.match(/\[(\d+)\]\[([^\]]+)\]/);
+          if (indexMatch) {
+            const index = indexMatch[1];
+            const field = indexMatch[2];
+
+            // Initialize the history entry object if needed
+            if (!historyEntries[index]) {
+              historyEntries[index] = {};
+            }
+
+            // Add the field value to the entry
+            historyEntries[index][field] = req.body[key];
+          }
+        }
+      }
+
+      // Convert the collected entries to an array
+      const newStatusHistory = Object.values(historyEntries)
+        .filter((entry) => entry.date && entry.status && entry.location) // Ensure valid entries
+        .map((entry) => ({
+          status: entry.status,
+          location: entry.location,
+          timestamp: new Date(entry.date),
+          note: entry.note || "",
+        }));
+
+      // Sort by date (newest first)
+      if (newStatusHistory.length > 0) {
+        newStatusHistory.sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
+
+        // Update the shipment history
+        shipment.statusHistory = newStatusHistory;
+
+        console.log(
+          "New status history:",
+          JSON.stringify(newStatusHistory, null, 2)
+        );
+      } else if (status !== previousStatus) {
+        // If status changed but no valid history entries, add a default one
+        shipment.statusHistory.unshift({
+          status,
+          location: statusLocation || origin,
+          note: statusNote || "",
+          timestamp: new Date(),
+        });
+
+        // Send status update email to customer
+        try {
+          await transporter.sendMail({
+            from: process.env.SMTP_USER,
+            to: shipment.customerEmail,
+            subject: `Your Shipment Status Update - ${shipment.trackingId}`,
+            html: statusUpdateTemplate(
+              shipment,
+              status,
+              statusLocation || origin,
+              statusNote || ""
+            ),
+          });
+        } catch (emailError) {
+          console.error("Error sending status update email:", emailError);
+          // Continue processing even if email fails
+        }
+      }
+    } catch (historyError) {
+      console.error("Error processing status history:", historyError);
+      // Continue processing even if status history update fails
     }
 
     await shipment.save();
+
+    // Debug: Log updated shipment
+    console.log(
+      "Shipment after update:",
+      JSON.stringify(
+        {
+          id: shipment._id,
+          trackingId: shipment.trackingId,
+          status: shipment.status,
+          statusHistory: shipment.statusHistory,
+        },
+        null,
+        2
+      )
+    );
 
     // Redirect to shipments page with success message
     res.redirect(

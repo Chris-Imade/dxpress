@@ -20,6 +20,7 @@ const projectRoutes = require("./routes/project");
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const apiRoutes = require("./routes/api");
+const trackRoutes = require("./routes/track");
 
 // Initialize Express app
 const app = express();
@@ -91,6 +92,8 @@ app.use("/project", projectRoutes);
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 app.use("/api", apiRoutes);
+app.use("/track", trackRoutes);
+app.use("/track-shipment", trackRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -14,7 +14,7 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb justify-content-center">
           <li class="breadcrumb-item"><a href="/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/track">Track</a></li>
+          <li class="breadcrumb-item"><a href="/shipment/track">Track</a></li>
           <li class="breadcrumb-item active" aria-current="page">Result</li>
         </ol>
       </nav>
@@ -29,104 +29,241 @@
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="bg-white p-4 p-md-5 common-shadow-three tw-rounded-xl">
-          <div class="tracking-info mb-5">
-            <h4 class="mb-4">Tracking Number: <%= shipment.id %></h4>
+          <!-- Shipment Header -->
+          <div class="tracking-header mb-5">
+            <div
+              class="d-flex flex-wrap justify-content-between align-items-center mb-4"
+            >
+              <h4 class="mb-0 fw-bold">
+                <i class="ph-bold ph-package text-main-600 me-2"></i>Tracking
+                ID:
+                <span class="text-main-600"><%= shipment.trackingId %></span>
+              </h4>
+              <span
+                class="badge bg-<%= shipment.status === 'Delivered' ? 'success' : shipment.status === 'In Transit' ? 'primary' : shipment.status === 'Delayed' ? 'warning' : shipment.status === 'Pending' ? 'info' : 'secondary' %> px-3 py-2 rounded-pill fs-6 mt-2 mt-md-0"
+              >
+                <%= shipment.status %>
+              </span>
+            </div>
 
             <!-- Shipment Progress Bar -->
             <div class="progress-container mb-4">
-              <% // Define progress based on status const statusMap = {
-              'Pending': 0, 'Processing': 25, 'In Transit': 50, 'Out for
-              Delivery': 75, 'Delivered': 100 }; // Get progress percentage
-              based on current status (default to 0 if status not found) const
-              progressPercent = statusMap[shipment.status] || 0; // Determine
-              progress bar color let progressColor = 'bg-main-600'; if
-              (shipment.status === 'Delivered') { progressColor = 'bg-success';
-              } else if (shipment.status === 'Delayed') { progressColor =
-              'bg-warning'; } %>
               <div class="progress" style="height: 10px">
+                <% if (shipment.status === 'Pending') { %>
                 <div
-                  class="progress-bar <%= progressColor %>"
+                  class="progress-bar bg-main-600 w-15"
                   role="progressbar"
-                  style="width: <%= progressPercent %>%"
-                  aria-valuenow="<%= progressPercent %>"
+                  aria-valuenow="15"
                   aria-valuemin="0"
                   aria-valuemax="100"
                 ></div>
+                <% } else if (shipment.status === 'In Transit') { %>
+                <div
+                  class="progress-bar bg-main-600 w-55"
+                  role="progressbar"
+                  aria-valuenow="55"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+                <% } else if (shipment.status === 'Delivered') { %>
+                <div
+                  class="progress-bar bg-main-600 w-100"
+                  role="progressbar"
+                  aria-valuenow="100"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+                <% } else if (shipment.status === 'Delayed') { %>
+                <div
+                  class="progress-bar bg-main-600 w-65"
+                  role="progressbar"
+                  aria-valuenow="65"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+                <% } else { %>
+                <div
+                  class="progress-bar bg-main-600 w-5"
+                  role="progressbar"
+                  aria-valuenow="5"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+                <% } %>
               </div>
               <div class="progress-labels d-flex justify-content-between mt-2">
-                <% Object.keys(statusMap).forEach(status => { %>
                 <span
-                  class="small progress-label <%= shipment.status === status ? 'text-main-600 fw-bold' : 'text-muted' %>"
-                  ><%= status %></span
+                  class="small progress-label <%= shipment.status === 'Pending' ? 'text-main-600 fw-bold' : 'text-muted' %>"
+                  >Pending</span
                 >
-                <% }); %>
+                <span
+                  class="small progress-label <%= shipment.status === 'In Transit' ? 'text-main-600 fw-bold' : 'text-muted' %>"
+                  >In Transit</span
+                >
+                <span
+                  class="small progress-label <%= shipment.status === 'Delayed' ? 'text-main-600 fw-bold' : 'text-muted' %>"
+                  >Delayed</span
+                >
+                <span
+                  class="small progress-label <%= shipment.status === 'Delivered' ? 'text-main-600 fw-bold' : 'text-muted' %>"
+                  >Delivered</span
+                >
               </div>
             </div>
 
-            <div class="status-box bg-light p-4 rounded">
-              <div class="row">
-                <div class="col-md-6">
-                  <p>
-                    <strong>Status:</strong>
-                    <span class="text-main-600"><%= shipment.status %></span>
-                  </p>
-                  <p>
-                    <strong>Current Location:</strong> <%=
-                    shipment.currentLocation %>
-                  </p>
-                  <p>
-                    <strong>Destination:</strong> <%= shipment.destination %>
-                  </p>
+            <!-- Shipment Details Cards -->
+            <div class="row g-4 mb-5" style="margin-top: 30px">
+              <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-3 text-muted">
+                      <i class="ph-bold ph-map-pin me-2"></i>Origin
+                    </h6>
+                    <h5 class="card-title mb-0"><%= shipment.origin %></h5>
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <p>
-                    <strong>Last Update:</strong> <%= shipment.lastUpdate %>
-                  </p>
-                  <p>
-                    <strong>Estimated Delivery:</strong> <%=
-                    shipment.estimatedDelivery %>
-                  </p>
+              </div>
+              <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-3 text-muted">
+                      <i class="ph-bold ph-map-pin-line me-2"></i>Destination
+                    </h6>
+                    <h5 class="card-title mb-0"><%= shipment.destination %></h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-3 text-muted">
+                      <i class="ph-bold ph-calendar me-2"></i>Estimated Delivery
+                    </h6>
+                    <h5 class="card-title mb-0">
+                      <%= new
+                      Date(shipment.estimatedDelivery).toLocaleDateString() %>
+                    </h5>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Tracking History Timeline -->
           <div class="tracking-history">
-            <h5 class="mb-4">Tracking History</h5>
+            <h5 class="fw-bold mb-4 d-flex align-items-center">
+              <i
+                class="ph-bold ph-clock-counter-clockwise me-2 text-main-600"
+              ></i>
+              Tracking History
+            </h5>
             <div class="timeline">
-              <% shipment.trackingHistory.forEach((event, index) => { %>
-              <div class="timeline-item <%= index === 0 ? 'first' : '' %>">
-                <div
-                  class="timeline-marker <%= index === 0 ? 'bg-main-600' : 'bg-secondary' %>"
-                ></div>
+              <% if (shipment.statusHistory && shipment.statusHistory.length >
+              0) { %> <% shipment.statusHistory.forEach((event, index) => { %>
+              <div class="timeline-item <%= index === 0 ? 'active' : '' %>">
+                <div class="timeline-marker"></div>
                 <div class="timeline-content">
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-2"
-                  >
-                    <h6 class="mb-0 fw-bold"><%= event.status %></h6>
-                    <small class="text-muted badge bg-light text-dark"
-                      ><%= event.timestamp %></small
-                    >
+                  <div class="timeline-date">
+                    <%= new Date(event.timestamp).toLocaleString() %>
                   </div>
-                  <p class="mb-1">
-                    <i class="fas fa-map-marker-alt text-main-600 me-2"></i><%=
-                    event.location %>
-                  </p>
-                  <% if(event.note) { %>
-                  <small class="text-muted d-block mt-2"
-                    ><i class="fas fa-info-circle me-1"></i><%= event.note
-                    %></small
-                  >
-                  <% } %>
+                  <div class="timeline-body">
+                    <h5 class="mb-2"><%= event.status %></h5>
+                    <p class="mb-1">
+                      <i class="ph-bold ph-map-pin text-main-600 me-2"></i>
+                      <%= event.location %>
+                    </p>
+                    <% if(event.note) { %>
+                    <p class="mb-0 mt-2 text-muted fs-sm">
+                      <i class="ph-bold ph-info me-1"></i>
+                      <%= event.note %>
+                    </p>
+                    <% } %>
+                  </div>
                 </div>
               </div>
-              <% }); %>
+              <% }); %> <% } else { %>
+              <div class="timeline-item active">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <div class="timeline-date">
+                    <%= new Date().toLocaleString() %>
+                  </div>
+                  <div class="timeline-body">
+                    <h5 class="mb-2"><%= shipment.status %></h5>
+                    <p class="mb-1">
+                      <i class="ph-bold ph-map-pin text-main-600 me-2"></i>
+                      <%= shipment.origin %>
+                    </p>
+                    <p class="mb-0 mt-2 text-muted fs-sm">
+                      <i class="ph-bold ph-info me-1"></i>
+                      Shipment created
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Shipment Details (Optional, can be expanded) -->
+          <div class="shipment-details mt-5 pt-4 border-top">
+            <h5 class="fw-bold mb-4 d-flex align-items-center">
+              <i class="ph-bold ph-info me-2 text-main-600"></i>
+              Shipment Details
+            </h5>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="details-list">
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">Weight:</div>
+                    <div class="detail-value fw-medium">
+                      <%= shipment.weight %> kg
+                    </div>
+                  </div>
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">Dimensions:</div>
+                    <div class="detail-value fw-medium">
+                      <%= shipment.dimensions %>
+                    </div>
+                  </div>
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">
+                      Service Type:
+                    </div>
+                    <div class="detail-value fw-medium">
+                      <%= shipment.serviceType || 'Standard' %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="details-list">
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">Last Update:</div>
+                    <div class="detail-value fw-medium">
+                      <%= new Date(shipment.updatedAt).toLocaleString() %>
+                    </div>
+                  </div>
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">
+                      Package Type:
+                    </div>
+                    <div class="detail-value fw-medium">
+                      <%= shipment.packageType || 'Parcel' %>
+                    </div>
+                  </div>
+                  <div class="detail-item d-flex mb-3">
+                    <div class="detail-label text-muted me-3">Carrier:</div>
+                    <div class="detail-value fw-medium">DXpress</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div class="text-center mt-5">
-            <a href="/track" class="btn btn-main-two hover-style-two">
-              Track Another Shipment
+            <a href="/shipment/track" class="btn btn-main-two hover-style-two">
+              <i class="ph-bold ph-arrow-left me-2"></i>Track Another Shipment
             </a>
           </div>
         </div>
@@ -137,14 +274,13 @@
 <!-- Tracking Result Section end -->
 
 <style>
-  .timeline-wrapper {
-    position: relative;
-    padding: 20px 0;
-  }
+  /* Timeline Styles */
   .timeline {
     position: relative;
-    padding-left: 50px;
+    padding-left: 45px;
+    margin-left: 10px;
   }
+
   .timeline:before {
     content: "";
     position: absolute;
@@ -152,73 +288,86 @@
     left: 15px;
     height: 100%;
     width: 2px;
-    background: #e0e0e0;
+    background: #e9ecef;
   }
+
   .timeline-item {
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 35px;
   }
+
   .timeline-item:last-child {
     margin-bottom: 0;
   }
-  .timeline-dot {
+
+  .timeline-marker {
     position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #007bff;
-    left: -50px;
+    left: -45px;
     top: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border: 4px solid white;
-    box-shadow: 0 0 0 2px #e0e0e0;
-  }
-  .timeline-date {
-    color: #6c757d;
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-  .timeline-content {
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #007bff;
-  }
-  .timeline-content h5 {
-    margin-top: 0;
-    margin-bottom: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #e9ecef;
+    background: white;
+    z-index: 1;
   }
 
-  /* Progress Bar Styles */
-  .shipment-progress-wrapper {
-    padding: 10px 0 20px;
+  .timeline-item.active .timeline-marker {
+    background: var(--color-main-600);
+    border-color: var(--color-main-600);
+    box-shadow: 0 0 0 5px rgba(var(--color-main-rgb), 0.2);
   }
-  .progress-point {
-    position: relative;
-  }
-  .progress-point:before {
-    content: "";
-    width: 15px;
-    height: 15px;
-    background: #dee2e6;
-    border-radius: 50%;
-    display: block;
-    margin: 0 auto 8px;
-    z-index: 1;
-    position: relative;
-  }
-  .progress-point.active:before {
-    background: var(--color-main-600, #0d6efd);
-  }
-  .point-label {
-    font-size: 11px;
+
+  .timeline-date {
     color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
     font-weight: 500;
   }
-  .progress-point.active .point-label {
-    color: var(--color-main-600, #0d6efd);
+
+  .timeline-content {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item.active .timeline-content {
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid var(--color-main-600);
+  }
+
+  /* Progress Bar Custom Classes */
+  .w-5 {
+    width: 5%;
+  }
+  .w-15 {
+    width: 15%;
+  }
+  .w-55 {
+    width: 55%;
+  }
+  .w-65 {
+    width: 65%;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 767px) {
+    .detail-item {
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
+    .detail-label {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .fs-sm {
+    font-size: 0.875rem;
+  }
+
+  .detail-label {
+    min-width: 120px;
   }
 </style>
