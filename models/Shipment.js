@@ -122,7 +122,7 @@ const shipmentSchema = new mongoose.Schema({
 });
 
 // Generate tracking ID pre-save
-shipmentSchema.pre("save", async function (next) {
+shipmentSchema.pre("validate", async function (next) {
   if (!this.isNew) {
     this.updatedAt = new Date();
     return next();
