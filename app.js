@@ -8,6 +8,9 @@ const session = require("express-session");
 // const ejsLocals = require("ejs-locals");
 require("dotenv").config();
 
+// Import models for admin initialization
+const User = require("./models/User");
+
 // Import routes
 const indexRoutes = require("./routes/index");
 const shipmentRoutes = require("./routes/shipment");
@@ -25,10 +28,51 @@ const trackRoutes = require("./routes/track");
 // Initialize Express app
 const app = express();
 
+// Function to ensure admin user exists
+const initializeAdminUser = async () => {
+  try {
+    // Check if an admin user already exists
+    const adminExists = await User.findOne({ role: "admin" });
+
+    if (!adminExists) {
+      console.log("No admin user found, creating default admin...");
+
+      // Get admin email from environment or use default
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@dxpress.uk";
+
+      // Check if we should use test email instead
+      const useTestEmail = process.env.NODE_ENV !== "production";
+      const testEmail = "imadechriswebdev@gmail.com";
+
+      // Create default admin user
+      const admin = new User({
+        email: useTestEmail ? testEmail : adminEmail,
+        password: process.env.ADMIN_PASSWORD || "$IamtheAdmin11",
+        fullName: "Admin User",
+        role: "admin",
+        isActive: true,
+      });
+
+      await admin.save();
+      console.log(
+        `Default admin user created successfully with email: ${admin.email}`
+      );
+    } else {
+      console.log(`Admin user already exists with email: ${adminExists.email}`);
+    }
+  } catch (error) {
+    console.error("Error initializing admin user:", error);
+  }
+};
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/dxpress")
-  .then(() => console.log("MongoDB connected..."))
+  .then(() => {
+    console.log("MongoDB connected...");
+    // Initialize admin user after connecting to the database
+    initializeAdminUser();
+  })
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Set view engine

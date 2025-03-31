@@ -13,6 +13,12 @@ router.get("/login", authController.getLoginPage);
 router.post("/login", authController.login);
 router.get("/logout", isAuthenticated, authController.logout);
 
+// Password reset routes
+router.get("/forgot-password", authController.getForgotPasswordPage);
+router.post("/forgot-password", authController.forgotPassword);
+router.get("/reset-password/:token", authController.getResetPasswordPage);
+router.post("/reset-password", authController.resetPassword);
+
 // Admin dashboard
 router.get(
   "/dashboard",

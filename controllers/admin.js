@@ -218,6 +218,11 @@ const statusUpdateTemplate = (
 // Dashboard
 exports.getDashboard = async (req, res) => {
   try {
+    // Log the authenticated user
+    console.log(
+      `Loading dashboard for user: ${req.user.email} (${req.user.role})`
+    );
+
     // Get counts for dashboard
     const shipmentCount = await Shipment.countDocuments();
     const pendingShipmentCount = await Shipment.countDocuments({
@@ -234,9 +239,12 @@ exports.getDashboard = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5);
 
+    console.log("Dashboard data loaded successfully");
+
     res.render("admin/dashboard", {
       title: "Admin Dashboard",
       path: "/admin/dashboard",
+      user: req.user,
       counts: {
         shipments: shipmentCount,
         pendingShipments: pendingShipmentCount,
@@ -252,8 +260,15 @@ exports.getDashboard = async (req, res) => {
     res.status(500).render("admin/dashboard", {
       title: "Admin Dashboard",
       path: "/admin/dashboard",
-      errorMessage: "Failed to load dashboard data",
-      counts: {},
+      user: req.user,
+      errorMessage: "Failed to load dashboard data: " + error.message,
+      counts: {
+        shipments: 0,
+        pendingShipments: 0,
+        deliveredShipments: 0,
+        newsletters: 0,
+        contacts: 0,
+      },
       recentShipments: [],
       layout: false,
     });
