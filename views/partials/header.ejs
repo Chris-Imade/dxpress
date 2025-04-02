@@ -194,6 +194,13 @@
                 >Home</a
               >
             </li>
+            <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/about' ? 'activePage' : '' %>">
+              <a
+                href="/about"
+                class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100 tw-pe-4"
+                >About Us</a
+              >
+            </li>
             <li class="nav-menu__item has-submenu position-relative <%= typeof path !== 'undefined' && path === '/project' ? 'activePage' : '' %>">
               <a
                 href="/project"
@@ -215,14 +222,7 @@
                 >Services</a
               >
             </li>
-            <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/about' ? 'activePage' : '' %>">
-              <a
-                href="/about"
-                class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100"
-                >About</a
-              >
-            </li>
-            <li class="nav-menu__item has-submenu position-relative <%= typeof path !== 'undefined' && path === '/blog' ? 'activePage' : '' %>">
+            <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/blog' ? 'activePage' : '' %>">
               <a
                 href="/blog"
                 class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100 tw-pe-4"
@@ -542,6 +542,13 @@
                     >Home</a
                   >
                 </li>
+                <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/about' ? 'activePage' : '' %>">
+                  <a
+                    href="/about"
+                    class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100 tw-pe-4"
+                    >About Us</a
+                  >
+                </li>
                 <li
                   class="nav-menu__item has-submenu position-relative <%= typeof path !== 'undefined' && path === '/project' ? 'activePage' : '' %>"
                 >
@@ -567,14 +574,7 @@
                     >Services</a
                   >
                 </li>
-                <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/about' ? 'activePage' : '' %>">
-                  <a
-                    href="/about"
-                    class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100"
-                    >About</a
-                  >
-                </li>
-                <li class="nav-menu__item has-submenu position-relative <%= typeof path !== 'undefined' && path === '/blog' ? 'activePage' : '' %>">
+                <li class="nav-menu__item <%= typeof path !== 'undefined' && path === '/blog' ? 'activePage' : '' %>">
                   <a
                     href="/blog"
                     class="nav-menu__link hover--translate-y-1 text-main-two-600 tw-py-9 fw-medium w-100 tw-pe-4"
