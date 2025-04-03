@@ -428,7 +428,7 @@ exports.createShipment = async (req, res) => {
       // Send notification to admin
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: "admin@dxpress.uk",
+        to: "support@dxpress.uk",
         subject: `New Shipment Created - ${shipment.trackingId}`,
         html: adminShipmentNotificationTemplate(shipment),
       });
@@ -536,7 +536,7 @@ exports.updateShipment = async (req, res) => {
     shipment.insuranceIncluded = insurance === "on";
     shipment.expressDelivery = expressDelivery === "on";
     shipment.additionalNotes = additionalNotes;
-    shipment.status = status;
+      shipment.status = status;
 
     // Handle status history entries from the form
     try {
@@ -590,30 +590,30 @@ exports.updateShipment = async (req, res) => {
         );
       } else if (status !== previousStatus) {
         // If status changed but no valid history entries, add a default one
-        shipment.statusHistory.unshift({
-          status,
+      shipment.statusHistory.unshift({
+        status,
           location: statusLocation || origin,
           note: statusNote || "",
-          timestamp: new Date(),
-        });
+        timestamp: new Date(),
+      });
 
-        // Send status update email to customer
-        try {
-          await transporter.sendMail({
-            from: process.env.SMTP_USER,
-            to: shipment.customerEmail,
-            subject: `Your Shipment Status Update - ${shipment.trackingId}`,
-            html: statusUpdateTemplate(
-              shipment,
-              status,
+      // Send status update email to customer
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: shipment.customerEmail,
+          subject: `Your Shipment Status Update - ${shipment.trackingId}`,
+          html: statusUpdateTemplate(
+            shipment,
+            status,
               statusLocation || origin,
               statusNote || ""
-            ),
-          });
-        } catch (emailError) {
-          console.error("Error sending status update email:", emailError);
-          // Continue processing even if email fails
-        }
+          ),
+        });
+      } catch (emailError) {
+        console.error("Error sending status update email:", emailError);
+        // Continue processing even if email fails
+      }
       }
     } catch (historyError) {
       console.error("Error processing status history:", historyError);

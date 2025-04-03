@@ -455,7 +455,7 @@ exports.createShipmentRequest = async (req, res) => {
       // Send notification to admin
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: "admin@dxpress.uk",
+        to: "support@dxpress.uk",
         subject: `New Shipment Created - ${shipment.trackingId}`,
         html: adminShipmentNotificationTemplate(shipment),
       });

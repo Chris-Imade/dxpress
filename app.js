@@ -38,7 +38,7 @@ const initializeAdminUser = async () => {
       console.log("No admin user found, creating default admin...");
 
       // Get admin email from environment or use default
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@dxpress.uk";
+      const adminEmail = process.env.ADMIN_EMAIL || "support@dxpress.uk";
       const adminPassword = process.env.ADMIN_PASSWORD || "$IamtheAdmin11";
 
       // Create default admin user

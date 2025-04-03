@@ -193,8 +193,8 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Allow both admin@dxpress.uk and test email
-    const allowedEmails = ["admin@dxpress.uk", "imadechriswebdev@gmail.com"];
+    // Allow both support@dxpress.uk and test email
+    const allowedEmails = ["support@dxpress.uk", "imadechriswebdev@gmail.com"];
 
     // For security, always show success message even if user doesn't exist
     if (!email || !allowedEmails.includes(email)) {
@@ -208,7 +208,7 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    // Find user by email and role (could be admin@dxpress.uk or test email)
+    // Find user by email and role (could be support@dxpress.uk or test email)
     const user = await User.findOne({ email, role: "admin" });
 
     if (!user) {

@@ -239,4 +239,15 @@ router.get("/track-shipment", (req, res) => {
   res.redirect("/shipment/track");
 });
 
+// Franchise route
+router.get("/franchise", (req, res) => {
+  res.render("franchise/index", {
+    title: "Franchise Opportunities - Dxpress",
+    path: "/franchise",
+    isLoggedIn:
+      req.session && req.session.isLoggedIn ? req.session.isLoggedIn : false,
+    user: req.session && req.session.user ? req.session.user : null,
+  });
+});
+
 module.exports = router;
