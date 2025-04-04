@@ -14,6 +14,15 @@ exports.subscribe = async (req, res) => {
       });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+      });
+    }
+
     // Check if email already exists
     const existingSubscriber = await Newsletter.findOne({ email });
 
@@ -28,8 +37,13 @@ exports.subscribe = async (req, res) => {
         existingSubscriber.isActive = true;
         await existingSubscriber.save();
 
-        // Send welcome email
-        await emailService.sendWelcomeEmail(email);
+        try {
+          // Send welcome email
+          await emailService.sendWelcomeEmail(email);
+        } catch (emailError) {
+          console.error("Error sending welcome email:", emailError);
+          // Continue with success response even if email fails
+        }
 
         return res.status(200).json({
           success: true,
@@ -52,18 +66,41 @@ exports.subscribe = async (req, res) => {
 
     await newSubscriber.save();
 
-    // Send welcome email
-    await emailService.sendWelcomeEmail(email);
+    try {
+      // Send welcome email
+      await emailService.sendWelcomeEmail(email);
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Continue with success response even if email fails
+    }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Thank you for subscribing to our newsletter!",
     });
   } catch (error) {
     console.error("Newsletter subscription error:", error);
-    res.status(500).json({
+
+    // Ensure we're always sending a JSON response
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data provided",
+        errors: error.errors,
+      });
+    }
+
+    if (error.name === "MongoError" && error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "This email is already subscribed to our newsletter",
+      });
+    }
+
+    return res.status(500).json({
       success: false,
-      message: "An error occurred while processing your subscription",
+      message:
+        "An error occurred while processing your subscription. Please try again later.",
     });
   }
 };
