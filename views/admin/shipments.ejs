@@ -171,4 +171,15 @@
 </div>
 </main>
 
+<script>
+  // Handle delete shipment
+  document.querySelectorAll('.delete-shipment-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const shipmentId = this.getAttribute('data-id');
+      const form = document.getElementById('deleteShipmentForm');
+      form.action = `/admin/shipments/delete/${shipmentId}`;
+    });
+  });
+</script>
+
 <%- include('../layouts/admin-footer') %> 

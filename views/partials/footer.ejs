@@ -204,24 +204,9 @@
           </p>
           <div class="d-flex align-items-center tw-gap-6">
             <a
-              href="javascript:void(0)"
-              class="fw-semibold text-neutral-500 hover-text-white hover-underline cursor-small hover--translate-y-1"
-              >Company</a
-            >
-            <a
               href="/franchise"
               class="fw-semibold text-neutral-500 hover-text-white hover-underline cursor-small hover--translate-y-1"
               >Franchise Opportunities</a
-            >
-            <a
-              href="javascript:void(0)"
-              class="fw-semibold text-neutral-500 hover-text-white hover-underline cursor-small hover--translate-y-1"
-              >Support</a
-            >
-            <a
-              href="javascript:void(0)"
-              class="fw-semibold text-neutral-500 hover-text-white hover-underline cursor-small hover--translate-y-1"
-              >Privacy</a
             >
           </div>
         </div>
@@ -238,12 +223,28 @@
     const newsletterMessageText = document.getElementById(
       "newsletter-message-text"
     );
+    const newsletterEmail = document.getElementById("newsletter-email");
 
     if (newsletterForm) {
       newsletterForm.addEventListener("submit", function (event) {
         event.preventDefault();
 
-        const email = document.getElementById("newsletter-email").value;
+        // Validate email format
+        const email = newsletterEmail.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+          newsletterMessage.style.display = "block";
+          newsletterMessageText.textContent =
+            "Please enter a valid email address";
+          newsletterMessageText.className = "text-danger text-center";
+          return;
+        }
+
+        // Show loading state
+        newsletterMessage.style.display = "block";
+        newsletterMessageText.textContent = "Processing your subscription...";
+        newsletterMessageText.className = "text-main-600 text-center";
 
         // Send AJAX request
         fetch("/newsletter/subscribe", {
@@ -253,7 +254,16 @@
           },
           body: JSON.stringify({ email }),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((data) => {
+                throw new Error(
+                  data.message || `HTTP error! status: ${response.status}`
+                );
+              });
+            }
+            return response.json();
+          })
           .then((data) => {
             // Display message
             newsletterMessage.style.display = "block";
@@ -277,7 +287,7 @@
             console.error("Newsletter subscription error:", error);
             newsletterMessage.style.display = "block";
             newsletterMessageText.textContent =
-              "An error occurred. Please try again later.";
+              error.message || "An error occurred. Please try again later.";
             newsletterMessageText.className = "text-danger text-center";
 
             // Hide message after 5 seconds

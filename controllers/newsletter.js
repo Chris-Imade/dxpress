@@ -6,8 +6,10 @@ const crypto = require("crypto");
 exports.subscribe = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("Received subscription request for email:", email);
 
     if (!email) {
+      console.log("No email provided in request");
       return res.status(400).json({
         success: false,
         message: "Email is required",
@@ -17,6 +19,7 @@ exports.subscribe = async (req, res) => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.log("Invalid email format:", email);
       return res.status(400).json({
         success: false,
         message: "Please enter a valid email address",
@@ -25,20 +28,27 @@ exports.subscribe = async (req, res) => {
 
     // Check if email already exists
     const existingSubscriber = await Newsletter.findOne({ email });
+    console.log(
+      "Existing subscriber check:",
+      existingSubscriber ? "Found" : "Not found"
+    );
 
     if (existingSubscriber) {
       if (existingSubscriber.isActive) {
+        console.log("Email already subscribed:", email);
         return res.status(400).json({
           success: false,
           message: "This email is already subscribed to our newsletter",
         });
       } else {
         // Reactivate the subscription
+        console.log("Reactivating subscription for:", email);
         existingSubscriber.isActive = true;
         await existingSubscriber.save();
 
         try {
           // Send welcome email
+          console.log("Sending welcome email to:", email);
           await emailService.sendWelcomeEmail(email);
         } catch (emailError) {
           console.error("Error sending welcome email:", emailError);
@@ -57,6 +67,7 @@ exports.subscribe = async (req, res) => {
     const confirmationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     // Create new subscriber
+    console.log("Creating new subscription for:", email);
     const newSubscriber = new Newsletter({
       email,
       confirmationToken,
@@ -65,9 +76,11 @@ exports.subscribe = async (req, res) => {
     });
 
     await newSubscriber.save();
+    console.log("New subscription saved successfully");
 
     try {
       // Send welcome email
+      console.log("Sending welcome email to new subscriber:", email);
       await emailService.sendWelcomeEmail(email);
     } catch (emailError) {
       console.error("Error sending welcome email:", emailError);
@@ -80,9 +93,11 @@ exports.subscribe = async (req, res) => {
     });
   } catch (error) {
     console.error("Newsletter subscription error:", error);
+    console.error("Error stack:", error.stack);
 
-    // Ensure we're always sending a JSON response
+    // Check for specific error types
     if (error.name === "ValidationError") {
+      console.error("Validation error:", error.errors);
       return res.status(400).json({
         success: false,
         message: "Invalid data provided",
@@ -91,9 +106,23 @@ exports.subscribe = async (req, res) => {
     }
 
     if (error.name === "MongoError" && error.code === 11000) {
+      console.error("Duplicate email error");
       return res.status(400).json({
         success: false,
         message: "This email is already subscribed to our newsletter",
+      });
+    }
+
+    // Check if it's an email configuration error
+    if (
+      error.message &&
+      error.message.includes("Email service not configured")
+    ) {
+      console.error("Email service configuration error");
+      return res.status(500).json({
+        success: false,
+        message:
+          "Email service is not properly configured. Please contact support.",
       });
     }
 
@@ -101,6 +130,7 @@ exports.subscribe = async (req, res) => {
       success: false,
       message:
         "An error occurred while processing your subscription. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

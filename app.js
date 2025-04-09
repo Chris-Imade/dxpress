@@ -24,6 +24,13 @@ const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const apiRoutes = require("./routes/api");
 const trackRoutes = require("./routes/track");
+const newsletterRoutes = require("./routes/newsletter");
+const ecommerceRoutes = require("./routes/ecommerce");
+const journalRoutes = require("./routes/journal");
+const shippingRoutes = require("./routes/shipping");
+
+// Import middleware
+const { isAuthenticated } = require("./middleware/auth");
 
 // Initialize Express app
 const app = express();
@@ -113,6 +120,12 @@ app.use(
 app.use(expressLayouts);
 app.set("layout", "layouts/main");
 
+// Add authentication middleware
+app.use((req, res, next) => {
+  res.locals.isLoggedIn = req.session.isLoggedIn || false;
+  next();
+});
+
 // Middleware to disable layouts for admin routes
 app.use((req, res, next) => {
   if (req.path.startsWith("/admin")) {
@@ -147,6 +160,11 @@ app.use("/auth", authRoutes);
 app.use("/api", apiRoutes);
 app.use("/track", trackRoutes);
 app.use("/track-shipment", trackRoutes);
+app.use("/newsletter", newsletterRoutes);
+app.use("/service", serviceRoutes);
+app.use("/ecommerce-integration", ecommerceRoutes);
+app.use("/dxpress-journal", journalRoutes);
+app.use("/international-shipping", shippingRoutes);
 
 // 404 handler
 app.use((req, res) => {

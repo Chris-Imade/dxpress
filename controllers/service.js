@@ -494,3 +494,30 @@ exports.getServiceDetailsPage = (req, res) => {
     relatedServices: relatedServices,
   });
 };
+
+exports.getDxpressJournalPage = (req, res) => {
+  res.render("dxpress-journal", {
+    title: "DXpress Journal - Insights & Updates",
+    page: "dxpress-journal",
+    layout: "layouts/main",
+    isLoggedIn: req.session.isLoggedIn || false,
+  });
+};
+
+exports.getInternationalShippingPage = (req, res) => {
+  res.render("international-shipping", {
+    title: "International Shipping & Parcel Delivery - DXpress",
+    page: "international-shipping",
+    layout: "layouts/main",
+    isLoggedIn: req.session.isLoggedIn || false,
+  });
+};
+
+exports.getEcommerceIntegrationPage = (req, res) => {
+  res.render("ecommerce-integration", {
+    title: "E-commerce Integration - DXpress",
+    page: "ecommerce-integration",
+    layout: "layouts/main",
+    isLoggedIn: req.session.isLoggedIn || false,
+  });
+};

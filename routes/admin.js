@@ -20,12 +20,7 @@ router.get("/reset-password/:token", authController.getResetPasswordPage);
 router.post("/reset-password", authController.resetPassword);
 
 // Admin dashboard
-router.get(
-  "/dashboard",
-  isAuthenticated,
-  isStaff,
-  adminController.getDashboard
-);
+router.get("/", isAuthenticated, isAdmin, adminController.getDashboard);
 
 // Shipment management routes
 router.get(
@@ -58,8 +53,8 @@ router.post(
   isStaff,
   adminController.updateShipment
 );
-router.delete(
-  "/shipments/:id",
+router.post(
+  "/shipments/delete/:id",
   isAuthenticated,
   isAdmin,
   adminController.deleteShipment
@@ -90,12 +85,4 @@ if (process.env.NODE_ENV !== "production") {
   router.post("/setup", authController.createAdminUser);
 }
 
-// Admin login route
-router.get("/login", (req, res) => {
-  res.render("admin/login", {
-    // layout: "admin/layouts/login",
-    title: "Admin Login",
-  });
-});
-
-module.exports = router; // Export only the router
+module.exports = router;

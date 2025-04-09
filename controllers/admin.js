@@ -216,63 +216,76 @@ const statusUpdateTemplate = (
 `;
 
 // Dashboard
-exports.getDashboard = async (req, res) => {
-  try {
-    // Log the authenticated user
-    console.log(
-      `Loading dashboard for user: ${req.user.email} (${req.user.role})`
-    );
+exports.getDashboard = (req, res) => {
+  res.render("admin/dashboard", {
+    title: "Admin Dashboard",
+    layout: "layouts/admin",
+  });
+};
 
-    // Get counts for dashboard
-    const shipmentCount = await Shipment.countDocuments();
-    const pendingShipmentCount = await Shipment.countDocuments({
-      status: "Pending",
-    });
-    const deliveredShipmentCount = await Shipment.countDocuments({
-      status: "Delivered",
-    });
-    const newsletterCount = await Newsletter.countDocuments();
-    const contactCount = await Contact.countDocuments();
+exports.getLogin = (req, res) => {
+  res.render("admin/login", {
+    title: "Admin Login",
+    layout: "layouts/admin-login",
+  });
+};
 
-    // Get recent shipments
-    const recentShipments = await Shipment.find()
-      .sort({ createdAt: -1 })
-      .limit(5);
+exports.postLogin = async (req, res) => {
+  // Login logic here
+  res.redirect("/admin");
+};
 
-    console.log("Dashboard data loaded successfully");
+exports.postLogout = (req, res) => {
+  req.session.destroy();
+  res.redirect("/admin/login");
+};
 
-    res.render("admin/dashboard", {
-      title: "Admin Dashboard",
-      path: "/admin/dashboard",
-      user: req.user,
-      counts: {
-        shipments: shipmentCount,
-        pendingShipments: pendingShipmentCount,
-        deliveredShipments: deliveredShipmentCount,
-        newsletters: newsletterCount,
-        contacts: contactCount,
-      },
-      recentShipments,
-      layout: false,
-    });
-  } catch (error) {
-    console.error("Dashboard error:", error);
-    res.status(500).render("admin/dashboard", {
-      title: "Admin Dashboard",
-      path: "/admin/dashboard",
-      user: req.user,
-      errorMessage: "Failed to load dashboard data: " + error.message,
-      counts: {
-        shipments: 0,
-        pendingShipments: 0,
-        deliveredShipments: 0,
-        newsletters: 0,
-        contacts: 0,
-      },
-      recentShipments: [],
-      layout: false,
-    });
-  }
+exports.getProfile = (req, res) => {
+  res.render("admin/profile", {
+    title: "Admin Profile",
+    layout: "layouts/admin",
+  });
+};
+
+exports.postProfile = async (req, res) => {
+  // Profile update logic here
+  res.redirect("/admin/profile");
+};
+
+exports.getUsers = (req, res) => {
+  res.render("admin/users", {
+    title: "Manage Users",
+    layout: "layouts/admin",
+  });
+};
+
+exports.getUser = (req, res) => {
+  res.render("admin/user", {
+    title: "User Details",
+    layout: "layouts/admin",
+  });
+};
+
+exports.postUser = async (req, res) => {
+  // User update logic here
+  res.redirect("/admin/users");
+};
+
+exports.deleteUser = async (req, res) => {
+  // User deletion logic here
+  res.redirect("/admin/users");
+};
+
+exports.getSettings = (req, res) => {
+  res.render("admin/settings", {
+    title: "Admin Settings",
+    layout: "layouts/admin",
+  });
+};
+
+exports.postSettings = async (req, res) => {
+  // Settings update logic here
+  res.redirect("/admin/settings");
 };
 
 // Shipments management
@@ -536,7 +549,7 @@ exports.updateShipment = async (req, res) => {
     shipment.insuranceIncluded = insurance === "on";
     shipment.expressDelivery = expressDelivery === "on";
     shipment.additionalNotes = additionalNotes;
-      shipment.status = status;
+    shipment.status = status;
 
     // Handle status history entries from the form
     try {
@@ -590,30 +603,30 @@ exports.updateShipment = async (req, res) => {
         );
       } else if (status !== previousStatus) {
         // If status changed but no valid history entries, add a default one
-      shipment.statusHistory.unshift({
-        status,
+        shipment.statusHistory.unshift({
+          status,
           location: statusLocation || origin,
           note: statusNote || "",
-        timestamp: new Date(),
-      });
+          timestamp: new Date(),
+        });
 
-      // Send status update email to customer
-      try {
-        await transporter.sendMail({
-          from: process.env.SMTP_USER,
-          to: shipment.customerEmail,
-          subject: `Your Shipment Status Update - ${shipment.trackingId}`,
-          html: statusUpdateTemplate(
-            shipment,
-            status,
+        // Send status update email to customer
+        try {
+          await transporter.sendMail({
+            from: process.env.SMTP_USER,
+            to: shipment.customerEmail,
+            subject: `Your Shipment Status Update - ${shipment.trackingId}`,
+            html: statusUpdateTemplate(
+              shipment,
+              status,
               statusLocation || origin,
               statusNote || ""
-          ),
-        });
-      } catch (emailError) {
-        console.error("Error sending status update email:", emailError);
-        // Continue processing even if email fails
-      }
+            ),
+          });
+        } catch (emailError) {
+          console.error("Error sending status update email:", emailError);
+          // Continue processing even if email fails
+        }
       }
     } catch (historyError) {
       console.error("Error processing status history:", historyError);
@@ -662,10 +675,10 @@ exports.deleteShipment = async (req, res) => {
     const shipmentId = req.params.id;
     await Shipment.findByIdAndDelete(shipmentId);
 
-    res.status(200).json({ message: "Shipment deleted successfully" });
+    res.redirect("/admin/shipments?message=Shipment deleted successfully");
   } catch (error) {
     console.error("Delete shipment error:", error);
-    res.status(500).json({ message: "Failed to delete shipment" });
+    res.redirect("/admin/shipments?message=Failed to delete shipment");
   }
 };
 

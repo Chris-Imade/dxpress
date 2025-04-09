@@ -2,6 +2,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 
 // Create transporter for sending emails
 const transporter = nodemailer.createTransport({
@@ -40,110 +41,69 @@ transporter.verify(function (error, success) {
 
 // Get login page
 exports.getLoginPage = (req, res) => {
-  // Check for success message in session
-  const successMessage = req.session.successMessage;
-
-  // Clear success message from session
-  if (successMessage) {
-    req.session.successMessage = null;
-  }
-
   res.render("admin/login", {
     title: "Admin Login",
-    path: "/admin/login",
-    errorMessage: null,
-    successMessage: successMessage,
-    layout: false, // Don't use any layout
+    layout: "layouts/admin-login",
   });
 };
 
 // Handle login
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    // Get any success message from session
-    const successMessage = req.session.successMessage;
+    const { email, password } = req.body;
 
-    // Clear success message from session
-    if (successMessage) {
-      req.session.successMessage = null;
-    }
-
-    // Find user
+    // Find user by email
     const user = await User.findOne({ email });
-
     if (!user) {
-      return res.render("admin/login", {
+      return res.status(401).render("admin/login", {
         title: "Admin Login",
-        path: "/admin/login",
-        errorMessage: "Invalid email or password",
-        successMessage: successMessage,
-        layout: false,
+        layout: "layouts/admin-login",
+        error: "Invalid email or password",
       });
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.render("admin/login", {
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).render("admin/login", {
         title: "Admin Login",
-        path: "/admin/login",
-        errorMessage:
-          "Your account has been deactivated. Please contact administrator.",
-        successMessage: successMessage,
-        layout: false,
+        layout: "layouts/admin-login",
+        error: "Invalid email or password",
       });
     }
 
-    // Check password
-    const isMatch = await user.comparePassword(password);
-
-    if (!isMatch) {
-      return res.render("admin/login", {
-        title: "Admin Login",
-        path: "/admin/login",
-        errorMessage: "Invalid email or password",
-        successMessage: successMessage,
-        layout: false,
-      });
-    }
-
-    // Create JWT token
+    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET || "your_jwt_secret",
-      { expiresIn: "1d" }
+      { expiresIn: "24h" }
     );
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    console.log(`User logged in successfully: ${user.email} (${user.role})`);
-
-    // Set cookie
+    // Set token in cookie
     res.cookie("token", token, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    // Redirect to admin dashboard
-    res.redirect("/admin/dashboard");
+    // Set session
+    req.session.isLoggedIn = true;
+    req.session.user = user;
+
+    res.redirect("/admin");
   } catch (error) {
     console.error("Login error:", error);
-    res.render("admin/login", {
+    res.status(500).render("admin/login", {
       title: "Admin Login",
-      path: "/admin/login",
-      errorMessage: "An error occurred during login",
-      successMessage: null,
-      layout: false,
+      layout: "layouts/admin-login",
+      error: "An error occurred during login",
     });
   }
 };
 
 // Logout
 exports.logout = (req, res) => {
-  res.clearCookie("token");
+  req.session.destroy();
   res.redirect("/admin/login");
 };
 

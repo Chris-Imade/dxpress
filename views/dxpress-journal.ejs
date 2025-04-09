@@ -1,0 +1,859 @@
+  <style>
+    :root {
+      --primary: #151d2a;
+      --primary-dark: #151d2a;
+      --primary-light: #e0e7ff;
+      --secondary: #06b6d4;
+      --secondary-dark: #0891b2;
+      --secondary-light: #cffafe;
+      --dark: #1e293b;
+      --gray-light: #f8fafc;
+      --gray: #e2e8f0;
+      --white: #ffffff;
+      --text: #334155;
+      --text-light: #64748b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background-color: var(--gray-light);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Navigation */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+
+    .logo i {
+      margin-right: 0.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links li a {
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links li a:hover {
+      color: var(--primary);
+    }
+
+    /* Hero Banner */
+    .journal-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: var(--white);
+      padding: 7rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .journal-banner::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      right: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .journal-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -15%;
+      left: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .banner-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .banner-subtitle {
+      font-size: 1.3rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Search Bar */
+    .search-container {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+      margin-top: 2rem;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      padding-left: 3rem;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    /* Blog Section */
+    .blog-section {
+      padding: 5rem 0;
+      background-color: var(--gray-light);
+    }
+
+    .categories {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .category-pill {
+      padding: 0.5rem 1.5rem;
+      background-color: var(--white);
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid var(--gray);
+    }
+
+    .category-pill:hover, .category-pill.active {
+      background-color: var(--primary);
+      color: var(--white);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .category-pill.active {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .post-card {
+      background-color: var(--white);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-image {
+      height: 200px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .post-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .post-card:hover .post-image img {
+      transform: scale(1.05);
+    }
+
+    .post-category {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-content {
+      padding: 1.5rem;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .post-meta div {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .post-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+      color: var(--dark);
+    }
+
+    .post-excerpt {
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .read-more {
+      display: inline-flex;
+      align-items: center;
+      color: var(--primary);
+      font-weight: 600;
+      gap: 0.4rem;
+      transition: gap 0.3s ease;
+    }
+
+    .read-more:hover {
+      gap: 0.7rem;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 4rem;
+    }
+
+    .page-item {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      background-color: var(--white);
+      border: 1px solid var(--gray);
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .page-item:hover, .page-item.active {
+      background-color: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+    }
+
+    /* Newsletter Section */
+    .newsletter {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+      color: var(--white);
+      padding: 5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .newsletter::before {
+      content: '';
+      position: absolute;
+      right: -5%;
+      top: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .newsletter-content {
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .newsletter-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .newsletter-description {
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .newsletter-form {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .newsletter-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      padding-right: 8rem;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .newsletter-button {
+      position: absolute;
+      right: 0.3rem;
+      top: 0.3rem;
+      bottom: 0.3rem;
+      padding: 0 1.5rem;
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .newsletter-button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Featured Posts */
+    .featured-section {
+      padding: 5rem 0;
+      background-color: var(--white);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+
+    .section-description {
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+
+    .featured-posts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .featured-post {
+      position: relative;
+      border-radius: 1rem;
+      overflow: hidden;
+      height: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .featured-post-large {
+      grid-column: span 2;
+      height: 500px;
+    }
+
+    .featured-post img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .featured-post:hover img {
+      transform: scale(1.05);
+    }
+
+    .featured-post-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+      color: var(--white);
+      transition: all 0.3s ease;
+    }
+
+    .featured-post-category {
+      display: inline-block;
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .featured-post-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: white;
+      line-height: 1.3;
+    }
+
+    .featured-post-large .featured-post-title {
+      font-size: 2.2rem;
+    }
+
+    .featured-post-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--dark);
+      color: var(--white);
+      padding: 4rem 0 2rem;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-logo {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .footer-logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .footer-logo-text i {
+      margin-right: 0.5rem;
+    }
+
+    .footer-description {
+      color: var(--text-light);
+      max-width: 300px;
+    }
+
+    .footer-links {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .footer-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--white);
+    }
+
+    .footer-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .footer-list li a {
+      color: var(--text-light);
+      transition: color 0.3s ease;
+    }
+
+    .footer-list li a:hover {
+      color: var(--primary-light);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 2rem;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+    
+    .social-icons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .social-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--white);
+      transition: all 0.3s ease;
+    }
+    
+    .social-icon:hover {
+      background-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .banner-title {
+        font-size: 2.5rem;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .featured-posts {
+        grid-template-columns: 1fr;
+      }
+      
+      .featured-post-large {
+        grid-column: span 1;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .mobile-menu-btn {
+        display: block;
+      }
+    }
+
+    /* Mobile menu */
+    .mobile-menu-btn {
+      display: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Journal Banner -->
+  <section class="journal-banner">
+    <div class="container">
+      <div class="banner-content animate">
+        <h1 class="banner-title">DXpress Journal</h1>
+        <p class="banner-subtitle">Insights, Tips, and Updates from the Logistics World</p>
+        
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-bar" placeholder="Search articles...">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Posts Section -->
+  <section class="featured-section">
+    <div class="container">
+      <div class="section-header animate">
+        <h2 class="section-title">Featured Articles</h2>
+        <p class="section-description">Handpicked insights to transform your logistics operations</p>
+      </div>
+
+      <div class="featured-posts">
+        <div class="featured-post featured-post-large animate" style="animation-delay: 0.1s">
+          <img src="/assets/images/journal/major.webp" alt="Supply Chain Resilience">
+          <div class="featured-post-overlay">
+            <span class="featured-post-category">Industry Trends</span>
+            <h3 class="featured-post-title">Building Supply Chain Resilience in Uncertain Times</h3>
+            <div class="featured-post-meta">
+              <div><i class="far fa-calendar-alt"></i> April 2, 2025</div>
+              <div><i class="far fa-clock"></i> 8 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="featured-post animate" style="animation-delay: 0.2s">
+          <img src="/assets/images/journal/post-333.webp" alt="Sustainable Shipping" style="object-fit: contain;">
+          <div class="featured-post-overlay">
+            <span class="featured-post-category">Sustainability</span>
+            <h3 class="featured-post-title">Eco-Friendly Shipping: A Guide for Modern Businesses</h3>
+            <div class="featured-post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 28, 2025</div>
+              <div><i class="far fa-clock"></i> 6 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="featured-post animate" style="animation-delay: 0.3s">
+          <img src="/assets/images/journal/post-2.jpg" alt="Last Mile Delivery">
+          <div class="featured-post-overlay">
+            <span class="featured-post-category">Delivery Solutions</span>
+            <h3 class="featured-post-title">Revolutionizing Last-Mile Delivery with Technology</h3>
+            <div class="featured-post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 15, 2025</div>
+              <div><i class="far fa-clock"></i> 5 min read</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Posts Section -->
+  <section class="blog-section">
+    <div class="container">
+      <div class="categories animate">
+        <div class="category-pill active">All</div>
+        <div class="category-pill">Logistics Strategy</div>
+        <div class="category-pill">E-commerce Tips</div>
+        <div class="category-pill">Shipping Solutions</div>
+        <div class="category-pill">Industry News</div>
+        <div class="category-pill">Technology</div>
+      </div>
+
+      <div class="posts-grid">
+        <!-- Blog Post 1 -->
+        <div class="post-card animate" style="animation-delay: 0.1s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post-11.jpg" alt="Peak Season Logistics">
+            <span class="post-category">Logistics Strategy</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> April 5, 2025</div>
+              <div><i class="far fa-clock"></i> 7 min read</div>
+            </div>
+            <h3 class="post-title">Mastering Peak Season Logistics</h3>
+            <p class="post-excerpt">
+              Discover proven strategies to handle increased shipping volumes
+              during peak seasons while maintaining efficiency and customer
+              satisfaction.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Blog Post 2 -->
+        <div class="post-card animate" style="animation-delay: 0.2s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post-12.jpg" alt="Multicarrier Shipping">
+            <span class="post-category">Shipping Solutions</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> April 1, 2025</div>
+              <div><i class="far fa-clock"></i> 6 min read</div>
+            </div>
+            <h3 class="post-title">Multicarrier Shipping Explained</h3>
+            <p class="post-excerpt">
+              Learn how using multiple shipping providers can optimize your
+              logistics operations and reduce costs while improving reliability.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Blog Post 3 -->
+        <div class="post-card animate" style="animation-delay: 0.3s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post-13.webp" alt="Free Shipping Strategy">
+            <span class="post-category">E-commerce Tips</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 26, 2025</div>
+              <div><i class="far fa-clock"></i> 5 min read</div>
+            </div>
+            <h3 class="post-title">Free Shipping Without Sacrificing Margins</h3>
+            <p class="post-excerpt">
+              Explore smart strategies to offer free shipping while maintaining
+              healthy profit margins and customer satisfaction.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Blog Post 4 -->
+        <div class="post-card animate" style="animation-delay: 0.4s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post111.jpg" alt="International Shipping">
+            <span class="post-category">Shipping Solutions</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 20, 2025</div>
+              <div><i class="far fa-clock"></i> 8 min read</div>
+            </div>
+            <h3 class="post-title">Navigating International Shipping Regulations</h3>
+            <p class="post-excerpt">
+              A comprehensive guide to understanding and managing the complex world of international shipping requirements and customs procedures.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Blog Post 5 -->
+        <div class="post-card animate" style="animation-delay: 0.5s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post222.jpg" alt="Warehouse Optimization">
+            <span class="post-category">Logistics Strategy</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 15, 2025</div>
+              <div><i class="far fa-clock"></i> 6 min read</div>
+            </div>
+            <h3 class="post-title">Warehouse Optimization Techniques for 2025</h3>
+            <p class="post-excerpt">
+              Innovative approaches to maximize warehouse efficiency through spatial organization, technology integration, and workforce management.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Blog Post 6 -->
+        <div class="post-card animate" style="animation-delay: 0.6s">
+          <div class="post-image">
+            <img src="/assets/images/journal/post-333.webp" alt="AI in Logistics">
+            <span class="post-category">Technology</span>
+          </div>
+          <div class="post-content">
+            <div class="post-meta">
+              <div><i class="far fa-calendar-alt"></i> March 10, 2025</div>
+              <div><i class="far fa-clock"></i> 7 min read</div>
+            </div>
+            <h3 class="post-title">AI and Machine Learning in Modern Logistics</h3>
+            <p class="post-excerpt">
+              How artificial intelligence is transforming supply chain management with predictive analytics, route optimization, and automated decision-making.
+            </p>
+            <a href="#" class="read-more">
+              Read more <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination animate" style="animation-delay: 0.7s">
+        <a href="#" class="page-item active">1</a>
+        <a href="#" class="page-item disabled" style="color: #ccc; pointer-events: none;">2</a>
+        <a href="#" class="page-item disabled" style="color: #ccc; pointer-events: none;">3</a>
+        <a href="#" class="page-item disabled" style="color: #ccc; pointer-events: none;">4</a>
+        <a href="#" class="page-item disabled" style="color: #ccc; pointer-events: none;">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>

@@ -14,6 +14,7 @@ A comprehensive shipping and logistics platform built with Node.js, Express, and
   - Pricing Plan section (with shipping plans)
   - FAQ section (common shipping questions)
   - Contact Us section (two-part layout)
+  - Newsletter subscription section
 
 ### 2. Navigation
 
@@ -21,23 +22,59 @@ A comprehensive shipping and logistics platform built with Node.js, Express, and
   - nav-home.ejs (for homepage)
   - nav-other.ejs (for other pages)
 - Create Shipment link in navigation
+- About Us section
+- Opening Hours display
 
-### 3. Team Page
+### 3. Admin Panel
 
-- Dedicated team page template
-- Team member profiles including:
-  - John Smith (CEO & Founder)
-  - Sarah Johnson (Operations Manager)
-  - Michael Brown (Logistics Director)
-  - Emily Davis (Customer Service Manager)
-  - Robert Wilson (Transportation Specialist)
-  - Jennifer Taylor (Supply Chain Manager)
-  - David Martinez (Fleet Manager)
-  - Jessica Anderson (International Shipping Coordinator)
+- Secure authentication system
+- Dashboard with key metrics:
+  - Total shipments
+  - Pending shipments
+  - Delivered shipments
+  - Newsletter subscribers
+  - Contact inquiries
+- Shipment Management:
+  - Create new shipments
+  - Edit existing shipments
+  - Delete shipments
+  - Track shipment status
+  - Search and filter shipments
+- Newsletter Management:
+  - View subscribers
+  - Export subscribers to CSV
+  - Delete subscribers
+- User Management:
+  - Role-based access control (Admin/Staff)
+  - User authentication
+  - Password reset functionality
 
-### 4. Create Shipment Process
+### 4. Newsletter System
 
-Currently implementing:
+- Email subscription form
+- Welcome email for new subscribers
+- Unsubscribe functionality
+- Admin management interface
+- CSV export capability
+- Email templates for:
+  - Welcome messages
+  - Unsubscribe confirmations
+
+### 5. Franchise System
+
+- Dedicated franchise page with:
+  - Hero section with call-to-action
+  - Why Choose Dxpress Franchise section
+  - Investment Requirements section
+  - Franchise Process section
+  - Contact CTA section
+- Comprehensive franchise information:
+  - Initial investment details
+  - Ongoing fees
+  - Support and training
+  - Business model benefits
+
+### 6. Create Shipment Process
 
 - Multi-step form with progress indicator:
   1. Shipment Details
@@ -46,8 +83,12 @@ Currently implementing:
   4. Confirmation
 - Interactive step navigation
 - Visual progress tracking
+- Email notifications for:
+  - Shipment creation
+  - Status updates
+  - Delivery confirmation
 
-### 5. Carrier Integration (In Progress)
+### 7. Carrier Integration (In Progress)
 
 Planning integration with:
 
@@ -59,7 +100,7 @@ Planning integration with:
 - FedEx REST API
 - UPS REST API
 
-### 6. Payment Integration (In Progress)
+### 8. Payment Integration (In Progress)
 
 Planning integration with:
 
@@ -74,14 +115,115 @@ Planning integration with:
 - Bootstrap framework
 - Custom CSS
 - JavaScript for interactivity
+- Responsive design
+- Modern UI components
 
 ### Backend
 
 - Node.js
 - Express.js framework
 - MongoDB database
+- Email service integration
+- Authentication system
+- Role-based access control
 
 ## Project Structure
+
+```
+dxpress-mvc/
+├── config/             # Configuration files
+├── controllers/        # Route controllers
+├── middleware/         # Custom middleware
+├── models/            # Database models
+├── public/            # Static files
+│   ├── css/          # Stylesheets
+│   ├── js/           # Client-side scripts
+│   └── images/       # Image assets
+├── routes/            # Route definitions
+├── views/             # EJS templates
+│   ├── admin/        # Admin panel views
+│   ├── layouts/      # Layout templates
+│   └── partials/     # Reusable components
+├── .env.example      # Environment variables template
+├── app.js            # Main application file
+└── package.json      # Project dependencies
+```
+
+## Installation
+
+1. Clone the repository
+
+```bash
+git clone [repository-url]
+```
+
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Set up environment variables
+
+```bash
+cp .env.example .env
+```
+
+4. Configure the following in your .env file:
+
+```env
+# Database
+MONGODB_URI=your_mongodb_uri
+
+# Email Configuration
+EMAIL_SERVICE=gmail
+EMAIL_USERNAME=your_email
+EMAIL_PASSWORD=your_app_password
+
+# Admin Configuration
+ADMIN_EMAIL=your_admin_email
+ADMIN_PASSWORD=your_admin_password
+
+# Carrier APIs
+DHL_API_KEY=your_dhl_api_key
+DHL_ACCOUNT_NUMBER=your_dhl_account
+DHL_SITE_ID=your_dhl_site_id
+DHL_PASSWORD=your_dhl_password
+
+FEDEX_CLIENT_ID=your_fedex_client_id
+FEDEX_CLIENT_SECRET=your_fedex_client_secret
+FEDEX_ACCOUNT_NUMBER=your_fedex_account
+FEDEX_METER_NUMBER=your_fedex_meter
+
+UPS_CLIENT_ID=your_ups_client_id
+UPS_CLIENT_SECRET=your_ups_client_secret
+UPS_ACCOUNT_NUMBER=your_ups_account
+UPS_ACCESS_KEY=your_ups_access_key
+
+# Payment Processing
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_PUBLIC_KEY=your_stripe_public_key
+PAYPAL_CLIENT_ID=your_paypal_client_id
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+```
+
+5. Start the development server
+
+```bash
+npm run dev
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Features
 

@@ -48,46 +48,39 @@ exports.isAuthenticated = (req, res, next) => {
         }
 
         // Extend user object with db details
-        req.user.email = user.email;
-        req.user.fullName = user.fullName;
-
-        console.log(`User authenticated: ${user.email} (${user.role})`);
+        req.user = { ...req.user, ...user.toObject() };
         next();
       })
-      .catch((err) => {
-        console.error("Error finding user:", err);
+      .catch((error) => {
+        console.error("Error finding user:", error);
         res.clearCookie("token");
+        req.session.successMessage =
+          "An error occurred. Please try logging in again.";
         return res.redirect("/admin/login");
       });
   } catch (error) {
     console.error("Authentication error:", error);
     res.clearCookie("token");
+    req.session.successMessage =
+      "An error occurred. Please try logging in again.";
     return res.redirect("/admin/login");
   }
 };
 
-// Admin authorization middleware
+// Admin role middleware
 exports.isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    return next();
+  if (!req.user || req.user.role !== "admin") {
+    req.session.errorMessage = "You do not have permission to access this page";
+    return res.redirect("/admin/dashboard");
   }
-
-  res.status(403).render("admin/forbidden", {
-    title: "Access Denied",
-    path: "/admin",
-    message: "You don't have permission to access this resource",
-  });
+  next();
 };
 
-// Staff authorization middleware
+// Staff role middleware
 exports.isStaff = (req, res, next) => {
-  if (req.user && (req.user.role === "admin" || req.user.role === "staff")) {
-    return next();
+  if (!req.user || (req.user.role !== "admin" && req.user.role !== "staff")) {
+    req.session.errorMessage = "You do not have permission to access this page";
+    return res.redirect("/admin/dashboard");
   }
-
-  res.status(403).render("admin/forbidden", {
-    title: "Access Denied",
-    path: "/admin",
-    message: "You don't have permission to access this resource",
-  });
+  next();
 };
