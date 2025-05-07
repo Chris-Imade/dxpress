@@ -37,10 +37,10 @@ const teamMembers = [
       },
     ],
     social: {
-      facebook: "https://facebook.com",
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      instagram: "https://instagram.com",
+      facebook: "https://www.facebook.com/profile.php?id=61575951567653",
+      linkedin:
+        "https://www.linkedin.com/company/107220447/admin/page-posts/published/",
+      instagram: "https://www.instagram.com/dxpressl/",
     },
   },
   {
@@ -81,10 +81,10 @@ const teamMembers = [
       },
     ],
     social: {
-      facebook: "https://facebook.com",
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      instagram: "https://instagram.com",
+      facebook: "https://www.facebook.com/profile.php?id=61575951567653",
+      linkedin:
+        "https://www.linkedin.com/company/107220447/admin/page-posts/published/",
+      instagram: "https://www.instagram.com/dxpressl/",
     },
   },
   {
@@ -125,10 +125,10 @@ const teamMembers = [
       },
     ],
     social: {
-      facebook: "https://facebook.com",
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      instagram: "https://instagram.com",
+      facebook: "https://www.facebook.com/profile.php?id=61575951567653",
+      linkedin:
+        "https://www.linkedin.com/company/107220447/admin/page-posts/published/",
+      instagram: "https://www.instagram.com/dxpressl/",
     },
   },
   {
@@ -169,10 +169,10 @@ const teamMembers = [
       },
     ],
     social: {
-      facebook: "https://facebook.com",
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      instagram: "https://instagram.com",
+      facebook: "https://www.facebook.com/profile.php?id=61575951567653",
+      linkedin:
+        "https://www.linkedin.com/company/107220447/admin/page-posts/published/",
+      instagram: "https://www.instagram.com/dxpressl/",
     },
   },
 ];
