@@ -500,54 +500,12 @@
             <div id="stripePaymentForm">
               <div class="card">
                 <div class="card-body">
-                  <div class="mb-3">
-                    <label for="cardNumber" class="form-label"
-                      >Card Number</label
-                    >
-                    <div class="input-group">
-                      <span class="input-group-text"
-                        ><i class="fas fa-credit-card"></i
-                      ></span>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="cardNumber"
-                        placeholder="1234 5678 9012 3456"
-                      />
-                    </div>
+                  <div class="total-price-display mb-4">
+                    <h4 class="text-center">
+                      Total Amount: £<span id="stripeTotalPrice">0.00</span>
+                    </h4>
                   </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="cardExpiry" class="form-label"
-                        >Expiration Date</label
-                      >
-                      <div class="input-group">
-                        <span class="input-group-text"
-                          ><i class="fas fa-calendar"></i
-                        ></span>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="cardExpiry"
-                          placeholder="MM/YY"
-                        />
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="cardCvc" class="form-label">CVC</label>
-                      <div class="input-group">
-                        <span class="input-group-text"
-                          ><i class="fas fa-lock"></i
-                        ></span>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="cardCvc"
-                          placeholder="123"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <div id="stripe-payment-element"></div>
                 </div>
               </div>
             </div>
@@ -555,13 +513,55 @@
             <div id="paypalPaymentForm" style="display: none">
               <div class="card">
                 <div class="card-body text-center">
-                  <i
-                    class="fab fa-paypal text-main-600"
-                    style="font-size: 48px"
-                  ></i>
-                  <p class="mt-3">
-                    You will be redirected to PayPal to complete your payment.
-                  </p>
+                  <div class="total-price-display mb-4">
+                    <h4 class="text-center">
+                      Total Amount: £<span id="paypalTotalPrice">0.00</span>
+                    </h4>
+                  </div>
+                  <script src="https://www.paypal.com/sdk/js?client-id=<%- process.env.PAYPAL_CLIENT_ID %>&amp;components=hosted-buttons&amp;disable-funding=venmo&amp;currency=GBP"></script>
+                  <div class="paypal-container w-100"></div>
+                  <script>
+                    // Define updatePayPalButton with error handling
+                    function updatePayPalButton(amount) {
+                      // Check if paypal is available
+                      if (typeof paypal === "undefined") {
+                        console.error("PayPal SDK not loaded yet");
+                        return;
+                      }
+
+                      try {
+                        paypal
+                          .HostedButtons({
+                            hostedButtonId:
+                              "<%- process.env.PAYPAL_HOSTED_BUTTON_ID %>",
+                            style: {
+                              layout: "vertical",
+                              color: "blue",
+                              shape: "rect",
+                              label: "pay",
+                            },
+                            createOrder: function () {
+                              return fetch("/api/payments/create", {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                  amount: amount,
+                                  currency: "GBP",
+                                  provider: "paypal",
+                                }),
+                              })
+                                .then((response) => response.json())
+                                .then((data) => data.id);
+                            },
+                          })
+                          .render(".paypal-container");
+                      } catch (error) {
+                        console.error("Error rendering PayPal button:", error);
+                      }
+                    }
+                  </script>
                 </div>
               </div>
             </div>
@@ -878,11 +878,126 @@
   .input-group:focus-within {
     box-shadow: 0 0 0 0.2rem rgba(var(--color-main-600-rgb), 0.25);
   }
+  #paypalPaymentForm .card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #paypalPaymentForm .card-body {
+    padding: 2rem;
+  }
+
+  .paypal-container {
+    min-width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .form-container-6UL254A8EQVRQ,
+  .css-1b6cd97,
+  .css-178qcrb,
+  #form-container-6UL254A8EQVRQ {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  @media only screen and (min-width: 500px) {
+    .paypal-button-container {
+      min-width: 500px;
+      max-width: 100% !important;
+    }
+  }
+
+  .paypal-button-container
+    .paypal-autoresize-container
+    .paypal-button-layout-vertical
+    .paypal-button-shape-rect
+    .paypal-button-number-single
+    .paypal-button-env-production {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* PayPal button container styles */
+  .paypal-button-container {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* PayPal button styles */
+  .paypal-button {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* PayPal button wrapper styles */
+  .paypal-button-wrapper {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Override PayPal's default styles */
+  .paypal-button-container .paypal-button-layout-vertical {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .paypal-button-container .paypal-button-shape-rect {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .paypal-button-container .paypal-button-number-single {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
 </style>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
+  // Pass environment variables to client-side
+  const STRIPE_PUBLIC_KEY = "<%- process.env.STRIPE_PUBLIC_KEY %>";
+  const PAYPAL_HOSTED_BUTTON_ID = "<%- process.env.PAYPAL_HOSTED_BUTTON_ID %>";
+  const PAYPAL_CLIENT_ID = "<%- process.env.PAYPAL_CLIENT_ID %>";
+
   document.addEventListener("DOMContentLoaded", function () {
-    // Get elements
+    // Initialize Stripe - log the key first to debug
+    console.log("Stripe key:", STRIPE_PUBLIC_KEY);
+
+    // Check if the key exists and is valid before initializing
+    if (
+      !STRIPE_PUBLIC_KEY ||
+      STRIPE_PUBLIC_KEY === "undefined" ||
+      STRIPE_PUBLIC_KEY.includes("<%- process.env.STRIPE_PUBLIC_KEY %>")
+    ) {
+      console.error("Invalid Stripe public key:", STRIPE_PUBLIC_KEY);
+      // Display error in the payment status
+      const paymentStatus = document.getElementById("paymentStatus");
+      if (paymentStatus) {
+        paymentStatus.innerHTML = `
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Payment configuration issue. Please contact support.
+          </div>
+        `;
+      }
+    }
+
+    // Initialize Stripe only if we have a valid key
+    const stripe =
+      STRIPE_PUBLIC_KEY &&
+      !STRIPE_PUBLIC_KEY.includes("<%- process.env.STRIPE_PUBLIC_KEY %>")
+        ? Stripe(STRIPE_PUBLIC_KEY)
+        : null;
+
+    let elements;
+
+    // Get elements with null checks
     const stepProgressBar = document.getElementById("stepProgressBar");
     const stepLabels = document.querySelectorAll(".step-label");
     const stepContents = document.querySelectorAll(".step-content");
@@ -905,79 +1020,317 @@
     let selectedRate = null;
 
     // Show insurance fields if insurance is checked
-    insuranceRequired.addEventListener("change", function () {
-      insuranceDetails.style.display = this.checked ? "block" : "none";
-    });
+    if (insuranceRequired && insuranceDetails) {
+      insuranceRequired.addEventListener("change", function () {
+        insuranceDetails.style.display = this.checked ? "block" : "none";
+      });
+    }
 
     // Handle step navigation
     function goToStep(step) {
       currentStep = step;
 
       // Update progress bar
-      const progress = ((step - 1) / 3) * 100;
-      stepProgressBar.style.width = `${progress}%`;
-      stepProgressBar.setAttribute("aria-valuenow", progress);
+      if (stepProgressBar) {
+        const progress = ((step - 1) / 3) * 100;
+        stepProgressBar.style.width = `${progress}%`;
+        stepProgressBar.setAttribute("aria-valuenow", progress);
+      }
 
       // Update step labels
-      stepLabels.forEach((label, index) => {
-        const stepNum = index + 1;
-        if (stepNum < step) {
-          label.classList.add("completed");
-          label.classList.remove("active", "disabled");
-        } else if (stepNum === step) {
-          label.classList.add("active");
-          label.classList.remove("completed", "disabled");
-        } else {
-          label.classList.add("disabled");
-          label.classList.remove("active", "completed");
-        }
-      });
+      if (stepLabels && stepLabels.length) {
+        stepLabels.forEach((label, index) => {
+          const stepNum = index + 1;
+          if (stepNum < step) {
+            label.classList.add("completed");
+            label.classList.remove("active", "disabled");
+          } else if (stepNum === step) {
+            label.classList.add("active");
+            label.classList.remove("completed", "disabled");
+          } else {
+            label.classList.add("disabled");
+            label.classList.remove("active", "completed");
+          }
+        });
+      }
 
       // Show current step content, hide others
-      stepContents.forEach((content, index) => {
-        if (index + 1 === step) {
-          content.style.display = "block";
-        } else {
-          content.style.display = "none";
+      if (stepContents && stepContents.length) {
+        stepContents.forEach((content, index) => {
+          if (index + 1 === step) {
+            content.style.display = "block";
+          } else {
+            content.style.display = "none";
+          }
+        });
+      }
+    }
+
+    // Add click handlers to step labels
+    if (stepLabels && stepLabels.length) {
+      stepLabels.forEach((label) => {
+        label.addEventListener("click", function () {
+          if (!this.classList.contains("disabled")) {
+            const targetStep = parseInt(this.getAttribute("data-step"));
+            goToStep(targetStep);
+          }
+        });
+      });
+    }
+
+    // Handle form submission (Step 1)
+    if (shipmentDetailsForm) {
+      shipmentDetailsForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Show loading animation
+        const loadingRates = document.getElementById("loadingRates");
+        const shippingRates = document.getElementById("shippingRates");
+
+        if (loadingRates) {
+          loadingRates.style.display = "block";
+        }
+
+        if (shippingRates) {
+          shippingRates.style.display = "none";
+        }
+
+        // Move to Step 2
+        goToStep(2);
+
+        // Simulate API call to get rates
+        setTimeout(function () {
+          // Hide loading, show rates
+          if (loadingRates) {
+            loadingRates.style.display = "none";
+          }
+
+          if (shippingRates) {
+            shippingRates.style.display = "block";
+          }
+
+          // Populate rates
+          populateShippingRates();
+        }, 2000);
+      });
+    }
+
+    // Handle selecting a rate
+    if (selectRateBtn) {
+      selectRateBtn.addEventListener("click", function () {
+        if (selectedRate) {
+          // Populate summary elements if they exist
+          const summaryElements = {
+            carrier: document.getElementById("summaryCarrier"),
+            service: document.getElementById("summaryService"),
+            delivery: document.getElementById("summaryDelivery"),
+            baseRate: document.getElementById("summaryBaseRate"),
+            additional: document.getElementById("summaryAdditional"),
+            total: document.getElementById("summaryTotal"),
+            stripeTotal: document.getElementById("stripeTotalPrice"),
+            paypalTotal: document.getElementById("paypalTotalPrice"),
+          };
+
+          // Update summary elements if they exist
+          if (summaryElements.carrier) {
+            summaryElements.carrier.textContent = selectedRate.carrier;
+          }
+
+          if (summaryElements.service) {
+            summaryElements.service.textContent = selectedRate.service;
+          }
+
+          if (summaryElements.delivery) {
+            summaryElements.delivery.textContent = selectedRate.deliveryDays;
+          }
+
+          if (summaryElements.baseRate) {
+            summaryElements.baseRate.textContent =
+              selectedRate.baseRate.toFixed(2);
+          }
+
+          if (summaryElements.additional) {
+            summaryElements.additional.textContent =
+              selectedRate.additionalFees.toFixed(2);
+          }
+
+          if (summaryElements.total) {
+            summaryElements.total.textContent =
+              selectedRate.totalRate.toFixed(2);
+          }
+
+          // Update payment form totals
+          if (summaryElements.stripeTotal) {
+            summaryElements.stripeTotal.textContent =
+              selectedRate.totalRate.toFixed(2);
+          }
+
+          if (summaryElements.paypalTotal) {
+            summaryElements.paypalTotal.textContent =
+              selectedRate.totalRate.toFixed(2);
+          }
+
+          // Update PayPal button with new amount
+          try {
+            if (typeof updatePayPalButton === "function") {
+              updatePayPalButton(selectedRate.totalRate);
+            } else {
+              console.error("updatePayPalButton function not found");
+            }
+          } catch (error) {
+            console.error("Error updating PayPal button:", error);
+          }
+
+          // Go to payment step
+          goToStep(3);
         }
       });
     }
 
-    // Add click handlers to step labels
-    stepLabels.forEach((label) => {
-      label.addEventListener("click", function () {
-        if (!this.classList.contains("disabled")) {
-          const targetStep = parseInt(this.getAttribute("data-step"));
-          goToStep(targetStep);
+    // Handle payment method change
+    if (
+      paymentMethodRadios &&
+      paymentMethodRadios.length &&
+      stripePaymentForm &&
+      paypalPaymentForm
+    ) {
+      paymentMethodRadios.forEach((radio) => {
+        radio.addEventListener("change", function () {
+          if (this.value === "stripe") {
+            stripePaymentForm.style.display = "block";
+            paypalPaymentForm.style.display = "none";
+          } else if (this.value === "paypal") {
+            stripePaymentForm.style.display = "none";
+            paypalPaymentForm.style.display = "block";
+          }
+        });
+      });
+    }
+
+    // Handle payment processing
+    if (processPaymentBtn) {
+      processPaymentBtn.addEventListener("click", async function () {
+        const paymentMethodRadio = document.querySelector(
+          'input[name="paymentMethod"]:checked'
+        );
+
+        if (!paymentMethodRadio) {
+          console.error("No payment method selected");
+          const paymentStatus = document.getElementById("paymentStatus");
+          if (paymentStatus) {
+            paymentStatus.innerHTML = `
+              <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Please select a payment method.
+              </div>
+            `;
+          }
+          return;
+        }
+
+        const paymentMethod = paymentMethodRadio.value;
+
+        try {
+          if (paymentMethod === "stripe") {
+            // Check if Stripe is properly initialized
+            if (!stripe) {
+              throw new Error(
+                "Stripe payment is not available. Please try PayPal or contact support."
+              );
+            }
+
+            // Create payment intent
+            const response = await fetch("/api/payments/create", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                shipmentId: selectedRate.id,
+                provider: "stripe",
+                amount: selectedRate.totalRate,
+              }),
+            });
+
+            const responseData = await response.json();
+
+            if (!responseData.success) {
+              throw new Error(
+                responseData.message || "Failed to create payment"
+              );
+            }
+
+            const { clientSecret } = responseData.data;
+
+            if (!clientSecret) {
+              throw new Error("No client secret received from server");
+            }
+
+            // Initialize Stripe Elements with client secret
+            elements = stripe.elements({
+              clientSecret,
+              appearance: {
+                theme: "stripe",
+              },
+            });
+
+            const paymentElement = elements.create("payment");
+            const stripeEl = document.getElementById("stripe-payment-element");
+            if (!stripeEl) {
+              throw new Error("Stripe payment element container not found");
+            }
+            paymentElement.mount(stripeEl);
+
+            // Confirm payment
+            const { error } = await stripe.confirmPayment({
+              elements,
+              confirmParams: {
+                return_url: `${window.location.origin}/shipment/confirmation?shipmentId=${selectedRate.id}`,
+              },
+            });
+
+            if (error) {
+              throw new Error(error.message);
+            }
+          } else if (paymentMethod === "paypal") {
+            // PayPal payment is handled by the hosted button
+            window.location.href = `https://www.paypal.com/ncp/payment/${PAYPAL_HOSTED_BUTTON_ID}`;
+          }
+        } catch (error) {
+          console.error("Payment error:", error);
+          const paymentStatus = document.getElementById("paymentStatus");
+          if (paymentStatus) {
+            paymentStatus.innerHTML = `
+              <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Payment failed: ${error.message}
+              </div>
+            `;
+          } else {
+            alert("Payment failed: " + error.message);
+          }
         }
       });
-    });
+    }
 
-    // Handle form submission (Step 1)
-    shipmentDetailsForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      // Show loading animation
-      document.getElementById("loadingRates").style.display = "block";
-      document.getElementById("shippingRates").style.display = "none";
-
-      // Move to Step 2
-      goToStep(2);
-
-      // Simulate API call to get rates
-      setTimeout(function () {
-        // Hide loading, show rates
-        document.getElementById("loadingRates").style.display = "none";
-        document.getElementById("shippingRates").style.display = "block";
-
-        // Populate rates
-        populateShippingRates();
-      }, 2000);
-    });
+    // Back button handlers
+    if (backButtons && backButtons.length) {
+      backButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          const targetStep = parseInt(this.getAttribute("data-step"));
+          goToStep(targetStep);
+        });
+      });
+    }
 
     // Populate shipping rates
     function populateShippingRates() {
       const ratesContainer = document.getElementById("ratesContainer");
+      if (!ratesContainer) {
+        console.error("Rates container not found");
+        return;
+      }
+
       ratesContainer.innerHTML = "";
 
       // Sample shipping rates
@@ -1058,289 +1411,42 @@
         ratesContainer.appendChild(rateCard);
 
         // Store rate data for later use
-        rateCard.querySelector(".card").dataset.rate = JSON.stringify(rate);
+        const cardElement = rateCard.querySelector(".card");
+        if (cardElement) {
+          cardElement.dataset.rate = JSON.stringify(rate);
+        }
       });
 
       // Add event listeners to rate cards
-      document.querySelectorAll(".rate-card").forEach((card) => {
-        card.addEventListener("click", function () {
-          // Remove selected class from all cards
-          document.querySelectorAll(".rate-card").forEach((c) => {
-            c.classList.remove("selected");
+      const rateCards = document.querySelectorAll(".rate-card");
+      if (rateCards && rateCards.length) {
+        rateCards.forEach((card) => {
+          card.addEventListener("click", function () {
+            // Remove selected class from all cards
+            document.querySelectorAll(".rate-card").forEach((c) => {
+              c.classList.remove("selected");
+            });
+
+            // Add selected class to clicked card
+            this.classList.add("selected");
+
+            // Enable continue button
+            if (selectRateBtn) {
+              selectRateBtn.disabled = false;
+            }
+
+            // Store selected rate
+            if (this.dataset.rate) {
+              try {
+                selectedRate = JSON.parse(this.dataset.rate);
+              } catch (error) {
+                console.error("Error parsing rate data:", error);
+              }
+            }
           });
-
-          // Add selected class to clicked card
-          this.classList.add("selected");
-
-          // Enable continue button
-          selectRateBtn.disabled = false;
-
-          // Store selected rate
-          selectedRate = JSON.parse(this.dataset.rate);
         });
-      });
-    }
-
-    // Handle selecting a rate
-    selectRateBtn.addEventListener("click", function () {
-      if (selectedRate) {
-        // Populate summary
-        document.getElementById("summaryCarrier").textContent =
-          selectedRate.carrier;
-        document.getElementById("summaryService").textContent =
-          selectedRate.service;
-        document.getElementById("summaryDelivery").textContent =
-          selectedRate.deliveryDays;
-        document.getElementById("summaryBaseRate").textContent =
-          selectedRate.baseRate.toFixed(2);
-        document.getElementById("summaryAdditional").textContent =
-          selectedRate.additionalFees.toFixed(2);
-        document.getElementById("summaryTotal").textContent =
-          selectedRate.totalRate.toFixed(2);
-
-        // Go to payment step
-        goToStep(3);
       }
-    });
-
-    // Handle payment method change
-    paymentMethodRadios.forEach((radio) => {
-      radio.addEventListener("change", function () {
-        if (this.value === "stripe") {
-          stripePaymentForm.style.display = "block";
-          paypalPaymentForm.style.display = "none";
-        } else if (this.value === "paypal") {
-          stripePaymentForm.style.display = "none";
-          paypalPaymentForm.style.display = "block";
-        }
-      });
-    });
-
-    // Handle payment processing
-    processPaymentBtn.addEventListener("click", function () {
-      // Show status message container and clean previous messages
-      const statusElement = document.getElementById("paymentStatus");
-      statusElement.innerHTML = `
-        <div class="alert alert-info">
-          <div class="d-flex align-items-center">
-            <div class="spinner-border spinner-border-sm me-3" role="status"></div>
-            <div>
-              <strong>Processing your shipment...</strong>
-              <p class="mb-0 small">This may take a few moments. Please don't refresh the page.</p>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Disable button during processing
-      this.disabled = true;
-      this.innerHTML =
-        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-
-      setTimeout(function () {
-        // Collect shipment data
-        const shipmentData = {
-          shipmentId:
-            "SHP" +
-            Math.floor(Math.random() * 1000000)
-              .toString()
-              .padStart(6, "0"),
-          trackingId:
-            "TRK" +
-            Math.floor(Math.random() * 10000000000)
-              .toString()
-              .padStart(10, "0"),
-          customerName: document.getElementById("customerName").value,
-          customerEmail: document.getElementById("customerEmail").value,
-          customerPhone: document.getElementById("customerPhone").value,
-          origin:
-            document.getElementById("originAddress").value +
-            ", " +
-            document.getElementById("originCity").value +
-            ", " +
-            document.getElementById("originPostalCode").value +
-            ", " +
-            document.getElementById("originCountry").value,
-          destination:
-            document.getElementById("destAddress").value +
-            ", " +
-            document.getElementById("destCity").value +
-            ", " +
-            document.getElementById("destPostalCode").value +
-            ", " +
-            document.getElementById("destCountry").value,
-          packageType: document.getElementById("packageType").value,
-          weight: document.getElementById("weight").value,
-          dimensions: {
-            length: document.getElementById("length").value,
-            width: document.getElementById("width").value,
-            height: document.getElementById("height").value,
-          },
-          carrier: selectedRate.carrier,
-          service: selectedRate.service,
-          estimatedDelivery: selectedRate.deliveryDate,
-          deliveryDays: selectedRate.deliveryDays,
-          status: "Pending",
-          fragile: document.getElementById("isFragile").checked,
-          insuranceRequired:
-            document.getElementById("insuranceRequired").checked,
-          price: selectedRate.totalRate,
-        };
-
-        // Set carrier and delivery information for confirmation page
-        document.getElementById("confirmShipmentId").textContent =
-          shipmentData.shipmentId;
-        document.getElementById("confirmCarrier").textContent =
-          shipmentData.carrier;
-        document.getElementById("confirmDelivery").textContent =
-          shipmentData.deliveryDays;
-        document.getElementById("confirmTrackingId").textContent =
-          shipmentData.trackingId;
-
-        // Send shipment data to server for email notification and database storage
-        fetch("/api/shipments/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(shipmentData),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(
-                `Server responded with status: ${response.status}`
-              );
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Shipment created:", data);
-
-            // Use the tracking ID from the server response if available
-            if (data.shipment && data.shipment.trackingId) {
-              document.getElementById("confirmTrackingId").textContent =
-                data.shipment.trackingId;
-            }
-
-            // Check if there was an email error and show warning in confirmation step if needed
-            if (data.message.includes("error sending emails")) {
-              document.getElementById("emailWarning").style.display = "block";
-            }
-
-            // Show success message
-            if (data.message.includes("emails sent successfully")) {
-              statusElement.innerHTML = `
-                <div class="alert alert-success">
-                  <div class="d-flex">
-                    <div class="me-3">
-                      <i class="fas fa-check-circle fa-2x"></i>
-                    </div>
-                    <div>
-                      <strong>Success!</strong>
-                      <p class="mb-0">Your shipment has been created and a confirmation email has been sent to your inbox.</p>
-                    </div>
-                  </div>
-                </div>
-              `;
-            } else if (data.message.includes("error sending emails")) {
-              statusElement.innerHTML = `
-                <div class="alert alert-warning">
-                  <div class="d-flex">
-                    <div class="me-3">
-                      <i class="fas fa-exclamation-triangle fa-2x"></i>
-                    </div>
-                    <div>
-                      <strong>Shipment Created</strong>
-                      <p class="mb-0">Your shipment has been created, but we could not send the confirmation email. Please save your tracking information.</p>
-                    </div>
-                  </div>
-                </div>
-              `;
-            } else {
-              statusElement.innerHTML = `
-                <div class="alert alert-success">
-                  <div class="d-flex">
-                    <div class="me-3">
-                      <i class="fas fa-check-circle fa-2x"></i>
-                    </div>
-                    <div>
-                      <strong>Success!</strong>
-                      <p class="mb-0">${data.message}</p>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }
-
-            // Continue to confirmation step
-            goToStep(4);
-          })
-          .catch((error) => {
-            console.error("Error creating shipment:", error);
-
-            // Show the email warning in the confirmation page
-            document.getElementById("emailWarning").style.display = "block";
-
-            // Show detailed error message
-            statusElement.innerHTML = `
-              <div class="alert alert-danger">
-                <div class="d-flex">
-                  <div class="me-3">
-                    <i class="fas fa-exclamation-circle fa-2x"></i>
-                  </div>
-                  <div>
-                    <strong>There was a problem processing your shipment</strong>
-                    <p class="mb-0">We've saved your tracking information, but encountered an error: ${error.message}</p>
-                    <p class="mb-0 mt-2">Please contact customer support if you need assistance.</p>
-                  </div>
-                </div>
-              </div>
-            `;
-
-            // Add option to retry or continue
-            statusElement.innerHTML += `
-              <div class="d-flex justify-content-end mt-3">
-                <button id="retryBtn" class="btn btn-outline-secondary me-2">
-                  <i class="fas fa-sync-alt me-2"></i> Retry
-                </button>
-                <button id="continueAnywayBtn" class="btn btn-main">
-                  Continue Anyway <i class="fas fa-arrow-right ms-2"></i>
-                </button>
-              </div>
-            `;
-
-            // Add event listeners for retry and continue buttons
-            setTimeout(() => {
-              const retryBtn = document.getElementById("retryBtn");
-              const continueAnywayBtn =
-                document.getElementById("continueAnywayBtn");
-
-              if (retryBtn) {
-                retryBtn.addEventListener("click", function () {
-                  // Re-enable the process payment button and reset its text
-                  processPaymentBtn.disabled = false;
-                  processPaymentBtn.innerHTML =
-                    'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
-                  // Clear status message
-                  statusElement.innerHTML = "";
-                });
-              }
-
-              if (continueAnywayBtn) {
-                continueAnywayBtn.addEventListener("click", function () {
-                  goToStep(4);
-                });
-              }
-            }, 100);
-          })
-          .finally(() => {
-            // Re-enable button for next time
-            processPaymentBtn.disabled = false;
-            processPaymentBtn.innerHTML =
-              'Process Payment <i class="fas fa-arrow-right ms-2"></i>';
-          });
-      }, 2000);
-    });
+    }
   });
 
   // Use Javascript to make this document body's color #212529
