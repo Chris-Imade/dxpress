@@ -477,6 +477,17 @@
       margin-bottom: 0.5rem;
       color: white;
       line-height: 1.3;
+      transition: color 0.3s ease;
+    }
+    
+    .featured-post-title-link {
+      text-decoration: none;
+      color: white;
+    }
+    
+    .featured-post-title-link:hover .featured-post-title {
+      color: var(--secondary);
+      text-decoration: underline;
     }
 
     .featured-post-large .featured-post-title {
@@ -489,6 +500,17 @@
       gap: 1rem;
       font-size: 0.9rem;
       opacity: 0.8;
+    }
+
+    /* Post title link */
+    .post-title-link {
+      color: var(--dark);
+      text-decoration: none;
+    }
+    
+    .post-title-link:hover .post-title {
+      color: var(--primary);
+      text-decoration: underline;
     }
 
     /* Footer */
@@ -666,7 +688,9 @@
           <img src="/assets/images/journal/major.webp" alt="Supply Chain Resilience">
           <div class="featured-post-overlay">
             <span class="featured-post-category">Industry Trends</span>
-            <h3 class="featured-post-title">Building Supply Chain Resilience in Uncertain Times</h3>
+            <a href="/journal/mastering-peak-season-logistics" class="featured-post-title-link">
+              <h3 class="featured-post-title">Building Supply Chain Resilience in Uncertain Times</h3>
+            </a>
             <div class="featured-post-meta">
               <div><i class="far fa-calendar-alt"></i> April 2, 2025</div>
               <div><i class="far fa-clock"></i> 8 min read</div>
@@ -678,7 +702,9 @@
           <img src="/assets/images/journal/post-333.webp" alt="Sustainable Shipping" style="object-fit: contain;">
           <div class="featured-post-overlay">
             <span class="featured-post-category">Sustainability</span>
-            <h3 class="featured-post-title">Eco-Friendly Shipping: A Guide for Modern Businesses</h3>
+            <a href="/journal/ai-and-machine-learning-in-modern-logistics" class="featured-post-title-link">
+              <h3 class="featured-post-title">Eco-Friendly Shipping: A Guide for Modern Businesses</h3>
+            </a>
             <div class="featured-post-meta">
               <div><i class="far fa-calendar-alt"></i> March 28, 2025</div>
               <div><i class="far fa-clock"></i> 6 min read</div>
@@ -690,7 +716,9 @@
           <img src="/assets/images/journal/post-2.jpg" alt="Last Mile Delivery">
           <div class="featured-post-overlay">
             <span class="featured-post-category">Delivery Solutions</span>
-            <h3 class="featured-post-title">Revolutionizing Last-Mile Delivery with Technology</h3>
+            <a href="/journal/warehouse-optimization-techniques" class="featured-post-title-link">
+              <h3 class="featured-post-title">Revolutionizing Last-Mile Delivery with Technology</h3>
+            </a>
             <div class="featured-post-meta">
               <div><i class="far fa-calendar-alt"></i> March 15, 2025</div>
               <div><i class="far fa-clock"></i> 5 min read</div>
@@ -725,7 +753,9 @@
               <div><i class="far fa-calendar-alt"></i> April 5, 2025</div>
               <div><i class="far fa-clock"></i> 7 min read</div>
             </div>
-            <h3 class="post-title">Mastering Peak Season Logistics</h3>
+            <a href="/journal/mastering-peak-season-logistics" class="post-title-link">
+              <h3 class="post-title">Mastering Peak Season Logistics</h3>
+            </a>
             <p class="post-excerpt">
               Discover proven strategies to handle increased shipping volumes
               during peak seasons while maintaining efficiency and customer
@@ -745,7 +775,9 @@
               <div><i class="far fa-calendar-alt"></i> April 1, 2025</div>
               <div><i class="far fa-clock"></i> 6 min read</div>
             </div>
-            <h3 class="post-title">Multicarrier Shipping Explained</h3>
+            <a href="/journal/multicarrier-shipping-explained" class="post-title-link">
+              <h3 class="post-title">Multicarrier Shipping Explained</h3>
+            </a>
             <p class="post-excerpt">
               Learn how using multiple shipping providers can optimize your
               logistics operations and reduce costs while improving reliability.
@@ -764,7 +796,9 @@
               <div><i class="far fa-calendar-alt"></i> March 26, 2025</div>
               <div><i class="far fa-clock"></i> 5 min read</div>
             </div>
-            <h3 class="post-title">Free Shipping Without Sacrificing Margins</h3>
+            <a href="/journal/free-shipping-without-sacrificing-margins" class="post-title-link">
+              <h3 class="post-title">Free Shipping Without Sacrificing Margins</h3>
+            </a>
             <p class="post-excerpt">
               Explore smart strategies to offer free shipping while maintaining
               healthy profit margins and customer satisfaction.
@@ -783,7 +817,9 @@
               <div><i class="far fa-calendar-alt"></i> March 20, 2025</div>
               <div><i class="far fa-clock"></i> 8 min read</div>
             </div>
-            <h3 class="post-title">Navigating International Shipping Regulations</h3>
+            <a href="/journal/international-shipping-regulations" class="post-title-link">
+              <h3 class="post-title">Navigating International Shipping Regulations</h3>
+            </a>
             <p class="post-excerpt">
               A comprehensive guide to understanding and managing the complex world of international shipping requirements and customs procedures.
             </p>
@@ -801,7 +837,9 @@
               <div><i class="far fa-calendar-alt"></i> March 15, 2025</div>
               <div><i class="far fa-clock"></i> 6 min read</div>
             </div>
-            <h3 class="post-title">Warehouse Optimization Techniques for 2025</h3>
+            <a href="/journal/warehouse-optimization-techniques" class="post-title-link">
+              <h3 class="post-title">Warehouse Optimization Techniques for 2025</h3>
+            </a>
             <p class="post-excerpt">
               Innovative approaches to maximize warehouse efficiency through spatial organization, technology integration, and workforce management.
             </p>
@@ -819,7 +857,9 @@
               <div><i class="far fa-calendar-alt"></i> March 10, 2025</div>
               <div><i class="far fa-clock"></i> 7 min read</div>
             </div>
-            <h3 class="post-title">AI and Machine Learning in Modern Logistics</h3>
+            <a href="/journal/ai-and-machine-learning-in-modern-logistics" class="post-title-link">
+              <h3 class="post-title">AI and Machine Learning in Modern Logistics</h3>
+            </a>
             <p class="post-excerpt">
               How artificial intelligence is transforming supply chain management with predictive analytics, route optimization, and automated decision-making.
             </p>

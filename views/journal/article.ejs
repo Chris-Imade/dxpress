@@ -1,0 +1,166 @@
+<!-- Article Banner -->
+<section class="article-banner py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 mx-auto text-center">
+        <span class="category-badge mb-3"><%= article.category %></span>
+        <h1 class="article-title mb-3"><%= article.title %></h1>
+        <div class="article-meta">
+          <i class="far fa-calendar-alt me-2"></i> <%= article.date %>
+          <span class="mx-3">|</span>
+          <i class="far fa-clock me-2"></i> <%= article.readTime %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Article Content -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <div class="article-content">
+          <%- article.content %>
+
+          <!-- Article Tags -->
+          <div class="article-tags mt-5 mb-5">
+            <h4 class="mb-3">Tags</h4>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <% article.tags.forEach(tag => { %>
+              <a href="#" class="article-tag"><%= tag %></a>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .article-banner {
+    background-color: #f8fafc;
+    padding: 5rem 0 3rem;
+  }
+
+  .category-badge {
+    display: inline-block;
+    background-color: #151d2a;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .article-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .article-meta {
+    color: #64748b;
+    font-size: 1rem;
+  }
+
+  .article-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #334155;
+    padding: 0 15px;
+    margin-top: 2rem;
+  }
+
+  .article-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .article-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .article-content p {
+    margin-bottom: 1.5rem;
+  }
+
+  .article-content ul,
+  .article-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .article-content li {
+    margin-bottom: 0.5rem;
+  }
+
+  .article-content blockquote {
+    border-left: 4px solid #06b6d4;
+    padding: 1rem 1.5rem;
+    margin: 2rem 0;
+    background-color: #f8fafc;
+    font-style: italic;
+  }
+
+  .article-content blockquote p {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+    color: #475569;
+  }
+
+  .article-tags {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .article-tag {
+    background-color: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .article-tag:hover {
+    background-color: #151d2a;
+    color: white;
+    border-color: #151d2a;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .article-content {
+      padding: 0;
+    }
+
+    .article-title {
+      font-size: 2rem;
+    }
+  }
+
+  @media (min-width: 992px) {
+    .article-title {
+      font-size: 3rem;
+    }
+
+    .article-banner {
+      padding: 6rem 0 4rem;
+    }
+  }
+</style>

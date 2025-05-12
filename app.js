@@ -164,6 +164,7 @@ app.use("/newsletter", newsletterRoutes);
 app.use("/service", serviceRoutes);
 app.use("/ecommerce-integration", ecommerceRoutes);
 app.use("/dxpress-journal", journalRoutes);
+app.use("/journal", journalRoutes);
 app.use("/international-shipping", shippingRoutes);
 
 // 404 handler

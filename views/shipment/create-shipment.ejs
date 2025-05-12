@@ -965,37 +965,87 @@
   const PAYPAL_HOSTED_BUTTON_ID = "<%- process.env.PAYPAL_HOSTED_BUTTON_ID %>";
   const PAYPAL_CLIENT_ID = "<%- process.env.PAYPAL_CLIENT_ID %>";
 
-  document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Stripe - log the key first to debug
-    console.log("Stripe key:", STRIPE_PUBLIC_KEY);
+  console.log("[Debug] Raw STRIPE_PUBLIC_KEY from EJS:", STRIPE_PUBLIC_KEY);
 
-    // Check if the key exists and is valid before initializing
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log(
+      "[Debug] DOMContentLoaded: STRIPE_PUBLIC_KEY is:",
+      STRIPE_PUBLIC_KEY
+    );
+
+    let stripe = null; // Declare stripe here to be in wider scope
+    let elements;
+
+    const isStripeKeyNotTruthy = !STRIPE_PUBLIC_KEY;
+    const isStripeKeyUndefinedString = STRIPE_PUBLIC_KEY === "undefined";
+    // To check for the literal EJS tag, we need to construct the string in a way EJS won't process it as a tag.
+    const ejsTagLiteral =
+      "<" + "%" + "-" + " process.env.STRIPE_PUBLIC_KEY " + "%" + ">";
+    const isStripeKeyStillEjsLiteral =
+      STRIPE_PUBLIC_KEY.includes(ejsTagLiteral);
+
+    console.log(
+      "[Debug] Stripe Key Check - !STRIPE_PUBLIC_KEY:",
+      isStripeKeyNotTruthy
+    );
+    console.log(
+      '[Debug] Stripe Key Check - STRIPE_PUBLIC_KEY === "undefined":',
+      isStripeKeyUndefinedString
+    );
+    console.log(
+      `[Debug] Stripe Key Check - STRIPE_PUBLIC_KEY.includes("${ejsTagLiteral}"):`,
+      isStripeKeyStillEjsLiteral
+    );
+
     if (
-      !STRIPE_PUBLIC_KEY ||
-      STRIPE_PUBLIC_KEY === "undefined" ||
-      STRIPE_PUBLIC_KEY.includes("<%- process.env.STRIPE_PUBLIC_KEY %>")
+      isStripeKeyNotTruthy ||
+      isStripeKeyUndefinedString ||
+      isStripeKeyStillEjsLiteral
     ) {
-      console.error("Invalid Stripe public key:", STRIPE_PUBLIC_KEY);
-      // Display error in the payment status
+      console.error(
+        "[Error] Invalid Stripe public key detected. Conditions: ",
+        {
+          isStripeKeyNotTruthy,
+          isStripeKeyUndefinedString,
+          isStripeKeyStillEjsLiteral,
+          actualValue: STRIPE_PUBLIC_KEY,
+        }
+      );
       const paymentStatus = document.getElementById("paymentStatus");
       if (paymentStatus) {
         paymentStatus.innerHTML = `
           <div class="alert alert-warning" role="alert">
             <i class="fas fa-exclamation-circle me-2"></i>
-            Payment configuration issue. Please contact support.
+            Stripe Payment Configuration Issue. Please contact support. (Debug code: SKE_INIT_FAIL)
           </div>
         `;
       }
+    } else {
+      try {
+        stripe = Stripe(STRIPE_PUBLIC_KEY);
+        console.log(
+          "[Debug] Stripe initialized successfully. Stripe object:",
+          stripe
+        );
+      } catch (e) {
+        console.error(
+          "[CRITICAL_ERROR] Stripe(STRIPE_PUBLIC_KEY) constructor FAILED. Key used:",
+          STRIPE_PUBLIC_KEY,
+          "Error object:",
+          e
+        );
+        stripe = null; // Ensure stripe is null if initialization fails
+        const paymentStatus = document.getElementById("paymentStatus");
+        if (paymentStatus) {
+          paymentStatus.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              Error initializing Stripe. Please contact support. (Debug code: SKE_STRIPE_CTOR_FAIL)
+            </div>
+          `;
+        }
+      }
     }
-
-    // Initialize Stripe only if we have a valid key
-    const stripe =
-      STRIPE_PUBLIC_KEY &&
-      !STRIPE_PUBLIC_KEY.includes("<%- process.env.STRIPE_PUBLIC_KEY %>")
-        ? Stripe(STRIPE_PUBLIC_KEY)
-        : null;
-
-    let elements;
 
     // Get elements with null checks
     const stepProgressBar = document.getElementById("stepProgressBar");
@@ -1232,10 +1282,35 @@
 
         try {
           if (paymentMethod === "stripe") {
+            console.log(
+              "[Debug] Processing Stripe payment. Current stripe object:",
+              stripe
+            );
+            console.log(
+              "[Debug] Current STRIPE_PUBLIC_KEY value:",
+              STRIPE_PUBLIC_KEY
+            );
             // Check if Stripe is properly initialized
             if (!stripe) {
+              console.error(
+                "[Error] Stripe object is null or undefined at payment processing time."
+              );
               throw new Error(
-                "Stripe payment is not available. Please try PayPal or contact support."
+                "Stripe payment is not available. Please try PayPal or contact support. (Debug code: SKE_NULL_AT_PAY)"
+              );
+            }
+
+            if (
+              !selectedRate ||
+              typeof selectedRate.id === "undefined" ||
+              typeof selectedRate.totalRate === "undefined"
+            ) {
+              console.error(
+                "[Error] selectedRate is not properly defined:",
+                selectedRate
+              );
+              throw new Error(
+                "Cannot process payment. Selected rate information is missing. (Debug code: SKE_NO_RATE)"
               );
             }
 
