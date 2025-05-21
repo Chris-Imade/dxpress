@@ -5,6 +5,27 @@ const authenticateApiKey = require("../middleware/apiAuth");
 const Shipment = require("../models/Shipment");
 const nodemailer = require("nodemailer");
 
+// Debug logging middleware for API routes
+const apiLogger = (req, res, next) => {
+  console.log("[API Debug]", {
+    timestamp: new Date().toISOString(),
+    path: req.path,
+    method: req.method,
+    headers: {
+      "x-api-key": req.headers["x-api-key"] ? "[PRESENT]" : "[MISSING]",
+      "content-type": req.headers["content-type"],
+      "user-agent": req.headers["user-agent"],
+    },
+    body: req.body,
+    query: req.query,
+    params: req.params,
+  });
+  next();
+};
+
+// Apply logging middleware to all API routes
+router.use(apiLogger);
+
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -18,6 +39,19 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 60000, // 60 seconds
   greetingTimeout: 30000, // 30 seconds
   socketTimeout: 60000, // 60 seconds
+});
+
+// Verify SMTP connection
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error("[SMTP Error]", {
+      timestamp: new Date().toISOString(),
+      error: error.message,
+      stack: error.stack,
+    });
+  } else {
+    console.log("[SMTP Success] Server is ready to take our messages");
+  }
 });
 
 // Email templates
@@ -172,13 +206,26 @@ const adminShipmentNotificationTemplate = (shipment) => `
 
 // Middleware to check API key
 const checkApiKey = (req, res, next) => {
+  console.log("[API Auth] Checking API key...");
   const apiKey = req.headers["x-api-key"];
-  if (!apiKey || apiKey !== process.env.API_KEY) {
+
+  if (!apiKey) {
+    console.log("[API Auth] No API key provided");
     return res.status(401).json({
       success: false,
-      message: "Invalid or missing API key",
+      message: "API key is required",
     });
   }
+
+  if (apiKey !== process.env.API_KEY) {
+    console.log("[API Auth] Invalid API key provided");
+    return res.status(401).json({
+      success: false,
+      message: "Invalid API key",
+    });
+  }
+
+  console.log("[API Auth] API key validated successfully");
   next();
 };
 

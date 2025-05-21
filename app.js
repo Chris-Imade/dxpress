@@ -146,6 +146,39 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add debug logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("[Debug] Headers:", JSON.stringify(req.headers, null, 2));
+
+  // Log environment variables (safely)
+  console.log("[Debug] Environment Check:", {
+    NODE_ENV: process.env.NODE_ENV,
+    STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY ? "[SET]" : "[NOT SET]",
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? "[SET]" : "[NOT SET]",
+    PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID ? "[SET]" : "[NOT SET]",
+    PAYPAL_HOSTED_BUTTON_ID: process.env.PAYPAL_HOSTED_BUTTON_ID
+      ? "[SET]"
+      : "[NOT SET]",
+    API_KEY: process.env.API_KEY ? "[SET]" : "[NOT SET]",
+    JWT_SECRET: process.env.JWT_SECRET ? "[SET]" : "[NOT SET]",
+    SESSION_SECRET: process.env.SESSION_SECRET ? "[SET]" : "[NOT SET]",
+  });
+
+  // Log response
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(
+      `[${new Date().toISOString()}] ${req.method} ${req.url} ${
+        res.statusCode
+      } - ${duration}ms`
+    );
+  });
+
+  next();
+});
+
 // Routes
 app.use("/", indexRoutes);
 app.use("/shipment", shipmentRoutes);
@@ -182,20 +215,28 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Error logging middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  if (req.path.startsWith("/admin")) {
-    return res.status(500).render("admin/500", {
-      title: "500 - Server Error",
-      path: "/admin/error",
-      error: err,
-      layout: false,
-    });
-  }
-  res.status(500).render("500", {
-    title: "500 - Server Error",
-    error: err.message,
+  console.error("[Error]", {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    url: req.url,
+    error: {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+    },
+    headers: req.headers,
+    body: req.body,
+    query: req.query,
+    params: req.params,
+  });
+
+  // Send error response
+  res.status(err.status || 500).json({
+    success: false,
+    message:
+      process.env.NODE_ENV === "production" ? "An error occurred" : err.message,
   });
 });
 
