@@ -961,89 +961,45 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script>
   // Pass environment variables to client-side
-  const STRIPE_PUBLIC_KEY = "<%- process.env.STRIPE_PUBLIC_KEY %>";
-  const PAYPAL_HOSTED_BUTTON_ID = "<%- process.env.PAYPAL_HOSTED_BUTTON_ID %>";
-  const PAYPAL_CLIENT_ID = "<%- process.env.PAYPAL_CLIENT_ID %>";
-
-  console.log("[Debug] Raw STRIPE_PUBLIC_KEY from EJS:", STRIPE_PUBLIC_KEY);
+  const STRIPE_PUBLIC_KEY = "<%= process.env.STRIPE_PUBLIC_KEY %>";
+  const PAYPAL_HOSTED_BUTTON_ID = "<%= process.env.PAYPAL_HOSTED_BUTTON_ID %>";
+  const PAYPAL_CLIENT_ID = "<%= process.env.PAYPAL_CLIENT_ID %>";
 
   document.addEventListener("DOMContentLoaded", function () {
-    console.log(
-      "[Debug] DOMContentLoaded: STRIPE_PUBLIC_KEY is:",
-      STRIPE_PUBLIC_KEY
-    );
+    let stripe = null;
+    let elements = null;
 
-    let stripe = null; // Declare stripe here to be in wider scope
-    let elements;
-
-    const isStripeKeyNotTruthy = !STRIPE_PUBLIC_KEY;
-    const isStripeKeyUndefinedString = STRIPE_PUBLIC_KEY === "undefined";
-    // To check for the literal EJS tag, we need to construct the string in a way EJS won't process it as a tag.
-    const ejsTagLiteral =
-      "<" + "%" + "-" + " process.env.STRIPE_PUBLIC_KEY " + "%" + ">";
-    const isStripeKeyStillEjsLiteral =
-      STRIPE_PUBLIC_KEY.includes(ejsTagLiteral);
-
-    console.log(
-      "[Debug] Stripe Key Check - !STRIPE_PUBLIC_KEY:",
-      isStripeKeyNotTruthy
-    );
-    console.log(
-      '[Debug] Stripe Key Check - STRIPE_PUBLIC_KEY === "undefined":',
-      isStripeKeyUndefinedString
-    );
-    console.log(
-      `[Debug] Stripe Key Check - STRIPE_PUBLIC_KEY.includes("${ejsTagLiteral}"):`,
-      isStripeKeyStillEjsLiteral
-    );
-
+    // Initialize Stripe only if we have a valid public key
     if (
-      isStripeKeyNotTruthy ||
-      isStripeKeyUndefinedString ||
-      isStripeKeyStillEjsLiteral
+      STRIPE_PUBLIC_KEY &&
+      STRIPE_PUBLIC_KEY !== "undefined" &&
+      !STRIPE_PUBLIC_KEY.includes("process.env")
     ) {
-      console.error(
-        "[Error] Invalid Stripe public key detected. Conditions: ",
-        {
-          isStripeKeyNotTruthy,
-          isStripeKeyUndefinedString,
-          isStripeKeyStillEjsLiteral,
-          actualValue: STRIPE_PUBLIC_KEY,
-        }
-      );
-      const paymentStatus = document.getElementById("paymentStatus");
-      if (paymentStatus) {
-        paymentStatus.innerHTML = `
-          <div class="alert alert-warning" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            Stripe Payment Configuration Issue. Please contact support. (Debug code: SKE_INIT_FAIL)
-          </div>
-        `;
-      }
-    } else {
       try {
         stripe = Stripe(STRIPE_PUBLIC_KEY);
-        console.log(
-          "[Debug] Stripe initialized successfully. Stripe object:",
-          stripe
-        );
-      } catch (e) {
-        console.error(
-          "[CRITICAL_ERROR] Stripe(STRIPE_PUBLIC_KEY) constructor FAILED. Key used:",
-          STRIPE_PUBLIC_KEY,
-          "Error object:",
-          e
-        );
-        stripe = null; // Ensure stripe is null if initialization fails
+        console.log("[Debug] Stripe initialized successfully");
+      } catch (error) {
+        console.error("[Error] Failed to initialize Stripe:", error);
         const paymentStatus = document.getElementById("paymentStatus");
         if (paymentStatus) {
           paymentStatus.innerHTML = `
             <div class="alert alert-danger" role="alert">
               <i class="fas fa-exclamation-circle me-2"></i>
-              Error initializing Stripe. Please contact support. (Debug code: SKE_STRIPE_CTOR_FAIL)
+              Payment processing is currently unavailable. Please try again later or contact support.
             </div>
           `;
         }
+      }
+    } else {
+      console.error("[Error] Invalid Stripe public key configuration");
+      const paymentStatus = document.getElementById("paymentStatus");
+      if (paymentStatus) {
+        paymentStatus.innerHTML = `
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Payment processing is not configured. Please contact support.
+          </div>
+        `;
       }
     }
 
