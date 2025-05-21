@@ -3,13 +3,50 @@
  * Handles payment processing for shipments
  */
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+let stripe;
+const initializeStripe = () => {
+  console.log("[Stripe Debug] Initializing Stripe...");
+  if (!stripe) {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    console.log("[Stripe Debug] Stripe key present:", !!stripeKey);
+    console.log(
+      "[Stripe Debug] Stripe key length:",
+      stripeKey ? stripeKey.length : 0
+    );
+
+    if (!stripeKey) {
+      console.error("[Stripe Debug] Stripe secret key is not configured");
+      return null;
+    }
+
+    try {
+      stripe = require("stripe")(stripeKey);
+      console.log("[Stripe Debug] Stripe client initialized successfully");
+    } catch (error) {
+      console.error("[Stripe Debug] Error initializing Stripe:", error);
+      return null;
+    }
+  }
+  return stripe;
+};
 
 const paymentProviders = {
   stripe: {
     createPaymentIntent: async (amount, currency, metadata) => {
       try {
-        const paymentIntent = await stripe.paymentIntents.create({
+        console.log("[Stripe Debug] Creating payment intent...");
+        const stripeClient = initializeStripe();
+        if (!stripeClient) {
+          throw new Error("Stripe is not properly configured");
+        }
+
+        console.log("[Stripe Debug] Payment intent details:", {
+          amount,
+          currency,
+          metadata,
+        });
+
+        const paymentIntent = await stripeClient.paymentIntents.create({
           amount: Math.round(amount * 100), // Convert to cents
           currency: currency.toLowerCase(),
           metadata,
@@ -17,16 +54,30 @@ const paymentProviders = {
             enabled: true,
           },
         });
+
+        console.log(
+          "[Stripe Debug] Payment intent created successfully:",
+          paymentIntent.id
+        );
         return paymentIntent;
       } catch (error) {
-        console.error("Stripe payment intent creation error:", error);
+        console.error("[Stripe Debug] Payment intent creation error:", {
+          message: error.message,
+          type: error.type,
+          code: error.code,
+          stack: error.stack,
+        });
         throw error;
       }
     },
 
     confirmPayment: async (paymentIntentId) => {
       try {
-        const paymentIntent = await stripe.paymentIntents.retrieve(
+        const stripeClient = initializeStripe();
+        if (!stripeClient) {
+          throw new Error("Stripe is not properly configured");
+        }
+        const paymentIntent = await stripeClient.paymentIntents.retrieve(
           paymentIntentId
         );
         return paymentIntent;

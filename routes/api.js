@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const apiController = require("../controllers/api");
-const authenticateApiKey = require("../middleware/apiAuth");
 const Shipment = require("../models/Shipment");
 const nodemailer = require("nodemailer");
 
@@ -12,7 +11,6 @@ const apiLogger = (req, res, next) => {
     path: req.path,
     method: req.method,
     headers: {
-      "x-api-key": req.headers["x-api-key"] ? "[PRESENT]" : "[MISSING]",
       "content-type": req.headers["content-type"],
       "user-agent": req.headers["user-agent"],
     },
@@ -35,10 +33,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  // Add timeout settings to give more time for connection
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000, // 30 seconds
-  socketTimeout: 60000, // 60 seconds
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 60000,
 });
 
 // Verify SMTP connection
@@ -204,203 +201,102 @@ const adminShipmentNotificationTemplate = (shipment) => `
 </html>
 `;
 
-// Middleware to check API key
-const checkApiKey = (req, res, next) => {
-  console.log("[API Auth] Checking API key...");
-  const apiKey = req.headers["x-api-key"];
-
-  if (!apiKey) {
-    console.log("[API Auth] No API key provided");
-    return res.status(401).json({
-      success: false,
-      message: "API key is required",
-    });
-  }
-
-  if (apiKey !== process.env.API_KEY) {
-    console.log("[API Auth] Invalid API key provided");
-    return res.status(401).json({
-      success: false,
-      message: "Invalid API key",
-    });
-  }
-
-  console.log("[API Auth] API key validated successfully");
-  next();
-};
-
-// Apply API key check to all routes except those explicitly bypassed
-const apiRoutes = express.Router();
-apiRoutes.use(checkApiKey);
-apiRoutes.use(authenticateApiKey);
-
-// Public endpoint for creating shipments from the frontend (no auth required)
+// Create a shipment
 router.post("/shipments/create", async (req, res) => {
   try {
-    const shipmentData = req.body;
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      origin,
+      destination,
+      packageType,
+      weight,
+      dimensions,
+      fragile,
+      insuranceRequired,
+      carrier,
+      service,
+      price,
+    } = req.body;
 
     // Validate required fields
     if (
-      !shipmentData.customerName ||
-      !shipmentData.customerEmail ||
-      !shipmentData.trackingId
+      !customerName ||
+      !customerEmail ||
+      !origin ||
+      !destination ||
+      !packageType ||
+      !weight
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required shipment details",
-      });
-    }
-
-    // Map frontend package types to valid enum values
-    const packageTypeMap = {
-      envelope: "Document",
-      small_box: "Parcel",
-      medium_box: "Parcel",
-      large_box: "Parcel",
-      pallet: "Freight",
-    };
-
-    // Default to 'Parcel' if no valid mapping exists
-    const mappedPackageType =
-      packageTypeMap[shipmentData.packageType] || "Parcel";
-
-    // Create estimated delivery date - either from the input or default to 7 days from now
-    const estimatedDelivery = shipmentData.estimatedDelivery
-      ? new Date(shipmentData.estimatedDelivery)
-      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-    // Format dimensions properly
-    const dimensions = {
-      length: parseFloat(shipmentData.dimensions.length) || 0,
-      width: parseFloat(shipmentData.dimensions.width) || 0,
-      height: parseFloat(shipmentData.dimensions.height) || 0,
-    };
-
-    // Store shipment in database
-    const shipment = new Shipment({
-      trackingId: shipmentData.trackingId,
-      customerName: shipmentData.customerName,
-      customerEmail: shipmentData.customerEmail,
-      customerPhone: shipmentData.customerPhone,
-      origin: shipmentData.origin,
-      destination: shipmentData.destination,
-      weight: parseFloat(shipmentData.weight),
-      dimensions: dimensions,
-      packageType: mappedPackageType,
-      status: "Pending",
-      carrier: shipmentData.carrier,
-      carrierServiceLevel: shipmentData.service,
-      fragile: shipmentData.fragile === true,
-      insuranceIncluded: shipmentData.insuranceRequired === true,
-      estimatedDelivery: estimatedDelivery,
-      statusHistory: [
-        {
-          status: "Pending",
-          location: shipmentData.origin,
-          note: "Shipment created through website",
-          timestamp: new Date(),
-        },
-      ],
-    });
-
-    // Save to database with proper error handling
-    await shipment.save();
-    console.log(
-      "Shipment saved to database with tracking ID:",
-      shipment.trackingId
-    );
-
-    // Send email notifications
-    try {
-      // Send confirmation to customer
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: shipmentData.customerEmail,
-        subject: "Your Shipment Confirmation - DXpress",
-        html: customerShipmentConfirmationTemplate(shipmentData),
-      });
-
-      // Send notification to admin
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: "support@dxpress.uk",
-        subject: `New Shipment Created - ${shipmentData.trackingId}`,
-        html: adminShipmentNotificationTemplate(shipmentData),
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Shipment created and emails sent successfully",
-        shipment: {
-          id: shipment._id,
-          trackingId: shipment.trackingId,
-          status: shipment.status,
-        },
-      });
-    } catch (emailError) {
-      console.error("Error sending shipment emails:", emailError);
-      return res.status(200).json({
-        success: true,
-        message: "Shipment created successfully but error sending emails",
-        shipment: {
-          id: shipment._id,
-          trackingId: shipment.trackingId,
-          status: shipment.status,
-        },
-      });
-    }
-  } catch (error) {
-    console.error("Create shipment error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create shipment",
-      error: error.message,
-    });
-  }
-});
-
-// Mount the API routes that require authentication
-router.use("/", apiRoutes);
-
-/**
- * Shipment routes
- */
-// Calculate shipping rates
-apiRoutes.post(
-  "/shipments/calculate-rates",
-  apiController.calculateShippingRates
-);
-
-// Create a new shipment
-apiRoutes.post("/shipments", apiController.createShipment);
-
-// Get a specific shipment
-apiRoutes.get("/shipments/:id", apiController.getShipment);
-
-// Get shipments with optional filtering
-apiRoutes.get("/shipments", apiController.getShipments);
-
-/**
- * Tracking routes
- */
-// Track a shipment
-apiRoutes.get("/tracking/:id", apiController.trackShipment);
-
-/**
- * Payment routes
- */
-// Create a payment
-apiRoutes.post("/payments/create", async (req, res) => {
-  try {
-    const { shipmentId, provider } = req.body;
-
-    if (!shipmentId || !provider) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
       });
     }
 
+    // Generate tracking ID
+    const trackingId = `${carrier.toLowerCase()}-${Date.now().toString(36)}`;
+
+    // Calculate estimated delivery date (2-3 business days from now)
+    const estimatedDelivery = new Date();
+    estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
+
+    // Create new shipment
+    const shipment = new Shipment({
+      trackingId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      origin,
+      destination,
+      packageType,
+      weight,
+      dimensions,
+      fragile,
+      insuranceRequired,
+      carrier,
+      service,
+      price,
+      estimatedDelivery,
+      status: "pending",
+      paymentStatus: "pending",
+    });
+
+    // Save shipment
+    await shipment.save();
+
+    res.json({
+      success: true,
+      message: "Shipment created successfully",
+      shipment: {
+        id: shipment._id,
+        trackingId: shipment.trackingId,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating shipment:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating shipment",
+      error: error.message,
+    });
+  }
+});
+
+// Create a payment
+router.post("/payments/create", async (req, res) => {
+  try {
+    const { shipmentId, provider, amount } = req.body;
+
+    if (!shipmentId || !provider || !amount) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    // Find the shipment
     const shipment = await Shipment.findOne({
       $or: [{ trackingId: shipmentId }, { _id: shipmentId }],
     });
@@ -420,46 +316,79 @@ apiRoutes.post("/payments/create", async (req, res) => {
     }
 
     // Initialize payment based on provider
-    let paymentIntent;
     if (provider === "stripe") {
-      // Initialize Stripe payment
-      paymentIntent = {
-        id: `pi_${Date.now()}`,
-        amount: shipment.selectedRate.cost * 100, // Convert to cents
-        currency: shipment.selectedRate.currency.toLowerCase(),
-      };
+      try {
+        // Initialize Stripe
+        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+        // Create a PaymentIntent with the order amount and currency
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(amount * 100), // Convert to cents
+          currency: "gbp",
+          automatic_payment_methods: {
+            enabled: true,
+          },
+          metadata: {
+            shipmentId: shipment.trackingId,
+            customerEmail: shipment.customerEmail,
+          },
+        });
+
+        // Update shipment with payment information
+        shipment.paymentProvider = provider;
+        shipment.paymentIntentId = paymentIntent.id;
+        await shipment.save();
+
+        res.json({
+          success: true,
+          data: {
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id,
+            amount: paymentIntent.amount,
+            currency: paymentIntent.currency,
+          },
+        });
+      } catch (error) {
+        console.error("Stripe payment creation error:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error creating Stripe payment",
+          error: error.message,
+        });
+      }
     } else if (provider === "paypal") {
       // Initialize PayPal payment
-      paymentIntent = {
+      const paymentIntent = {
         id: `PAY-${Date.now()}`,
-        amount: shipment.selectedRate.cost,
-        currency: shipment.selectedRate.currency,
+        amount: amount,
+        currency: "gbp",
       };
+
+      // Update shipment with payment information
+      shipment.paymentProvider = provider;
+      shipment.paymentIntentId = paymentIntent.id;
+      await shipment.save();
+
+      res.json({
+        success: true,
+        data: {
+          paymentIntentId: paymentIntent.id,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+        },
+      });
     } else {
       return res.status(400).json({
         success: false,
         message: "Invalid payment provider",
       });
     }
-
-    // Update shipment with payment information
-    shipment.paymentProvider = provider;
-    shipment.paymentIntentId = paymentIntent.id;
-    await shipment.save();
-
-    res.json({
-      success: true,
-      data: {
-        paymentIntentId: paymentIntent.id,
-        amount: paymentIntent.amount,
-        currency: paymentIntent.currency,
-      },
-    });
   } catch (error) {
     console.error("Error creating payment:", error);
     res.status(500).json({
       success: false,
       message: "Error creating payment",
+      error: error.message,
     });
   }
 });

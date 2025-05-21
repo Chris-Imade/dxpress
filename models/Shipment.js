@@ -1,125 +1,116 @@
 const mongoose = require("mongoose");
 
-const shipmentSchema = new mongoose.Schema({
-  trackingId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  customerName: {
-    type: String,
-    required: true,
-  },
-  customerEmail: {
-    type: String,
-    required: true,
-  },
-  customerPhone: {
-    type: String,
-    required: true,
-  },
-  origin: {
-    type: String,
-    required: true,
-  },
-  destination: {
-    type: String,
-    required: true,
-  },
-  shipmentDate: {
-    type: Date,
-    default: Date.now,
-  },
-  estimatedDelivery: {
-    type: Date,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["Pending", "In Transit", "Delivered", "Delayed", "Cancelled"],
-    default: "Pending",
-  },
-  statusHistory: [
-    {
-      status: String,
-      location: String,
-      timestamp: {
-        type: Date,
-        default: Date.now,
-      },
-      note: String,
-    },
-  ],
-  weight: {
-    type: Number,
-    required: true,
-  },
-  dimensions: {
-    length: Number,
-    width: Number,
-    height: Number,
-  },
-  packageType: {
-    type: String,
-    enum: ["Document", "Parcel", "Freight", "Express"],
-    required: true,
-  },
-  fragile: {
-    type: Boolean,
-    default: false,
-  },
-  insuranceIncluded: {
-    type: Boolean,
-    default: false,
-  },
-  expressDelivery: {
-    type: Boolean,
-    default: false,
-  },
-  additionalNotes: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-  // New fields for e-commerce shipping platform
-  carrier: {
-    type: String,
-    enum: ["DHL", "FedEx", "UPS", "USPS", "Other"],
-  },
-  carrierServiceLevel: String,
-  carrierTrackingId: String,
-  shippingCost: {
-    amount: Number,
-    currency: {
-      type: String,
-      default: "USD",
-    },
-  },
-  shippingRates: [
-    {
-      carrier: String,
-      serviceLevel: String,
-      cost: Number,
-      estimatedDays: Number,
-      selected: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  paymentStatus: {
-    type: String,
-    enum: ["Unpaid", "Paid", "Refunded"],
-    default: "Unpaid",
-  },
-  paymentMethod: String,
-  paymentId: String,
-  invoiceId: String,
+const addressSchema = new mongoose.Schema({
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  postalCode: { type: String, required: true },
+  country: { type: String, required: true },
 });
+
+const shipmentSchema = new mongoose.Schema(
+  {
+    trackingId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    customerName: {
+      type: String,
+      required: true,
+    },
+    customerEmail: {
+      type: String,
+      required: true,
+    },
+    customerPhone: {
+      type: String,
+      required: true,
+    },
+    origin: {
+      type: addressSchema,
+      required: true,
+    },
+    destination: {
+      type: addressSchema,
+      required: true,
+    },
+    packageType: {
+      type: String,
+      required: true,
+      enum: ["envelope", "small_box", "medium_box", "large_box", "pallet"],
+    },
+    weight: {
+      type: Number,
+      required: true,
+    },
+    dimensions: {
+      length: Number,
+      width: Number,
+      height: Number,
+    },
+    fragile: {
+      type: Boolean,
+      default: false,
+    },
+    insuranceRequired: {
+      type: Boolean,
+      default: false,
+    },
+    declaredValue: {
+      type: Number,
+    },
+    carrier: {
+      type: String,
+      required: true,
+    },
+    service: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    estimatedDelivery: {
+      type: Date,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "processing", "in_transit", "delivered", "cancelled"],
+      default: "pending",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "refunded"],
+      default: "pending",
+    },
+    paymentProvider: {
+      type: String,
+      enum: ["stripe", "paypal"],
+    },
+    paymentIntentId: {
+      type: String,
+    },
+    paymentCompletedAt: {
+      type: Date,
+    },
+    trackingHistory: [
+      {
+        status: String,
+        location: String,
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        description: String,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
 
 // Generate tracking ID pre-save
 shipmentSchema.pre("validate", async function (next) {
