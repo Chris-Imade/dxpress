@@ -1,0 +1,627 @@
+<!-- Dashboard Shipment Creation -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon">
+            <i class="fas fa-plus-circle"></i>
+        </div>
+        <div>
+            <div class="card-title">Create New Shipment</div>
+            <div class="card-subtitle">Quick and easy shipment creation for logged-in users</div>
+        </div>
+        <div style="margin-left: auto;">
+            <button class="btn btn-secondary" onclick="loadTemplate()">
+                <i class="fas fa-file-import"></i>
+                Load Template
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Shipment Form -->
+<form id="shipmentForm" style="display: grid; gap: 24px;">
+    <!-- Sender Information -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <div class="card-title">Sender Information</div>
+                <div class="card-subtitle">Your shipping details</div>
+            </div>
+            <div style="margin-left: auto;">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="useProfile" checked onchange="toggleProfileData()">
+                    <span class="slider"></span>
+                </label>
+                <span style="margin-left: 8px; font-size: 14px; color: #6b7280;">Use my profile</span>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Full Name *</label>
+                <input type="text" id="senderName" value="John Doe" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Company</label>
+                <input type="text" id="senderCompany" value="Acme Corporation" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Phone *</label>
+                <input type="tel" id="senderPhone" value="+1 (555) 123-4567" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Email *</label>
+                <input type="email" id="senderEmail" value="john@acme.com" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Address *</label>
+                <input type="text" id="senderAddress" value="123 Business St, New York, NY 10001" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipient Information -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+                <div class="card-title">Recipient Information</div>
+                <div class="card-subtitle">Delivery destination details</div>
+            </div>
+            <div style="margin-left: auto;">
+                <button type="button" class="btn btn-secondary" onclick="loadFromAddressBook()">
+                    <i class="fas fa-address-book"></i>
+                    Address Book
+                </button>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Full Name *</label>
+                <input type="text" id="recipientName" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Company</label>
+                <input type="text" id="recipientCompany" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Phone *</label>
+                <input type="tel" id="recipientPhone" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Email</label>
+                <input type="email" id="recipientEmail" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Address *</label>
+                <input type="text" id="recipientAddress" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Package Information -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div>
+                <div class="card-title">Package Information</div>
+                <div class="card-subtitle">Package details and dimensions</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Package Type *</label>
+                <select id="packageType" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+                    <option value="">Select package type</option>
+                    <option value="envelope">Envelope</option>
+                    <option value="box">Box</option>
+                    <option value="tube">Tube</option>
+                    <option value="pallet">Pallet</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Weight (kg) *</label>
+                <input type="number" id="packageWeight" min="0.1" step="0.1" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Length (cm) *</label>
+                <input type="number" id="packageLength" min="1" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Width (cm) *</label>
+                <input type="number" id="packageWidth" min="1" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Height (cm) *</label>
+                <input type="number" id="packageHeight" min="1" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Declared Value ($)</label>
+                <input type="number" id="packageValue" min="0" step="0.01" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Description *</label>
+                <textarea id="packageDescription" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; resize: vertical;" placeholder="Describe the contents of your package..." required></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping Options -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <div>
+                <div class="card-title">Shipping Options</div>
+                <div class="card-subtitle">Choose your preferred shipping method</div>
+            </div>
+            <div style="margin-left: auto;">
+                <button type="button" class="btn btn-secondary" onclick="calculateRates()">
+                    <i class="fas fa-calculator"></i>
+                    Get Rates
+                </button>
+            </div>
+        </div>
+        <div id="shippingOptions" style="margin-top: 20px;">
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>Click "Get Rates" to see available shipping options</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Services -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-plus-square"></i>
+            </div>
+            <div>
+                <div class="card-title">Additional Services</div>
+                <div class="card-subtitle">Optional add-on services</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px;">
+                <input type="checkbox" id="insurance" style="width: 18px; height: 18px;">
+                <div>
+                    <label for="insurance" style="font-weight: 600; color: #374151; cursor: pointer;">Insurance Coverage</label>
+                    <div style="font-size: 12px; color: #6b7280;">Protect your package against loss or damage</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px;">
+                <input type="checkbox" id="signature" style="width: 18px; height: 18px;">
+                <div>
+                    <label for="signature" style="font-weight: 600; color: #374151; cursor: pointer;">Signature Required</label>
+                    <div style="font-size: 12px; color: #6b7280;">Require signature upon delivery</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px;">
+                <input type="checkbox" id="tracking" style="width: 18px; height: 18px;" checked>
+                <div>
+                    <label for="tracking" style="font-weight: 600; color: #374151; cursor: pointer;">Real-time Tracking</label>
+                    <div style="font-size: 12px; color: #6b7280;">Track your package in real-time</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px;">
+                <input type="checkbox" id="notifications" style="width: 18px; height: 18px;" checked>
+                <div>
+                    <label for="notifications" style="font-weight: 600; color: #374151; cursor: pointer;">SMS/Email Notifications</label>
+                    <div style="font-size: 12px; color: #6b7280;">Get updates on delivery status</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 16px; justify-content: flex-end; padding: 20px 0;">
+        <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+            <i class="fas fa-save"></i>
+            Save as Draft
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="previewShipment()">
+            <i class="fas fa-eye"></i>
+            Preview
+        </button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i>
+            Create Shipment
+        </button>
+    </div>
+</form>
+
+<style>
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #032330;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.shipping-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.shipping-option:hover {
+    border-color: #032330;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(3, 35, 48, 0.1);
+}
+
+.shipping-option.selected {
+    border-color: #032330;
+    background: #f0f9ff;
+}
+
+.shipping-option input[type="radio"] {
+    display: none;
+}
+
+.carrier-logo {
+    width: 60px;
+    height: 40px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #374151;
+    font-size: 12px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Pre-fill from URL parameters if coming from rates page
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('from')) {
+        document.getElementById('senderAddress').value = urlParams.get('from');
+    }
+    if (urlParams.get('to')) {
+        document.getElementById('recipientAddress').value = urlParams.get('to');
+    }
+    if (urlParams.get('weight')) {
+        document.getElementById('packageWeight').value = urlParams.get('weight');
+    }
+    
+    // Form submission
+    document.getElementById('shipmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        createShipment();
+    });
+});
+
+function toggleProfileData() {
+    const useProfile = document.getElementById('useProfile').checked;
+    const senderFields = ['senderName', 'senderCompany', 'senderPhone', 'senderEmail', 'senderAddress'];
+    
+    senderFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        field.disabled = useProfile;
+        if (useProfile) {
+            field.style.background = '#f9fafb';
+            field.style.color = '#6b7280';
+        } else {
+            field.style.background = 'white';
+            field.style.color = '#374151';
+        }
+    });
+}
+
+function loadTemplate() {
+    // Simulate loading a saved template
+    const templates = [
+        {
+            name: 'Standard Business Package',
+            recipientName: 'Jane Smith',
+            recipientCompany: 'Tech Solutions Inc',
+            recipientPhone: '+1 (555) 987-6543',
+            recipientEmail: 'jane@techsol.com',
+            recipientAddress: '456 Innovation Dr, San Francisco, CA 94107',
+            packageType: 'box',
+            packageWeight: '2.5',
+            packageLength: '30',
+            packageWidth: '20',
+            packageHeight: '15',
+            packageValue: '500',
+            packageDescription: 'Electronic components and documentation'
+        }
+    ];
+    
+    const template = templates[0];
+    Object.keys(template).forEach(key => {
+        const field = document.getElementById(key);
+        if (field) {
+            field.value = template[key];
+        }
+    });
+    
+    showNotification('Template loaded successfully!', 'success');
+}
+
+function loadFromAddressBook() {
+    // Simulate address book selection
+    const addresses = [
+        {
+            name: 'Sarah Johnson',
+            company: 'Global Logistics',
+            phone: '+1 (555) 456-7890',
+            email: 'sarah@globallog.com',
+            address: '789 Commerce St, Chicago, IL 60601'
+        },
+        {
+            name: 'Mike Chen',
+            company: 'Retail Express',
+            phone: '+1 (555) 321-9876',
+            email: 'mike@retailexp.com',
+            address: '321 Market Ave, Seattle, WA 98101'
+        }
+    ];
+    
+    // For demo, just load the first address
+    const address = addresses[0];
+    document.getElementById('recipientName').value = address.name;
+    document.getElementById('recipientCompany').value = address.company;
+    document.getElementById('recipientPhone').value = address.phone;
+    document.getElementById('recipientEmail').value = address.email;
+    document.getElementById('recipientAddress').value = address.address;
+    
+    showNotification('Address loaded from address book!', 'success');
+}
+
+function calculateRates() {
+    const weight = document.getElementById('packageWeight').value;
+    const length = document.getElementById('packageLength').value;
+    const width = document.getElementById('packageWidth').value;
+    const height = document.getElementById('packageHeight').value;
+    const senderAddress = document.getElementById('senderAddress').value;
+    const recipientAddress = document.getElementById('recipientAddress').value;
+    
+    if (!weight || !length || !width || !height || !senderAddress || !recipientAddress) {
+        showNotification('Please fill in package dimensions and addresses first', 'warning');
+        return;
+    }
+    
+    // Show loading
+    const optionsContainer = document.getElementById('shippingOptions');
+    optionsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Calculating shipping rates...</p></div>';
+    
+    // Simulate rate calculation
+    setTimeout(() => {
+        displayShippingOptions();
+    }, 2000);
+}
+
+function displayShippingOptions() {
+    const optionsContainer = document.getElementById('shippingOptions');
+    const volume = parseFloat(document.getElementById('packageLength').value) * 
+                  parseFloat(document.getElementById('packageWidth').value) * 
+                  parseFloat(document.getElementById('packageHeight').value) / 1000;
+    const weight = parseFloat(document.getElementById('packageWeight').value);
+    const basePrice = Math.max(weight * 15, volume * 10);
+    
+    const options = [
+        {
+            carrier: 'DHL Express',
+            service: 'Next Day Delivery',
+            price: (basePrice * 1.5).toFixed(2),
+            delivery: '1 business day',
+            logo: 'DHL'
+        },
+        {
+            carrier: 'FedEx Priority',
+            service: 'Priority Overnight',
+            price: (basePrice * 1.3).toFixed(2),
+            delivery: '1-2 business days',
+            logo: 'FedEx'
+        },
+        {
+            carrier: 'UPS Ground',
+            service: 'Ground Shipping',
+            price: (basePrice * 0.9).toFixed(2),
+            delivery: '3-5 business days',
+            logo: 'UPS'
+        },
+        {
+            carrier: 'USPS Priority',
+            service: 'Priority Mail',
+            price: (basePrice * 0.8).toFixed(2),
+            delivery: '2-3 business days',
+            logo: 'USPS'
+        }
+    ];
+    
+    optionsContainer.innerHTML = options.map((option, index) => `
+        <div class="shipping-option" onclick="selectShippingOption(${index})">
+            <input type="radio" name="shippingOption" value="${index}" id="option${index}">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div class="carrier-logo">${option.logo}</div>
+                    <div>
+                        <div style="font-weight: 600; color: #032330; font-size: 16px;">${option.carrier}</div>
+                        <div style="color: #6b7280; font-size: 14px;">${option.service}</div>
+                        <div style="color: #6b7280; font-size: 12px;">Delivery: ${option.delivery}</div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 24px; font-weight: 700; color: #032330;">$${option.price}</div>
+                    <div style="font-size: 12px; color: #6b7280;">+ taxes & fees</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectShippingOption(index) {
+    // Remove previous selections
+    document.querySelectorAll('.shipping-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Select clicked option
+    event.currentTarget.classList.add('selected');
+    document.getElementById(`option${index}`).checked = true;
+}
+
+function saveDraft() {
+    console.log('Saving shipment as draft...');
+    showNotification('Shipment saved as draft!', 'success');
+}
+
+function previewShipment() {
+    console.log('Opening shipment preview...');
+    // Here you would open a preview modal or new page
+    showNotification('Opening shipment preview...', 'info');
+}
+
+function createShipment() {
+    // Validate required fields
+    const requiredFields = [
+        'senderName', 'senderPhone', 'senderEmail', 'senderAddress',
+        'recipientName', 'recipientPhone', 'recipientAddress',
+        'packageType', 'packageWeight', 'packageLength', 'packageWidth', 'packageHeight', 'packageDescription'
+    ];
+    
+    let isValid = true;
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            field.style.borderColor = '#ef4444';
+            isValid = false;
+        } else {
+            field.style.borderColor = '#e5e7eb';
+        }
+    });
+    
+    // Check if shipping option is selected
+    const selectedOption = document.querySelector('input[name="shippingOption"]:checked');
+    if (!selectedOption) {
+        showNotification('Please select a shipping option', 'warning');
+        return;
+    }
+    
+    if (!isValid) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Simulate shipment creation
+    showNotification('Creating shipment...', 'info');
+    
+    setTimeout(() => {
+        const trackingNumber = 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        showNotification(`Shipment created successfully! Tracking: ${trackingNumber}`, 'success');
+        
+        // Redirect to tracking page
+        setTimeout(() => {
+            window.location.href = `/dashboard/tracking?id=${trackingNumber}`;
+        }, 2000);
+    }, 2000);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    notification.style.background = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Add CSS for loading spinner
+const style = document.createElement('style');
+style.textContent = `
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #032330;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
+</script>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - DXpress</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #032330, #053142);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1f36;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #1a1f36;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #374151;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+
+        ul,
+        ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1b51ff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #1b51ff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(27, 81, 255, 0.3);
+        }
+
+        .effective-date {
+            background: #f0f4ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #3730a3;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .content {
+                padding: 25px 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <h1>Terms of Service</h1>
+            <p class="subtitle">DXpress Shipping and Logistics Platform</p>
+        </div>
+
+        <div class="content">
+            <div class="effective-date">
+                <i class="fas fa-calendar-alt"></i> Effective Date: <%= new Date().toLocaleDateString('en-US', {
+                    year: 'numeric' , month: 'long' , day: 'numeric' }) %>
+            </div>
+
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing and using the DXpress platform ("Service"), you accept and agree to be bound by the terms
+                and provision of this agreement. If you do not agree to abide by the above, please do not use this
+                service.</p>
+
+            <h2>2. Description of Service</h2>
+            <p>DXpress is a comprehensive shipping and logistics platform that provides:</p>
+            <ul>
+                <li>Multi-carrier shipping rate comparison</li>
+                <li>Shipment creation and management</li>
+                <li>Real-time package tracking</li>
+                <li>Payment processing for shipping services</li>
+                <li>Customer support and assistance</li>
+            </ul>
+
+            <h2>3. User Accounts</h2>
+            <h3>3.1 Account Creation</h3>
+            <p>To use certain features of our Service, you must register for an account. You agree to provide accurate,
+                current, and complete information during the registration process.</p>
+
+            <h3>3.2 Account Security</h3>
+            <p>You are responsible for safeguarding the password and for maintaining the confidentiality of your
+                account. You agree not to disclose your password to any third party.</p>
+
+            <h3>3.3 Account Termination</h3>
+            <p>We reserve the right to terminate or suspend your account at any time for violations of these Terms of
+                Service.</p>
+
+            <h2>4. Shipping Services</h2>
+            <h3>4.1 Service Availability</h3>
+            <p>Shipping services are subject to availability and may vary by location. We work with multiple carriers
+                including DHL, FedEx, and UPS to provide comprehensive coverage.</p>
+
+            <h3>4.2 Rates and Pricing</h3>
+            <p>Shipping rates are provided by our carrier partners and may change without notice. Final shipping costs
+                will be confirmed before payment processing.</p>
+
+            <h3>4.3 Package Requirements</h3>
+            <p>All packages must comply with carrier restrictions and regulations. Prohibited items include but are not
+                limited to:</p>
+            <ul>
+                <li>Hazardous materials</li>
+                <li>Illegal substances</li>
+                <li>Perishable items (unless specifically approved)</li>
+                <li>Items exceeding size and weight limitations</li>
+            </ul>
+
+            <h2>5. Payment Terms</h2>
+            <h3>5.1 Payment Processing</h3>
+            <p>We accept various payment methods including credit cards and PayPal. All payments are processed securely
+                through our payment partners.</p>
+
+            <h3>5.2 Refunds</h3>
+            <p>Refunds may be issued in accordance with our refund policy and carrier terms. Processing time for refunds
+                may vary.</p>
+
+            <h2>6. Liability and Insurance</h2>
+            <h3>6.1 Limitation of Liability</h3>
+            <p>DXpress acts as an intermediary between customers and shipping carriers. Our liability is limited to the
+                terms and conditions of the respective carriers.</p>
+
+            <h3>6.2 Insurance Options</h3>
+            <p>Insurance options are available for valuable shipments. Coverage terms are subject to carrier policies
+                and limitations.</p>
+
+            <h2>7. Privacy and Data Protection</h2>
+            <p>Your privacy is important to us. Please review our <a href="/privacy"
+                    style="color: #1b51ff; text-decoration: none;">Privacy Policy</a> to understand how we collect, use,
+                and protect your information.</p>
+
+            <h2>8. Intellectual Property</h2>
+            <p>The Service and its original content, features, and functionality are and will remain the exclusive
+                property of DXpress and its licensors. The Service is protected by copyright, trademark, and other laws.
+            </p>
+
+            <h2>9. Prohibited Uses</h2>
+            <p>You may not use our Service:</p>
+            <ul>
+                <li>For any unlawful purpose or to solicit others to perform unlawful acts</li>
+                <li>To violate any international, federal, provincial, or state regulations, rules, laws, or local
+                    ordinances</li>
+                <li>To infringe upon or violate our intellectual property rights or the intellectual property rights of
+                    others</li>
+                <li>To harass, abuse, insult, harm, defame, slander, disparage, intimidate, or discriminate</li>
+                <li>To submit false or misleading information</li>
+            </ul>
+
+            <h2>10. Termination</h2>
+            <p>We may terminate or suspend your account and bar access to the Service immediately, without prior notice
+                or liability, under our sole discretion, for any reason whatsoever and without limitation, including but
+                not limited to a breach of the Terms.</p>
+
+            <h2>11. Changes to Terms</h2>
+            <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision
+                is material, we will provide at least 30 days notice prior to any new terms taking effect.</p>
+
+            <h2>12. Contact Information</h2>
+            <p>If you have any questions about these Terms of Service, please contact us:</p>
+            <ul>
+                <li>Email: legal@dxpress.com</li>
+                <li>Phone: +1 (555) 123-4567</li>
+                <li>Address: 123 Shipping Lane, Logistics City, LC 12345</li>
+            </ul>
+
+            <h2>13. Governing Law</h2>
+            <p>These Terms shall be interpreted and governed by the laws of the jurisdiction in which DXpress operates,
+                without regard to its conflict of law provisions.</p>
+        </div>
+
+        <a href="/auth" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Sign In
+        </a>
+    </div>
+</body>
+
+</html>

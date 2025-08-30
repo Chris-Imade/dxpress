@@ -25,15 +25,43 @@ A comprehensive shipping and logistics platform built with Node.js, Express, and
 - About Us section
 - Opening Hours display
 
-### 3. Admin Panel
+### 3. Authentication System
 
-- Secure authentication system
+#### Admin Authentication
+- Secure admin panel access at `/admin/login`
+- Role-based access control (Admin/Staff)
+- JWT-based authentication with secure cookies
+- Password reset functionality for admin users
 - Dashboard with key metrics:
   - Total shipments
   - Pending shipments
   - Delivered shipments
   - Newsletter subscribers
   - Contact inquiries
+
+#### User Authentication
+- Modern signup/signin page at `/auth` with toggle functionality
+- Beautiful, responsive design with real-time validation
+- User registration with email verification
+- Password strength requirements and visual feedback
+- Forgot password flow with email reset links
+- User dashboard at `/dashboard` with:
+  - Shipment statistics
+  - Quick action buttons
+  - Recent shipments overview
+  - Profile management
+
+#### Authentication Features
+- **Dual Authentication System**: Separate flows for admin and regular users
+- **JWT Security**: Secure token-based authentication with HTTP-only cookies
+- **Email Integration**: Welcome emails and password reset functionality
+- **Real-time Validation**: Client-side form validation with visual feedback
+- **Password Security**: Bcrypt hashing with salt rounds and strength requirements
+- **Session Management**: Secure session handling with automatic redirects
+- **Role-based Routing**: Smart middleware that redirects based on user roles
+
+### 4. Admin Panel
+
 - Shipment Management:
   - Create new shipments
   - Edit existing shipments
@@ -45,9 +73,8 @@ A comprehensive shipping and logistics platform built with Node.js, Express, and
   - Export subscribers to CSV
   - Delete subscribers
 - User Management:
-  - Role-based access control (Admin/Staff)
-  - User authentication
-  - Password reset functionality
+  - View registered users
+  - Manage user roles and permissions
 
 ### 4. Newsletter System
 
@@ -133,15 +160,27 @@ Planning integration with:
 dxpress-mvc/
 ├── config/             # Configuration files
 ├── controllers/        # Route controllers
+│   └── auth.js        # Authentication controller (admin & user)
 ├── middleware/         # Custom middleware
+│   └── auth.js        # Authentication middleware with role-based routing
 ├── models/            # Database models
+│   └── User.js        # User model (admin, staff, user roles)
 ├── public/            # Static files
 │   ├── css/          # Stylesheets
 │   ├── js/           # Client-side scripts
 │   └── images/       # Image assets
 ├── routes/            # Route definitions
+│   ├── auth.js       # Authentication routes (/auth)
+│   ├── admin.js      # Admin panel routes (/admin)
+│   └── user.js       # User dashboard routes (/dashboard)
 ├── views/             # EJS templates
 │   ├── admin/        # Admin panel views
+│   ├── auth/         # Authentication views
+│   │   ├── signup-signin.ejs    # Modern toggle auth page
+│   │   ├── forgot-password.ejs  # Password reset request
+│   │   └── reset-password.ejs   # Password reset form
+│   ├── user/         # User dashboard views
+│   │   └── dashboard.ejs        # User dashboard
 │   ├── layouts/      # Layout templates
 │   └── partials/     # Reusable components
 ├── .env.example      # Environment variables template
@@ -180,9 +219,22 @@ EMAIL_SERVICE=gmail
 EMAIL_USERNAME=your_email
 EMAIL_PASSWORD=your_app_password
 
+# Authentication Configuration
+JWT_SECRET=your_jwt_secret_key
+SESSION_SECRET=your_session_secret_key
+
 # Admin Configuration
 ADMIN_EMAIL=your_admin_email
 ADMIN_PASSWORD=your_admin_password
+
+# SMTP Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+
+# Base URL (for email links)
+BASE_URL=http://localhost:3000
 
 # Carrier APIs
 DHL_API_KEY=your_dhl_api_key
@@ -312,10 +364,17 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### Security
 
-- User authentication
-- Payment data encryption
-- Secure API handling
-- Input validation
+- **Dual Authentication System**:
+  - Admin authentication for backend management
+  - User authentication for customer accounts
+- **JWT Token Security**: HTTP-only cookies with secure token handling
+- **Password Security**: Bcrypt hashing with 12 salt rounds
+- **Email Verification**: Welcome emails and password reset flows
+- **Role-based Access Control**: Admin, Staff, and User roles
+- **Input Validation**: Real-time client-side and server-side validation
+- **Session Management**: Secure session handling with automatic cleanup
+- **Payment data encryption**
+- **Secure API handling**
 
 ## Installation
 
@@ -381,6 +440,67 @@ npm run dev
 ```
 
 ## API Documentation
+
+### Authentication Endpoints
+
+#### User Authentication
+
+- `GET /auth` - Modern signup/signin page with toggle functionality
+- `POST /auth/login` - User login (returns JSON response)
+- `POST /auth/register` - User registration (returns JSON response)
+- `GET /auth/forgot-password` - Password reset request page
+- `POST /auth/forgot-password` - Send password reset email
+- `GET /auth/reset-password/:token` - Password reset form
+- `POST /auth/reset-password/:token` - Process password reset
+- `GET /auth/logout` - User logout
+
+#### Admin Authentication
+
+- `GET /admin/login` - Admin login page
+- `POST /admin/login` - Admin login processing
+- `GET /admin/logout` - Admin logout
+
+#### User Dashboard
+
+- `GET /dashboard` - User dashboard (requires authentication)
+- `GET /profile` - User profile management (requires authentication)
+
+### Authentication Flows
+
+#### User Registration Flow
+
+1. User visits `/auth` and toggles to signup mode
+2. Fills registration form with real-time validation
+3. POST to `/auth/register` with form data
+4. System validates input and checks for existing users
+5. Password is hashed with bcrypt (12 salt rounds)
+6. User account created with 'user' role
+7. Welcome email sent automatically
+8. Success response returned to client
+9. User can then sign in
+
+#### User Login Flow
+
+1. User visits `/auth` (signin mode by default)
+2. Enters credentials with client-side validation
+3. POST to `/auth/login` with credentials
+4. System validates credentials and generates JWT
+5. JWT stored in HTTP-only cookie
+6. Success response with redirect URL
+7. User redirected to `/dashboard`
+
+#### Password Reset Flow
+
+1. User clicks "Forgot Password" link
+2. Visits `/auth/forgot-password` page
+3. Enters email address
+4. POST to `/auth/forgot-password`
+5. System generates secure reset token
+6. Reset email sent with time-limited link
+7. User clicks link to visit `/auth/reset-password/:token`
+8. Enters new password with validation
+9. POST to `/auth/reset-password/:token`
+10. Password updated and user can sign in
 
 ### Shipment Creation
 

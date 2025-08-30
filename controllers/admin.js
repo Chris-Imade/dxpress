@@ -216,11 +216,77 @@ const statusUpdateTemplate = (
 `;
 
 // Dashboard
-exports.getDashboard = (req, res) => {
-  res.render("admin/dashboard", {
-    title: "Admin Dashboard",
-    layout: "layouts/admin",
-  });
+exports.getDashboard = async (req, res) => {
+  try {
+    const counts = {
+      shipments: await Shipment.countDocuments(),
+      pendingShipments: await Shipment.countDocuments({ status: "pending" }),
+      deliveredShipments: await Shipment.countDocuments({
+        status: "delivered",
+      }),
+      newsletters: await Newsletter.countDocuments(),
+    };
+
+    const recentShipments = await Shipment.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.render("admin/dashboard", {
+      title: "Admin Dashboard",
+      layout: "layouts/admin",
+      path: "/admin/",
+      counts,
+      recentShipments,
+      stylesheets: "",
+      scripts: "",
+    });
+  } catch (error) {
+    console.error("Get dashboard error:", error);
+    res.status(500).render("admin/dashboard", {
+      title: "Admin Dashboard",
+      layout: "layouts/admin",
+      path: "/admin/",
+      errorMessage: "Failed to load dashboard data",
+      counts: {},
+      recentShipments: [],
+      stylesheets: "",
+      scripts: "",
+    });
+  }
+};
+
+// Settings
+exports.getSettings = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    res.render("admin/settings", {
+      title: "Settings",
+      layout: "layouts/admin",
+      user,
+      path: "/admin/settings",
+    });
+  } catch (error) {
+    console.error("Get settings error:", error);
+    res.status(500).redirect("/admin/dashboard");
+  }
+};
+
+exports.postSettings = async (req, res) => {
+  try {
+    const { dhl, fedex, ups } = req.body;
+    await User.findByIdAndUpdate(req.session.user._id, {
+      "shippingRates.dhl.baseRate": dhl.baseRate,
+      "shippingRates.dhl.additionalFees": dhl.additionalFees,
+      "shippingRates.fedex.baseRate": fedex.baseRate,
+      "shippingRates.fedex.additionalFees": fedex.additionalFees,
+      "shippingRates.ups.baseRate": ups.baseRate,
+      "shippingRates.ups.additionalFees": ups.additionalFees,
+    });
+    res.redirect("/admin/settings");
+  } catch (error) {
+    console.error("Post settings error:", error);
+    res.status(500).redirect("/admin/settings");
+  }
 };
 
 exports.getLogin = (req, res) => {
@@ -274,13 +340,6 @@ exports.postUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   // User deletion logic here
   res.redirect("/admin/users");
-};
-
-exports.getSettings = (req, res) => {
-  res.render("admin/settings", {
-    title: "Admin Settings",
-    layout: "layouts/admin",
-  });
 };
 
 exports.postSettings = async (req, res) => {
@@ -441,7 +500,7 @@ exports.createShipment = async (req, res) => {
       // Send notification to admin
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: "support@dxpress.uk",
+        to: "admin@dxpress.uk",
         subject: `New Shipment Created - ${shipment.trackingId}`,
         html: adminShipmentNotificationTemplate(shipment),
       });

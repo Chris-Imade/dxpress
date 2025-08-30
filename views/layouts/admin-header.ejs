@@ -34,7 +34,7 @@
         <div
           class="sidebar-header py-3 px-3 d-flex align-items-center justify-content-between"
         >
-          <a href="/admin/dashboard" class="d-flex align-items-center">
+          <a href="/admin/" class="d-flex align-items-center">
             <div class="logo-wrapper">
               <img
                 src="/assets/img/logo-light.png"
@@ -56,8 +56,8 @@
         <ul class="nav flex-column">
           <li class="nav-item">
             <a
-              class="nav-link <%= path === '/admin/dashboard' ? 'active' : '' %>"
-              href="/admin/dashboard"
+              class="nav-link <%= path === '/admin/' ? 'active' : '' %>"
+              href="/admin/"
             >
               <i class="fas fa-tachometer-alt me-2"></i>
               <span class="nav-text">Dashboard</span>
@@ -79,6 +79,15 @@
             >
               <i class="fas fa-envelope me-2"></i>
               <span class="nav-text">Newsletter</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/admin/settings' ? 'active' : '' %>"
+              href="/admin/settings"
+            >
+              <i class="fas fa-cog me-2"></i>
+              <span class="nav-text">Settings</span>
             </a>
           </li>
           <li class="nav-item mt-5">

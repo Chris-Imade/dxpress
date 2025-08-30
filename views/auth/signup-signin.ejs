@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - DXpress</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #032330 0%, #1a4c5a 50%, #2d6b7a 100%);
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1a1f36;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #032330, #1a4c5a, #2d6b7a);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #032330, #1a4c5a);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(3, 35, 48, 0.3);
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1f36;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .auth-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .toggle-btn.active {
+            background: #032330;
+            color: white;
+            box-shadow: 0 4px 12px rgba(3, 35, 48, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 45px;
+            font-size: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-control:focus {
+            border-color: #032330;
+            box-shadow: 0 0 0 3px rgba(3, 35, 48, 0.1);
+            outline: none;
+            background: white;
+        }
+
+        .form-control.is-invalid {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .form-control.is-valid {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+            z-index: 1;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .password-toggle:hover {
+            color: #1b51ff;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .success-message {
+            color: #10b981;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #032330, #1a4c5a);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(3, 35, 48, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-loading {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .auth-footer a {
+            color: #1b51ff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: #0041f0;
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .form-signin, .form-signup {
+            transition: all 0.3s ease;
+        }
+
+        .form-signup {
+            display: none;
+        }
+
+        .strength-meter {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background: #ef4444; }
+        .strength-medium { background: #f59e0b; }
+        .strength-strong { background: #10b981; }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 2px;
+        }
+
+        .terms-checkbox label {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .auth-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="logo">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <h1 class="auth-title">Welcome to DXpress</h1>
+            <p class="auth-subtitle">Your trusted shipping partner</p>
+        </div>
+
+        <div class="auth-toggle">
+            <button type="button" class="toggle-btn active" data-form="signin">Sign In</button>
+            <button type="button" class="toggle-btn" data-form="signup">Sign Up</button>
+        </div>
+
+        <div class="alert alert-danger" id="errorAlert"></div>
+        <div class="alert alert-success" id="successAlert"></div>
+
+        <!-- Sign In Form -->
+        <form class="form-signin" id="signinForm" action="/auth/login" method="POST">
+            <div class="form-group">
+                <label for="signin-email">Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" class="form-control" id="signin-email" name="email" required>
+                </div>
+                <div class="error-message" id="signin-email-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="signin-password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" class="form-control" id="signin-password" name="password" required>
+                    <button type="button" class="password-toggle" data-target="signin-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="signin-password-error"></div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <span class="btn-text">Sign In</span>
+                <div class="btn-loading">
+                    <div class="spinner"></div>
+                </div>
+            </button>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form class="form-signup" id="signupForm" action="/auth/register" method="POST">
+            <div class="form-group">
+                <label for="signup-name">Full Name</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="form-control" id="signup-name" name="name" required>
+                </div>
+                <div class="error-message" id="signup-name-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-email">Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" class="form-control" id="signup-email" name="email" required>
+                </div>
+                <div class="error-message" id="signup-email-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" class="form-control" id="signup-password" name="password" required>
+                    <button type="button" class="password-toggle" data-target="signup-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="strength-meter">
+                    <div class="strength-fill" id="password-strength"></div>
+                </div>
+                <div class="error-message" id="signup-password-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-confirm-password">Confirm Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" class="form-control" id="signup-confirm-password" name="confirmPassword" required>
+                    <button type="button" class="password-toggle" data-target="signup-confirm-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="signup-confirm-password-error"></div>
+                <div class="success-message" id="signup-confirm-password-success"></div>
+            </div>
+
+            <div class="terms-checkbox">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">
+                    I agree to the <a href="/terms" target="_blank">Terms of Service</a> and 
+                    <a href="/privacy" target="_blank">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="signup-submit-btn" disabled>
+                <span class="btn-text">Create Account</span>
+                <div class="btn-loading">
+                    <div class="spinner"></div>
+                </div>
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <div class="auth-footer">
+            <p class="signin-footer">
+                Don't have an account? 
+                <a href="#" class="toggle-link" data-form="signup">Sign up here</a>
+            </p>
+            <p class="signup-footer" style="display: none;">
+                Already have an account? 
+                <a href="#" class="toggle-link" data-form="signin">Sign in here</a>
+            </p>
+            <p style="margin-top: 15px;">
+                <a href="/auth/forgot-password">Forgot your password?</a>
+            </p>
+            <p style="margin-top: 10px;">
+                <a href="/">← Back to Website</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Form toggle functionality
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const toggleLinks = document.querySelectorAll('.toggle-link');
+        const signinForm = document.querySelector('.form-signin');
+        const signupForm = document.querySelector('.form-signup');
+        const signinFooter = document.querySelector('.signin-footer');
+        const signupFooter = document.querySelector('.signup-footer');
+        const authTitle = document.querySelector('.auth-title');
+        const authSubtitle = document.querySelector('.auth-subtitle');
+
+        function toggleForm(formType) {
+            // Update toggle buttons
+            toggleBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.form === formType);
+            });
+
+            // Show/hide forms
+            if (formType === 'signin') {
+                signinForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                signinFooter.style.display = 'block';
+                signupFooter.style.display = 'none';
+                authTitle.textContent = 'Welcome Back';
+                authSubtitle.textContent = 'Sign in to your account';
+            } else {
+                signinForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                signinFooter.style.display = 'none';
+                signupFooter.style.display = 'block';
+                authTitle.textContent = 'Create Account';
+                authSubtitle.textContent = 'Join DXpress today';
+            }
+
+            // Clear any alerts
+            hideAlert();
+        }
+
+        // Event listeners for toggle buttons and links
+        [...toggleBtns, ...toggleLinks].forEach(element => {
+            element.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleForm(element.dataset.form);
+            });
+        });
+
+        // Password visibility toggle
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        // Form validation
+        const validationRules = {
+            'signin-email': {
+                required: true,
+                email: true
+            },
+            'signin-password': {
+                required: true,
+                minLength: 6
+            },
+            'signup-name': {
+                required: true,
+                minLength: 2
+            },
+            'signup-email': {
+                required: true,
+                email: true
+            },
+            'signup-password': {
+                required: true,
+                minLength: 8,
+                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/
+            },
+            'signup-confirm-password': {
+                required: true,
+                match: 'signup-password'
+            }
+        };
+
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const rules = validationRules[fieldId];
+            const errorElement = document.getElementById(fieldId + '-error');
+            const successElement = document.getElementById(fieldId + '-success');
+            
+            if (!field || !rules) return true;
+
+            let isValid = true;
+            let errorMessage = '';
+
+            // Required validation
+            if (rules.required && !field.value.trim()) {
+                isValid = false;
+                errorMessage = 'This field is required';
+            }
+
+            // Email validation
+            if (isValid && rules.email && field.value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid email address';
+                }
+            }
+
+            // Min length validation
+            if (isValid && rules.minLength && field.value.length < rules.minLength) {
+                isValid = false;
+                errorMessage = `Must be at least ${rules.minLength} characters long`;
+            }
+
+            // Pattern validation
+            if (isValid && rules.pattern && field.value && !rules.pattern.test(field.value)) {
+                isValid = false;
+                errorMessage = 'Password must contain uppercase, lowercase, and number';
+            }
+
+            // Match validation
+            if (isValid && rules.match && field.value) {
+                const matchField = document.getElementById(rules.match);
+                if (field.value !== matchField.value) {
+                    isValid = false;
+                    errorMessage = 'Passwords do not match';
+                }
+            }
+
+            // Update field appearance
+            field.classList.toggle('is-invalid', !isValid);
+            field.classList.toggle('is-valid', isValid && field.value);
+
+            // Show/hide error message
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = !isValid ? 'block' : 'none';
+            }
+
+            // Show success message for confirm password only
+            if (successElement && isValid && field.value && fieldId === 'signup-confirm-password') {
+                successElement.textContent = 'Passwords match';
+                successElement.style.display = 'block';
+            } else if (successElement) {
+                successElement.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        // Password strength meter
+        function updatePasswordStrength(password) {
+            const strengthMeter = document.getElementById('password-strength');
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 25;
+            if (/[a-z]/.test(password)) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/\d/.test(password)) strength += 25;
+            
+            strengthMeter.style.width = strength + '%';
+            strengthMeter.className = 'strength-fill';
+            
+            if (strength <= 25) strengthMeter.classList.add('strength-weak');
+            else if (strength <= 75) strengthMeter.classList.add('strength-medium');
+            else strengthMeter.classList.add('strength-strong');
+        }
+
+        // Terms checkbox validation
+        function updateSubmitButton() {
+            const termsCheckbox = document.getElementById('terms');
+            const submitBtn = document.getElementById('signup-submit-btn');
+            
+            if (termsCheckbox && submitBtn) {
+                submitBtn.disabled = !termsCheckbox.checked;
+            }
+        }
+
+        // Real-time validation
+        Object.keys(validationRules).forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('blur', () => validateField(fieldId));
+                field.addEventListener('input', () => {
+                    if (fieldId === 'signup-password') {
+                        updatePasswordStrength(field.value);
+                    }
+                    if (fieldId === 'signup-confirm-password') {
+                        validateField(fieldId);
+                    }
+                });
+            }
+        });
+
+        // Terms checkbox event listener
+        const termsCheckbox = document.getElementById('terms');
+        if (termsCheckbox) {
+            termsCheckbox.addEventListener('change', updateSubmitButton);
+        }
+
+        // Alert functions
+        function showAlert(message, type = 'danger') {
+            const alert = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideAlert() {
+            document.getElementById('errorAlert').style.display = 'none';
+            document.getElementById('successAlert').style.display = 'none';
+        }
+
+        // Form submission
+        function handleFormSubmit(form, event) {
+            event.preventDefault();
+            
+            const formData = new FormData(form);
+            const formType = form.id === 'signinForm' ? 'signin' : 'signup';
+            const submitBtn = form.querySelector('.btn-primary');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            
+            // Validate all fields
+            let isValid = true;
+            const fieldsToValidate = formType === 'signin' 
+                ? ['signin-email', 'signin-password']
+                : ['signup-name', 'signup-email', 'signup-password', 'signup-confirm-password'];
+            
+            fieldsToValidate.forEach(fieldId => {
+                if (!validateField(fieldId)) {
+                    isValid = false;
+                }
+            });
+
+            // Check terms for signup
+            if (formType === 'signup') {
+                const termsCheckbox = document.getElementById('terms');
+                if (!termsCheckbox.checked) {
+                    isValid = false;
+                    showAlert('Please accept the Terms of Service and Privacy Policy');
+                    return;
+                }
+            }
+
+            if (!isValid) {
+                showAlert('Please correct the errors in the form');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.style.opacity = '0';
+            btnLoading.style.display = 'block';
+
+            // Convert FormData to JSON for proper handling
+            const jsonData = {};
+            for (let [key, value] of formData.entries()) {
+                jsonData[key] = value;
+            }
+
+            // Submit form
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message || 'Success!', 'success');
+                    if (formType === 'signin') {
+                        setTimeout(() => {
+                            window.location.href = data.redirect || '/dashboard';
+                        }, 1500);
+                    } else {
+                        // For signup, maybe show success and switch to signin
+                        setTimeout(() => {
+                            toggleForm('signin');
+                            showAlert('Account created! Please sign in.', 'success');
+                        }, 2000);
+                    }
+                } else {
+                    showAlert(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Network error. Please try again.');
+            })
+            .finally(() => {
+                // Reset loading state
+                submitBtn.disabled = false;
+                btnText.style.opacity = '1';
+                btnLoading.style.display = 'none';
+            });
+        }
+
+        // Add form submit listeners
+        document.getElementById('signinForm').addEventListener('submit', function(e) {
+            handleFormSubmit(this, e);
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            handleFormSubmit(this, e);
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for URL parameters to determine initial form
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'signup') {
+                toggleForm('signup');
+            }
+        });
+    </script>
+</body>
+</html>

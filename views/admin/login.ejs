@@ -13,18 +13,19 @@
 
       body {
         background: #f5f7fb;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         font-family: "Inter", sans-serif;
         color: #1a1f36;
       }
 
       .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
         width: 100%;
         max-width: 400px;
         padding: 20px;
+        margin: auto;
       }
 
       .login-box {
@@ -151,8 +152,9 @@
 
         <% if (errorMessage) { %>
         <div class="alert alert-danger"><%= errorMessage %></div>
-        <% } %> <% if (locals.successMessage) { %>
-        <div class="alert alert-success"><%= locals.successMessage %></div>
+        <% } %>
+        <% if (successMessage) { %>
+        <div class="alert alert-success"><%= successMessage %></div>
         <% } %>
 
         <form action="/admin/login" method="POST" class="login-form">

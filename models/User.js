@@ -13,14 +13,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  fullName: {
+  name: {
     type: String,
     required: true,
   },
+  fullName: {
+    type: String,
+    required: false,
+  },
   role: {
     type: String,
-    enum: ["admin", "staff"],
-    default: "staff",
+    enum: ["admin", "staff", "user"],
+    default: "user",
   },
   isActive: {
     type: Boolean,
@@ -37,6 +41,20 @@ const userSchema = new mongoose.Schema({
   resetTokenExpiry: {
     type: Date,
     default: null,
+  },
+  shippingRates: {
+    dhl: {
+      baseRate: { type: Number, default: 45.99 },
+      additionalFees: { type: Number, default: 5.0 },
+    },
+    fedex: {
+      baseRate: { type: Number, default: 35.5 },
+      additionalFees: { type: Number, default: 3.5 },
+    },
+    ups: {
+      baseRate: { type: Number, default: 40.75 },
+      additionalFees: { type: Number, default: 4.25 },
+    },
   },
   createdAt: {
     type: Date,

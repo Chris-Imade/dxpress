@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Shipment = require("./models/Shipment");
 const User = require("./models/User");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const adminUser = {
@@ -35,144 +36,132 @@ const shipments = [
     customerName: "John Smith",
     customerEmail: "john.smith@example.com",
     customerPhone: "+44 123 456 7890",
-    origin: "London, UK",
-    destination: "Paris, France",
-    shipmentDate: new Date("2023-08-10"),
-    estimatedDelivery: new Date("2023-08-15"),
-    status: "Delivered",
-    statusHistory: [
-      {
-        status: "Pending",
-        location: "London Distribution Center",
-        timestamp: new Date("2023-08-10T09:00:00"),
-        note: "Shipment created and ready for processing",
-      },
-      {
-        status: "In Transit",
-        location: "London International Airport",
-        timestamp: new Date("2023-08-11T14:30:00"),
-        note: "Shipment departed from origin facility",
-      },
-      {
-        status: "In Transit",
-        location: "Paris Charles de Gaulle Airport",
-        timestamp: new Date("2023-08-12T08:45:00"),
-        note: "Shipment arrived at destination airport",
-      },
-      {
-        status: "In Transit",
-        location: "Paris Local Distribution Center",
-        timestamp: new Date("2023-08-13T11:20:00"),
-        note: "Shipment is out for delivery",
-      },
-      {
-        status: "Delivered",
-        location: "Paris, France",
-        timestamp: new Date("2023-08-14T16:05:00"),
-        note: "Shipment delivered successfully. Signed by: Marie Laurent",
-      },
-    ],
+    origin: {
+      address: "123 Main St",
+      city: "London",
+      postalCode: "SW1A 0AA",
+      country: "UK",
+    },
+    destination: {
+      address: "456 High St",
+      city: "Paris",
+      postalCode: "75001",
+      country: "France",
+    },
+    packageType: "medium_box",
     weight: 5.2,
     dimensions: {
       length: 30,
       width: 25,
       height: 20,
     },
-    packageType: "Parcel",
     fragile: true,
-    insuranceIncluded: true,
-    expressDelivery: true,
-    additionalNotes: "Handle with care. Contains fragile electronic equipment.",
+    insuranceRequired: true,
+    declaredValue: 500,
+    carrier: "DHL",
+    service: "Express",
+    price: 50.0,
+    estimatedDelivery: new Date("2023-08-15"),
+    status: "delivered",
+    paymentStatus: "paid",
+    paymentProvider: "stripe",
+    paymentIntentId: "pi_123456789",
+    paymentCompletedAt: new Date("2023-08-10"),
+    trackingHistory: [
+      {
+        status: "pending",
+        location: "London Distribution Center",
+        timestamp: new Date("2023-08-10T09:00:00"),
+        description: "Shipment created and ready for processing",
+      },
+      {
+        status: "in_transit",
+        location: "London International Airport",
+        timestamp: new Date("2023-08-11T14:30:00"),
+        description: "Shipment departed from origin facility",
+      },
+      {
+        status: "in_transit",
+        location: "Paris Charles de Gaulle Airport",
+        timestamp: new Date("2023-08-12T08:45:00"),
+        description: "Shipment arrived at destination airport",
+      },
+      {
+        status: "in_transit",
+        location: "Paris Local Distribution Center",
+        timestamp: new Date("2023-08-13T11:20:00"),
+        description: "Shipment is out for delivery",
+      },
+      {
+        status: "delivered",
+        location: "Paris, France",
+        timestamp: new Date("2023-08-14T16:05:00"),
+        description: "Shipment delivered successfully. Signed by: Marie Laurent",
+      },
+    ],
   },
   {
     trackingId: "DX789012XYZ",
     customerName: "Emma Wilson",
     customerEmail: "emma.wilson@example.com",
     customerPhone: "+44 987 654 3210",
-    origin: "Manchester, UK",
-    destination: "Berlin, Germany",
-    shipmentDate: new Date("2023-09-05"),
-    estimatedDelivery: new Date("2023-09-12"),
-    status: "In Transit",
-    statusHistory: [
-      {
-        status: "Pending",
-        location: "Manchester Regional Center",
-        timestamp: new Date("2023-09-05T10:15:00"),
-        note: "Shipment created and ready for processing",
-      },
-      {
-        status: "In Transit",
-        location: "Manchester International Airport",
-        timestamp: new Date("2023-09-06T13:40:00"),
-        note: "Shipment departed from origin facility",
-      },
-      {
-        status: "In Transit",
-        location: "Amsterdam Schiphol Airport (Transfer)",
-        timestamp: new Date("2023-09-07T07:30:00"),
-        note: "Shipment at transfer location",
-      },
-      {
-        status: "In Transit",
-        location: "Berlin Brandenburg Airport",
-        timestamp: new Date("2023-09-08T11:45:00"),
-        note: "Shipment arrived at destination airport",
-      },
-    ],
+    origin: {
+      address: "456 Park Ave",
+      city: "Manchester",
+      postalCode: "M1 1AA",
+      country: "UK",
+    },
+    destination: {
+      address: "789 Kurfürstendamm",
+      city: "Berlin",
+      postalCode: "10719",
+      country: "Germany",
+    },
+    packageType: "large_box",
     weight: 12.8,
     dimensions: {
       length: 50,
       width: 40,
       height: 30,
     },
-    packageType: "Freight",
     fragile: false,
-    insuranceIncluded: true,
-    expressDelivery: false,
-    additionalNotes: "Business equipment for trade show.",
-  },
-  {
-    trackingId: "DX345678DEF",
-    customerName: "Sarah Johnson",
-    customerEmail: "sarah.johnson@example.com",
-    customerPhone: "+44 555 123 4567",
-    origin: "Birmingham, UK",
-    destination: "New York, USA",
-    shipmentDate: new Date("2023-08-25"),
-    estimatedDelivery: new Date("2023-09-05"),
-    status: "Delayed",
-    statusHistory: [
+    insuranceRequired: true,
+    declaredValue: 1000,
+    carrier: "FedEx",
+    service: "Standard",
+    price: 75.0,
+    estimatedDelivery: new Date("2023-09-12"),
+    status: "in_transit",
+    paymentStatus: "paid",
+    paymentProvider: "paypal",
+    paymentIntentId: "pi_987654321",
+    paymentCompletedAt: new Date("2023-09-05"),
+    trackingHistory: [
       {
-        status: "Pending",
-        location: "Birmingham Distribution Center",
-        timestamp: new Date("2023-08-25T08:30:00"),
-        note: "Shipment created and ready for processing",
+        status: "pending",
+        location: "Manchester Regional Center",
+        timestamp: new Date("2023-09-05T10:15:00"),
+        description: "Shipment created and ready for processing",
       },
       {
-        status: "In Transit",
-        location: "London Heathrow Airport",
-        timestamp: new Date("2023-08-27T09:15:00"),
-        note: "Shipment departed from origin country",
+        status: "in_transit",
+        location: "Manchester International Airport",
+        timestamp: new Date("2023-09-06T13:40:00"),
+        description: "Shipment departed from origin facility",
       },
       {
-        status: "Delayed",
-        location: "London Heathrow Airport",
-        timestamp: new Date("2023-08-28T16:45:00"),
-        note: "Flight delayed due to weather conditions",
+        status: "in_transit",
+        location: "Amsterdam Schiphol Airport (Transfer)",
+        timestamp: new Date("2023-09-07T07:30:00"),
+        description: "Shipment at transfer location",
+      },
+      {
+        status: "in_transit",
+        location: "Berlin Brandenburg Airport",
+        timestamp: new Date("2023-09-08T11:45:00"),
+        description: "Shipment arrived at destination airport",
       },
     ],
-    weight: 3.1,
-    dimensions: {
-      length: 25,
-      width: 20,
-      height: 15,
-    },
-    packageType: "Document",
-    fragile: false,
-    insuranceIncluded: true,
-    expressDelivery: true,
-    additionalNotes: "Important business documents.",
   },
 ];
 
@@ -199,23 +188,27 @@ const seedDatabase = async () => {
 
 async function seedAdminUser() {
   try {
-    // Check if admin already exists
-    const existingAdmin = await User.findOne({ role: "admin" });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, salt);
 
-    if (existingAdmin) {
-      console.log("Admin user already exists, skipping creation");
-      return;
-    }
+    const adminDetails = {
+      email: process.env.ADMIN_EMAIL,
+      password: hashedPassword,
+      fullName: "Admin User",
+      role: "admin",
+    };
 
-    // Create admin user
-    const admin = new User(adminUser);
-    await admin.save();
-    console.log("Admin user created successfully");
-    console.log("Email:", adminUser.email);
-    console.log("Password:", adminUser.password);
-    console.log("Please change this password after first login");
+    const updatedAdmin = await User.findOneAndUpdate(
+      { email: adminDetails.email, role: "admin" },
+      adminDetails,
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    console.log("Admin user created or updated successfully");
+    console.log("Email:", updatedAdmin.email);
+    console.log("Please change this password after first login if it's the default.");
   } catch (error) {
-    console.error("Error creating admin user:", error);
+    console.error("Error creating or updating admin user:", error);
     throw error;
   }
 }

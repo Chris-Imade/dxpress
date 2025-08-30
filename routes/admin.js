@@ -22,6 +22,15 @@ router.post("/reset-password", authController.resetPassword);
 // Admin dashboard
 router.get("/", isAuthenticated, isAdmin, adminController.getDashboard);
 
+// Settings route
+router.get("/settings", isAuthenticated, isAdmin, adminController.getSettings);
+router.post(
+  "/settings",
+  isAuthenticated,
+  isAdmin,
+  adminController.postSettings
+);
+
 // Shipment management routes
 router.get(
   "/shipments",

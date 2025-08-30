@@ -144,7 +144,7 @@ exports.submitContactForm = async (req, res) => {
       // Send notification to admin
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: "support@dxpress.uk",
+        to: "admin@dxpress.uk",
         subject: "New Contact Form Submission",
         html: adminNotificationTemplate({
           name,

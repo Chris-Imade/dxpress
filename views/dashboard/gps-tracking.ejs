@@ -1,0 +1,535 @@
+<!-- GPS/Map Real-time Shipment Tracking -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon">
+            <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div>
+            <div class="card-title">Real-time GPS Tracking</div>
+            <div class="card-subtitle">Live shipment location monitoring</div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="refreshTracking()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+            <button class="btn btn-primary" onclick="toggleAutoRefresh()">
+                <i class="fas fa-play"></i>
+                Auto Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tracking Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fas fa-shipping-fast"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">24</div>
+            <div class="stat-label">Active Shipments</div>
+            <div class="stat-change positive">+3 today</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-route"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">18</div>
+            <div class="stat-label">In Transit</div>
+            <div class="stat-change neutral">On schedule</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">2</div>
+            <div class="stat-label">Delayed</div>
+            <div class="stat-change negative">Needs attention</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">4</div>
+            <div class="stat-label">Out for Delivery</div>
+            <div class="stat-change positive">Today</div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Container -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon">
+            <i class="fas fa-globe-americas"></i>
+        </div>
+        <div>
+            <div class="card-title">Live Tracking Map</div>
+            <div class="card-subtitle">Real-time shipment locations</div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="centerMap()" style="padding: 8px 12px;">
+                <i class="fas fa-crosshairs"></i>
+            </button>
+            <button class="btn btn-secondary" onclick="toggleSatellite()" style="padding: 8px 12px;">
+                <i class="fas fa-satellite"></i>
+            </button>
+            <button class="btn btn-secondary" onclick="toggleTraffic()" style="padding: 8px 12px;">
+                <i class="fas fa-traffic-light"></i>
+            </button>
+        </div>
+    </div>
+    <div id="trackingMap" style="height: 500px; border-radius: 12px; margin-top: 16px; position: relative;">
+        <!-- Map will be initialized here -->
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+        <div style="display: flex; gap: 20px; font-size: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%;"></div>
+                <span>On Time</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></div>
+                <span>Delayed</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%;"></div>
+                <span>In Transit</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 50%;"></div>
+                <span>Out for Delivery</span>
+            </div>
+        </div>
+        <div style="font-size: 12px; color: #6b7280;">
+            Last updated: <span id="lastUpdated">2 minutes ago</span>
+        </div>
+    </div>
+</div>
+
+<!-- Active Shipments List -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-list"></i>
+            </div>
+            <div>
+                <div class="card-title">Active Shipments</div>
+                <div class="card-subtitle">Click to track on map</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <div class="shipment-item" onclick="focusShipment('TRK001')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;">
+                <div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%;"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #032330;">TRK001234567</div>
+                    <div style="font-size: 14px; color: #6b7280;">New York → Los Angeles</div>
+                    <div style="font-size: 12px; color: #6b7280;">DHL Express • 2.5 kg</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; font-weight: 600; color: #10b981;">On Time</div>
+                    <div style="font-size: 12px; color: #6b7280;">ETA: Dec 22, 3:30 PM</div>
+                </div>
+            </div>
+
+            <div class="shipment-item" onclick="focusShipment('TRK002')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;">
+                <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #032330;">TRK002345678</div>
+                    <div style="font-size: 14px; color: #6b7280;">Chicago → Miami</div>
+                    <div style="font-size: 12px; color: #6b7280;">FedEx Priority • 1.8 kg</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; font-weight: 600; color: #f59e0b;">Delayed</div>
+                    <div style="font-size: 12px; color: #6b7280;">ETA: Dec 23, 11:00 AM</div>
+                </div>
+            </div>
+
+            <div class="shipment-item" onclick="focusShipment('TRK003')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;">
+                <div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 50%;"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #032330;">TRK003456789</div>
+                    <div style="font-size: 14px; color: #6b7280;">Seattle → Boston</div>
+                    <div style="font-size: 12px; color: #6b7280;">UPS Ground • 3.2 kg</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; font-weight: 600; color: #8b5cf6;">Out for Delivery</div>
+                    <div style="font-size: 12px; color: #6b7280;">ETA: Today, 5:00 PM</div>
+                </div>
+            </div>
+
+            <div class="shipment-item" onclick="focusShipment('TRK004')" style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;">
+                <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%;"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #032330;">TRK004567890</div>
+                    <div style="font-size: 14px; color: #6b7280;">Dallas → Denver</div>
+                    <div style="font-size: 12px; color: #6b7280;">USPS Priority • 0.9 kg</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; font-weight: 600; color: #3b82f6;">In Transit</div>
+                    <div style="font-size: 12px; color: #6b7280;">ETA: Dec 24, 2:15 PM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Details Panel -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+                <div class="card-title">Shipment Details</div>
+                <div class="card-subtitle">Selected tracking info</div>
+            </div>
+        </div>
+        <div id="shipmentDetails" style="margin-top: 20px;">
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-mouse-pointer" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>Click on a shipment to view details</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+.shipment-item:hover {
+    border-color: #032330;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(3, 35, 48, 0.1);
+}
+
+.shipment-item.selected {
+    border-color: #032330;
+    background: #f0f9ff;
+}
+
+.tracking-marker {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.route-line {
+    stroke-width: 4;
+    stroke-opacity: 0.8;
+    stroke-dasharray: 10, 5;
+    animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -100;
+    }
+}
+</style>
+
+<script>
+let map;
+let markers = {};
+let autoRefreshInterval;
+let isAutoRefresh = false;
+
+// Sample shipment data
+const shipments = {
+    'TRK001': {
+        id: 'TRK001234567',
+        origin: 'New York, NY',
+        destination: 'Los Angeles, CA',
+        carrier: 'DHL Express',
+        weight: '2.5 kg',
+        status: 'On Time',
+        statusColor: '#10b981',
+        currentLocation: [39.8283, -98.5795], // Kansas (middle of route)
+        eta: 'Dec 22, 3:30 PM',
+        progress: 65,
+        route: [[40.7128, -74.0060], [39.8283, -98.5795], [34.0522, -118.2437]]
+    },
+    'TRK002': {
+        id: 'TRK002345678',
+        origin: 'Chicago, IL',
+        destination: 'Miami, FL',
+        carrier: 'FedEx Priority',
+        weight: '1.8 kg',
+        status: 'Delayed',
+        statusColor: '#f59e0b',
+        currentLocation: [33.7490, -84.3880], // Atlanta
+        eta: 'Dec 23, 11:00 AM',
+        progress: 45,
+        route: [[41.8781, -87.6298], [33.7490, -84.3880], [25.7617, -80.1918]]
+    },
+    'TRK003': {
+        id: 'TRK003456789',
+        origin: 'Seattle, WA',
+        destination: 'Boston, MA',
+        carrier: 'UPS Ground',
+        weight: '3.2 kg',
+        status: 'Out for Delivery',
+        statusColor: '#8b5cf6',
+        currentLocation: [42.3601, -71.0589], // Boston area
+        eta: 'Today, 5:00 PM',
+        progress: 95,
+        route: [[47.6062, -122.3321], [41.2524, -95.9980], [42.3601, -71.0589]]
+    },
+    'TRK004': {
+        id: 'TRK004567890',
+        origin: 'Dallas, TX',
+        destination: 'Denver, CO',
+        carrier: 'USPS Priority',
+        weight: '0.9 kg',
+        status: 'In Transit',
+        statusColor: '#3b82f6',
+        currentLocation: [35.2271, -101.8313], // Amarillo
+        eta: 'Dec 24, 2:15 PM',
+        progress: 30,
+        route: [[32.7767, -96.7970], [35.2271, -101.8313], [39.7392, -104.9903]]
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMap();
+    loadShipments();
+});
+
+function initializeMap() {
+    map = L.map('trackingMap').setView([39.8283, -98.5795], 4);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+}
+
+function loadShipments() {
+    Object.keys(shipments).forEach(trackingId => {
+        const shipment = shipments[trackingId];
+        addShipmentToMap(trackingId, shipment);
+    });
+}
+
+function addShipmentToMap(trackingId, shipment) {
+    // Create custom marker
+    const markerHtml = `<div class="tracking-marker pulse" style="background: ${shipment.statusColor};">${trackingId.slice(-3)}</div>`;
+    const customIcon = L.divIcon({
+        html: markerHtml,
+        className: 'custom-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+    
+    const marker = L.marker(shipment.currentLocation, { icon: customIcon })
+        .addTo(map)
+        .bindPopup(`
+            <div style="min-width: 200px;">
+                <h4 style="margin: 0 0 8px 0; color: #032330;">${shipment.id}</h4>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Route:</strong> ${shipment.origin} → ${shipment.destination}</p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Carrier:</strong> ${shipment.carrier}</p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>Status:</strong> <span style="color: ${shipment.statusColor}; font-weight: 600;">${shipment.status}</span></p>
+                <p style="margin: 4px 0; font-size: 14px;"><strong>ETA:</strong> ${shipment.eta}</p>
+                <div style="margin-top: 8px;">
+                    <div style="background: #e5e7eb; border-radius: 10px; height: 6px;">
+                        <div style="background: ${shipment.statusColor}; height: 6px; border-radius: 10px; width: ${shipment.progress}%;"></div>
+                    </div>
+                    <div style="text-align: center; font-size: 12px; margin-top: 4px; color: #6b7280;">${shipment.progress}% Complete</div>
+                </div>
+            </div>
+        `);
+    
+    markers[trackingId] = marker;
+    
+    // Add route line
+    const routeLine = L.polyline(shipment.route, {
+        color: shipment.statusColor,
+        weight: 3,
+        opacity: 0.6,
+        className: 'route-line'
+    }).addTo(map);
+}
+
+function focusShipment(trackingId) {
+    // Remove previous selection
+    document.querySelectorAll('.shipment-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Add selection to clicked item
+    event.currentTarget.classList.add('selected');
+    
+    const shipment = shipments[trackingId];
+    if (shipment && markers[trackingId]) {
+        // Center map on shipment
+        map.setView(shipment.currentLocation, 8);
+        markers[trackingId].openPopup();
+        
+        // Update details panel
+        updateShipmentDetails(shipment);
+    }
+}
+
+function updateShipmentDetails(shipment) {
+    const detailsPanel = document.getElementById('shipmentDetails');
+    detailsPanel.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 60px; height: 60px; background: ${shipment.statusColor}; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+                <i class="fas fa-truck"></i>
+            </div>
+            <h4 style="margin: 0; color: #032330;">${shipment.id}</h4>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">${shipment.carrier}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 600; color: #374151;">Progress</span>
+                <span style="color: ${shipment.statusColor}; font-weight: 600;">${shipment.progress}%</span>
+            </div>
+            <div style="background: #e5e7eb; border-radius: 10px; height: 8px;">
+                <div style="background: ${shipment.statusColor}; height: 8px; border-radius: 10px; width: ${shipment.progress}%; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+        
+        <div style="space-y: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="color: #6b7280;">Origin</span>
+                <span style="font-weight: 600; color: #374151;">${shipment.origin}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="color: #6b7280;">Destination</span>
+                <span style="font-weight: 600; color: #374151;">${shipment.destination}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="color: #6b7280;">Weight</span>
+                <span style="font-weight: 600; color: #374151;">${shipment.weight}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                <span style="color: #6b7280;">Status</span>
+                <span style="font-weight: 600; color: ${shipment.statusColor};">${shipment.status}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span style="color: #6b7280;">ETA</span>
+                <span style="font-weight: 600; color: #374151;">${shipment.eta}</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn btn-primary" style="width: 100%;" onclick="viewFullTracking('${shipment.id}')">
+                <i class="fas fa-external-link-alt"></i>
+                View Full Tracking
+            </button>
+        </div>
+    `;
+}
+
+function refreshTracking() {
+    console.log('Refreshing tracking data...');
+    // Simulate data refresh
+    document.getElementById('lastUpdated').textContent = 'Just now';
+    showNotification('Tracking data refreshed', 'success');
+}
+
+function toggleAutoRefresh() {
+    const button = event.currentTarget;
+    if (isAutoRefresh) {
+        clearInterval(autoRefreshInterval);
+        button.innerHTML = '<i class="fas fa-play"></i> Auto Refresh';
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+        isAutoRefresh = false;
+        showNotification('Auto refresh disabled', 'info');
+    } else {
+        autoRefreshInterval = setInterval(refreshTracking, 30000); // Refresh every 30 seconds
+        button.innerHTML = '<i class="fas fa-pause"></i> Auto Refresh';
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+        isAutoRefresh = true;
+        showNotification('Auto refresh enabled (30s)', 'success');
+    }
+}
+
+function centerMap() {
+    map.setView([39.8283, -98.5795], 4);
+}
+
+function toggleSatellite() {
+    // Toggle between street and satellite view
+    console.log('Toggling satellite view');
+}
+
+function toggleTraffic() {
+    // Toggle traffic layer
+    console.log('Toggling traffic layer');
+}
+
+function viewFullTracking(shipmentId) {
+    window.location.href = `/dashboard/tracking?id=${shipmentId}`;
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    notification.style.background = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>

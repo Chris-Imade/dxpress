@@ -22,6 +22,9 @@ const teamRoutes = require("./routes/team");
 const projectRoutes = require("./routes/project");
 const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
+const legalRoutes = require("./routes/legal");
+const dashboardRoutes = require("./routes/dashboard");
 const apiRoutes = require("./routes/api");
 const trackRoutes = require("./routes/track");
 const newsletterRoutes = require("./routes/newsletter");
@@ -45,7 +48,7 @@ const initializeAdminUser = async () => {
       console.log("No admin user found, creating default admin...");
 
       // Get admin email from environment or use default
-      const adminEmail = process.env.ADMIN_EMAIL || "support@dxpress.uk";
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@dxpress.uk";
       const adminPassword = process.env.ADMIN_PASSWORD || "$IamtheAdmin11";
 
       // Create default admin user
@@ -180,6 +183,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use("/api", apiRoutes);
 app.use("/", indexRoutes);
 app.use("/shipment", shipmentRoutes);
 app.use("/services", serviceRoutes);
@@ -190,6 +194,9 @@ app.use("/team", teamRoutes);
 app.use("/project", projectRoutes);
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
+app.use("/", userRoutes);
+app.use("/", legalRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.use("/api", apiRoutes);
 app.use("/track", trackRoutes);
 app.use("/track-shipment", trackRoutes);
@@ -232,11 +239,13 @@ app.use((err, req, res, next) => {
     params: req.params,
   });
 
-  // Send error response
-  res.status(err.status || 500).json({
-    success: false,
-    message:
+  // Render error page
+  res.status(err.status || 500).render("500", {
+    title: "Server Error",
+    path: "/500",
+    error:
       process.env.NODE_ENV === "production" ? "An error occurred" : err.message,
+    layout: false,
   });
 });
 
