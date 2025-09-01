@@ -61,25 +61,14 @@
     <div>
         <div class="dashboard-card" style="margin-bottom: 24px;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold;">
+                <div style="width: 80px; height: 80px; min-width: 80px; min-height: 80px; max-width: 80px; max-height: 80px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; aspect-ratio: 1 / 1; flex-shrink: 0; overflow: hidden;">
                     <%= user && user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
                 </div>
                 <h3 style="margin: 0 0 4px 0; color: #032330;"><%= user && user.name ? user.name : 'User' %></h3>
                 <p style="margin: 0; color: #6b7280; font-size: 14px;"><%= user && user.email ? user.email : 'user@example.com' %></p>
             </div>
-            <div style="padding: 16px; background: #f9fafb; border-radius: 10px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-size: 14px; color: #6b7280;">Member Since</span>
-                    <span style="font-size: 14px; font-weight: 600; color: #374151;">Dec 2024</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-size: 14px; color: #6b7280;">Total Shipments</span>
-                    <span style="font-size: 14px; font-weight: 600; color: #374151;">47</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 14px; color: #6b7280;">Account Status</span>
-                    <span style="font-size: 12px; padding: 4px 8px; background: #d1fae5; color: #065f46; border-radius: 12px; font-weight: 600;">Active</span>
-                </div>
+            <div id="profileStats" style="padding: 16px; background: #f9fafb; border-radius: 10px;">
+                <!-- Profile stats will be populated by JavaScript -->
             </div>
         </div>
 
@@ -108,86 +97,32 @@
     </div>
 </div>
 
-<!-- Preferences -->
+<!-- Quick Actions -->
 <div class="dashboard-card" style="margin-top: 24px;">
     <div class="card-header">
         <div class="card-icon">
-            <i class="fas fa-cog"></i>
+            <i class="fas fa-bolt"></i>
         </div>
         <div>
-            <div class="card-title">Preferences</div>
-            <div class="card-subtitle">Customize your dashboard experience</div>
+            <div class="card-title">Quick Actions</div>
+            <div class="card-subtitle">Common profile-related tasks</div>
         </div>
     </div>
-    <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-        <div>
-            <h4 style="margin: 0 0 16px 0; color: #032330;">Notifications</h4>
-            <div>
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
-                    <div>
-                        <div style="font-weight: 600; color: #374151;">Email Notifications</div>
-                        <div style="font-size: 12px; color: #6b7280;">Receive updates via email</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
-                    <div>
-                        <div style="font-weight: 600; color: #374151;">SMS Notifications</div>
-                        <div style="font-size: 12px; color: #6b7280;">Receive updates via SMS</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
-                    <div>
-                        <div style="font-weight: 600; color: #374151;">Push Notifications</div>
-                        <div style="font-size: 12px; color: #6b7280;">Browser notifications</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div>
-            <h4 style="margin: 0 0 16px 0; color: #032330;">Display</h4>
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Theme</label>
-                <select style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="auto">Auto</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Language</label>
-                <select style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                </select>
-            </div>
-            <div>
-                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Timezone</label>
-                <select style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
-                    <option value="EST">Eastern Time (EST)</option>
-                    <option value="PST">Pacific Time (PST)</option>
-                    <option value="CST">Central Time (CST)</option>
-                    <option value="MST">Mountain Time (MST)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-        <button class="btn btn-primary" onclick="savePreferences()">
-            <i class="fas fa-save"></i>
-            Save Preferences
+    <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <button class="btn btn-outline-primary" onclick="viewNotifications()" style="padding: 16px; text-align: left;">
+            <i class="fas fa-bell" style="margin-bottom: 8px; font-size: 20px;"></i>
+            <div style="font-weight: 600;">View Notifications</div>
+            <div style="font-size: 12px; opacity: 0.7;">Manage your alerts</div>
+        </button>
+        <button class="btn btn-outline-primary" onclick="viewInvoices()" style="padding: 16px; text-align: left;">
+            <i class="fas fa-file-invoice" style="margin-bottom: 8px; font-size: 20px;"></i>
+            <div style="font-weight: 600;">View Invoices</div>
+            <div style="font-size: 12px; opacity: 0.7;">Billing & payments</div>
+        </button>
+        <button class="btn btn-outline-primary" onclick="viewShipments()" style="padding: 16px; text-align: left;">
+            <i class="fas fa-box" style="margin-bottom: 8px; font-size: 20px;"></i>
+            <div style="font-weight: 600;">My Shipments</div>
+            <div style="font-size: 12px; opacity: 0.7;">Track packages</div>
         </button>
     </div>
 </div>
@@ -251,11 +186,77 @@ input:checked + .slider:before {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    loadProfileStats();
+    
     document.getElementById('profileForm').addEventListener('submit', function(e) {
         e.preventDefault();
         updateProfile();
     });
 });
+
+function loadProfileStats() {
+    // Load user shipments and invoices for stats
+    Promise.all([
+        fetch('/dashboard/api/shipments').then(r => r.json()),
+        fetch('/dashboard/api/invoices').then(r => r.json())
+    ]).then(([shipmentsData, invoicesData]) => {
+        const shipments = shipmentsData.success ? shipmentsData.shipments : [];
+        const invoices = invoicesData.success ? invoicesData.invoices : [];
+        
+        renderProfileStats(shipments, invoices);
+    }).catch(error => {
+        console.error('Error loading profile stats:', error);
+        showEmptyProfileStats();
+    });
+}
+
+function renderProfileStats(shipments, invoices) {
+    const statsContainer = document.getElementById('profileStats');
+    const memberSince = '<%= user && user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", {month: "short", year: "numeric"}) : "Dec 2024" %>';
+    
+    statsContainer.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Member Since</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">${memberSince}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Total Shipments</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">${shipments.length}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Total Invoices</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">${invoices.length}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 14px; color: #6b7280;">Account Status</span>
+            <span style="font-size: 12px; padding: 4px 8px; background: #d1fae5; color: #065f46; border-radius: 12px; font-weight: 600;">Active</span>
+        </div>
+    `;
+}
+
+function showEmptyProfileStats() {
+    const statsContainer = document.getElementById('profileStats');
+    const memberSince = '<%= user && user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", {month: "short", year: "numeric"}) : "Dec 2024" %>';
+    
+    statsContainer.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Member Since</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">${memberSince}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Total Shipments</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 14px; color: #6b7280;">Total Invoices</span>
+            <span style="font-size: 14px; font-weight: 600; color: #374151;">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 14px; color: #6b7280;">Account Status</span>
+            <span style="font-size: 12px; padding: 4px 8px; background: #d1fae5; color: #065f46; border-radius: 12px; font-weight: 600;">Active</span>
+        </div>
+    `;
+}
 
 function updateProfile() {
     const firstName = document.getElementById('firstName').value;
@@ -288,21 +289,16 @@ function enableTwoFactor() {
     showNotification('Two-factor authentication setup coming soon', 'info');
 }
 
-function savePreferences() {
-    // Collect all preference settings
-    const emailNotifications = document.querySelector('input[type="checkbox"]:nth-of-type(1)').checked;
-    const smsNotifications = document.querySelector('input[type="checkbox"]:nth-of-type(2)').checked;
-    const pushNotifications = document.querySelector('input[type="checkbox"]:nth-of-type(3)').checked;
-    const theme = document.querySelector('select:nth-of-type(1)').value;
-    const language = document.querySelector('select:nth-of-type(2)').value;
-    const timezone = document.querySelector('select:nth-of-type(3)').value;
-    
-    console.log('Saving preferences:', {
-        notifications: { email: emailNotifications, sms: smsNotifications, push: pushNotifications },
-        display: { theme, language, timezone }
-    });
-    
-    showNotification('Preferences saved successfully!', 'success');
+function viewNotifications() {
+    window.location.href = '/dashboard/notifications';
+}
+
+function viewInvoices() {
+    window.location.href = '/dashboard/invoices';
+}
+
+function viewShipments() {
+    window.location.href = '/dashboard/orders';
 }
 
 function showNotification(message, type) {

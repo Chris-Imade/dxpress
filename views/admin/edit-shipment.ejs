@@ -1,469 +1,324 @@
-<%- include('../layouts/admin-header') %>
-
-<main id="main-content" class="ml-collapsed">
-
-<div class="dashboard-content">
-  <nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/admin/shipments">Shipments</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Edit Shipment</li>
-    </ol>
-  </nav>
-
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white py-3">
-      <h5 class="mb-0">
-        Edit Shipment <span class="text-muted">#<%= shipment.trackingId %></span>
-      </h5>
+<!-- Edit Shipment Page -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-edit"></i>
+        </div>
+        <div>
+            <div class="card-title">Edit Shipment #<%= shipment.trackingId %></div>
+            <div class="card-subtitle">Update shipment details and status</div>
+        </div>
+        <div style="margin-left: auto;">
+            <a href="/admin/shipments" style="display: inline-flex; align-items: center; padding: 10px 16px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500; transition: background-color 0.2s;">
+                <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+                Back to Shipments
+            </a>
+        </div>
     </div>
-    
-    <div class="card-body">
+</div>
+
+<!-- Edit Shipment Form -->
+<div class="dashboard-card">
+    <div style="padding: 24px;">
+      <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+        <div style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+          <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+          <%= errorMessage %>
+        </div>
+      <% } %>
+      
       <form action="/admin/shipments/edit/<%= shipment._id %>" method="POST">
-        <div class="row g-3">
-          <div class="col-md-6 mb-3">
-            <label for="customerName" class="form-label">Customer Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="customerName"
-              name="customerName"
-              value="<%= shipment.customerName %>"
-              required
-            />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="customerEmail" class="form-label">Customer Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="customerEmail"
-              name="customerEmail"
-              value="<%= shipment.customerEmail %>"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-md-6 mb-3">
-            <label for="customerPhone" class="form-label">Customer Phone</label>
-            <input
-              type="tel"
-              class="form-control"
-              id="customerPhone"
-              name="customerPhone"
-              value="<%= shipment.customerPhone %>"
-            />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="estimatedDelivery" class="form-label">Estimated Delivery Date</label>
-            <input
-              type="date"
-              class="form-control"
-              id="estimatedDelivery"
-              name="estimatedDelivery"
-              value="<%= shipment.estimatedDelivery ? shipment.estimatedDelivery.toISOString().split('T')[0] : '' %>"
-            />
-          </div>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-md-6 mb-3">
-            <label for="origin" class="form-label">Origin</label>
-            <input
-              type="text"
-              class="form-control"
-              id="origin"
-              name="origin"
-              value="<%= shipment.origin %>"
-              required
-            />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="destination" class="form-label">Destination</label>
-            <input
-              type="text"
-              class="form-control"
-              id="destination"
-              name="destination"
-              value="<%= shipment.destination %>"
-              required
-            />
-          </div>
-        </div>
-
-        <div class="row g-3">
-          <div class="col-md-4 mb-3">
-            <label for="weight" class="form-label">Weight (kg)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-control"
-              id="weight"
-              name="weight"
-              value="<%= shipment.weight %>"
-              required
-            />
-          </div>
-          <div class="col-md-4 mb-3">
-            <label for="dimensions" class="form-label">Dimensions</label>
-            <div class="row g-2">
-              <div class="col">
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  placeholder="Length"
-                  name="length"
-                  value="<%= shipment.dimensions?.length || '' %>"
-                />
-              </div>
-              <div class="col">
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  placeholder="Width"
-                  name="width"
-                  value="<%= shipment.dimensions?.width || '' %>"
-                />
-              </div>
-              <div class="col">
-                <input
-                  type="number"
-                  step="0.01"
-                  class="form-control"
-                  placeholder="Height"
-                  name="height"
-                  value="<%= shipment.dimensions?.height || '' %>"
-                />
-              </div>
+        <!-- Customer Information Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-user" style="margin-right: 8px; color: #6b7280;"></i>
+                Customer Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Customer Name</label>
+                    <input type="text" id="customerName" name="customerName" value="<%= shipment.customerName %>" required 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Customer Email</label>
+                    <input type="email" id="customerEmail" name="customerEmail" value="<%= shipment.customerEmail %>" required 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
             </div>
-            <small class="text-muted">Length × Width × Height (cm)</small>
-          </div>
-          <div class="col-md-4 mb-3">
-            <label for="packageType" class="form-label">Package Type</label>
-            <select class="form-select" id="packageType" name="packageType" required>
-              <option value="Document" <%= shipment.packageType === 'Document' ? 'selected' : '' %>>Document</option>
-              <option value="Parcel" <%= shipment.packageType === 'Parcel' ? 'selected' : '' %>>Parcel</option>
-              <option value="Freight" <%= shipment.packageType === 'Freight' ? 'selected' : '' %>>Freight</option>
-              <option value="Express" <%= shipment.packageType === 'Express' ? 'selected' : '' %>>Express</option>
-            </select>
-          </div>
         </div>
 
-        <div class="row g-3">
-          <div class="col-md-6 mb-3">
-            <label for="status" class="form-label">Status</label>
-            <select class="form-select" id="status" name="status" required>
-              <option value="Pending" <%= shipment.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-              <option value="In Transit" <%= shipment.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
-              <option value="Delivered" <%= shipment.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-              <option value="Delayed" <%= shipment.status === 'Delayed' ? 'selected' : '' %>>Delayed</option>
-              <option value="Cancelled" <%= shipment.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="carrierName" class="form-label">Carrier Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="carrierName"
-              name="carrierName"
-              value="<%= shipment.carrierName %>"
-            />
-          </div>
+        <!-- Contact & Delivery Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-phone" style="margin-right: 8px; color: #6b7280;"></i>
+                Contact & Delivery
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Customer Phone</label>
+                    <input type="tel" id="customerPhone" name="customerPhone" value="<%= shipment.customerPhone %>" 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Estimated Delivery Date</label>
+                    <input type="date" id="estimatedDelivery" name="estimatedDelivery" 
+                           value="<%= shipment.estimatedDelivery ? shipment.estimatedDelivery.toISOString().split('T')[0] : '' %>" 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+            </div>
         </div>
 
-        <div class="row g-3">
-          <div class="col-md-12 mb-3">
-            <label for="notes" class="form-label">Notes</label>
-            <textarea
-              class="form-control"
-              id="notes"
-              name="additionalNotes"
-              rows="3"
-            ><%= shipment.additionalNotes %></textarea>
-          </div>
+        <!-- Shipping Route Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-route" style="margin-right: 8px; color: #6b7280;"></i>
+                Shipping Route
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                        <i class="fas fa-map-marker-alt" style="color: #10b981; margin-right: 4px;"></i>
+                        Origin Address
+                    </label>
+                    <input type="text" id="originAddress" name="originAddress" value="<%= typeof shipment.origin === 'object' ? shipment.origin.address : '' %>" required 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease; margin-bottom: 12px;" 
+                           onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e5e7eb'" placeholder="Street address">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <input type="text" id="originCity" name="originCity" value="<%= typeof shipment.origin === 'object' ? shipment.origin.city : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="City">
+                        <input type="text" id="originPostalCode" name="originPostalCode" value="<%= typeof shipment.origin === 'object' ? shipment.origin.postalCode : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Postal Code">
+                        <input type="text" id="originCountry" name="originCountry" value="<%= typeof shipment.origin === 'object' ? shipment.origin.country : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Country">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                        <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 4px;"></i>
+                        Destination Address
+                    </label>
+                    <input type="text" id="destinationAddress" name="destinationAddress" value="<%= typeof shipment.destination === 'object' ? shipment.destination.address : '' %>" required 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease; margin-bottom: 12px;" 
+                           onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#e5e7eb'" placeholder="Street address">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <input type="text" id="destinationCity" name="destinationCity" value="<%= typeof shipment.destination === 'object' ? shipment.destination.city : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="City">
+                        <input type="text" id="destinationPostalCode" name="destinationPostalCode" value="<%= typeof shipment.destination === 'object' ? shipment.destination.postalCode : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Postal Code">
+                        <input type="text" id="destinationCountry" name="destinationCountry" value="<%= typeof shipment.destination === 'object' ? shipment.destination.country : '' %>" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Country">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-3">
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="isFragile"
-              name="isFragile"
-              <%= shipment.fragile ? 'checked' : '' %>
-            />
-            <label class="form-check-label" for="isFragile">Fragile</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              id="insurance"
-              name="insurance"
-              <%= shipment.insuranceIncluded ? 'checked' : '' %>
-            />
-            <label class="form-check-label" for="insurance">Insurance</label>
-          </div>
+        <!-- Package Details Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-box" style="margin-right: 8px; color: #6b7280;"></i>
+                Package Details
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Weight (kg)</label>
+                    <input type="number" step="0.01" id="weight" name="weight" value="<%= shipment.weight %>" required 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Dimensions (cm)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <input type="number" step="0.01" placeholder="Length" name="length" 
+                               value="<%= shipment.dimensions?.length || '' %>" 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                               onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                        <input type="number" step="0.01" placeholder="Width" name="width" 
+                               value="<%= shipment.dimensions?.width || '' %>" 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                               onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                        <input type="number" step="0.01" placeholder="Height" name="height" 
+                               value="<%= shipment.dimensions?.height || '' %>" 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                               onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                    </div>
+                    <small style="color: #6b7280; font-size: 12px; margin-top: 4px; display: block;">Length × Width × Height</small>
+                </div>
+            </div>
         </div>
-
-        <h5 class="mt-4 mb-3">Shipment History</h5>
-        <div id="statusHistory" class="mb-4">
-          <% if (shipment.statusHistory && shipment.statusHistory.length > 0) { %>
-            <% shipment.statusHistory.forEach((history, index) => { %>
-              <div class="status-history-item mb-3">
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">Date</label>
-                    <input
-                      type="datetime-local"
-                      class="form-control"
-                      name="statusHistory[<%= index %>][date]"
-                      value="<%= (history.timestamp && !isNaN(new Date(history.timestamp).getTime())) ? new Date(history.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="statusHistory[<%= index %>][status]" required>
-                      <option value="Pending" <%= history.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                      <option value="Processing" <%= history.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                      <option value="In Transit" <%= history.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
-                      <option value="Out for Delivery" <%= history.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
-                      <option value="Delivered" <%= history.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                      <option value="Delayed" <%= history.status === 'Delayed' ? 'selected' : '' %>>Delayed</option>
-                      <option value="Failed Attempt" <%= history.status === 'Failed Attempt' ? 'selected' : '' %>>Failed Attempt</option>
-                      <option value="Cancelled" <%= history.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+        <!-- Package Type & Status Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-clipboard-list" style="margin-right: 8px; color: #6b7280;"></i>
+                Package Type & Status
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Package Type</label>
+                    <select id="packageType" name="packageType" required 
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; transition: border-color 0.2s ease;" 
+                            onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                        <option value="envelope" <%= shipment.packageType === 'envelope' ? 'selected' : '' %>>Envelope</option>
+                        <option value="small_box" <%= shipment.packageType === 'small_box' ? 'selected' : '' %>>Small Box</option>
+                        <option value="medium_box" <%= shipment.packageType === 'medium_box' ? 'selected' : '' %>>Medium Box</option>
+                        <option value="large_box" <%= shipment.packageType === 'large_box' ? 'selected' : '' %>>Large Box</option>
+                        <option value="pallet" <%= shipment.packageType === 'pallet' ? 'selected' : '' %>>Pallet</option>
                     </select>
-                  </div>
-                  <div class="col-md-5">
-                    <label class="form-label">Location</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="statusHistory[<%= index %>][location]"
-                      value="<%= history.location %>"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-danger remove-history" <%= index === 0 ? 'disabled' : '' %>>
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
                 </div>
-                <div class="row mt-2">
-                  <div class="col-md-11">
-                    <label class="form-label">Notes</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="statusHistory[<%= index %>][note]"
-                      value="<%= history.note || '' %>"
-                      placeholder="Optional notes about this status"
-                    />
-                  </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Status</label>
+                    <select id="status" name="status" required 
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; transition: border-color 0.2s ease;" 
+                            onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
+                        <option value="pending" <%= shipment.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="processing" <%= shipment.status === 'processing' ? 'selected' : '' %>>Processing</option>
+                        <option value="in_transit" <%= shipment.status === 'in_transit' ? 'selected' : '' %>>In Transit</option>
+                        <option value="delivered" <%= shipment.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="cancelled" <%= shipment.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
                 </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <div class="status-history-item mb-3">
-              <div class="row g-3">
-                <div class="col-md-3">
-                  <label class="form-label">Date</label>
-                  <input
-                    type="datetime-local"
-                    class="form-control"
-                    name="statusHistory[0][date]"
-                    value="<%= new Date().toISOString().slice(0, 16) %>"
-                    required
-                  />
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Carrier Name</label>
+                    <input type="text" id="carrierName" name="carrierName" value="<%= shipment.carrierName || '' %>" 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: border-color 0.2s ease;" 
+                           onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'">
                 </div>
-                <div class="col-md-3">
-                  <label class="form-label">Status</label>
-                  <select class="form-select" name="statusHistory[0][status]" required>
-                    <option value="Pending" selected>Pending</option>
-                    <option value="Processing">Processing</option>
-                    <option value="In Transit">In Transit</option>
-                    <option value="Out for Delivery">Out for Delivery</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Delayed">Delayed</option>
-                    <option value="Failed Attempt">Failed Attempt</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </div>
-                <div class="col-md-5">
-                  <label class="form-label">Location</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="statusHistory[0][location]"
-                    value="<%= shipment.origin %>"
-                    required
-                  />
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                  <button type="button" class="btn btn-outline-danger remove-history" disabled>
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="row mt-2">
-                <div class="col-md-11">
-                  <label class="form-label">Notes</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="statusHistory[0][note]"
-                    value=""
-                    placeholder="Optional notes about this status"
-                  />
-                </div>
-              </div>
             </div>
-          <% } %>
         </div>
-        
-        <button type="button" id="addStatusHistory" class="btn btn-outline-primary mb-4">
-          <i class="fas fa-plus"></i> Add Status Update
-        </button>
 
-        <div class="d-flex justify-content-between">
-          <a href="/admin/shipments" class="btn btn-light">
-            <i class="fas fa-arrow-left"></i> Cancel
-          </a>
-          <button type="submit" id="submitBtn" class="btn btn-primary">
-            <i class="fas fa-save"></i> Save Changes
-          </button>
+        <!-- Additional Notes Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-sticky-note" style="margin-right: 8px; color: #6b7280;"></i>
+                Additional Notes
+            </h3>
+            <textarea id="notes" name="additionalNotes" rows="4" placeholder="Enter any additional notes or special instructions..." 
+                      style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: vertical; transition: border-color 0.2s ease;" 
+                      onfocus="this.style.borderColor='#032330'" onblur="this.style.borderColor='#e5e7eb'"><%= shipment.additionalNotes || '' %></textarea>
+        </div>
+
+        <!-- Special Options Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-shield-alt" style="margin-right: 8px; color: #6b7280;"></i>
+                Special Options
+            </h3>
+            <div style="display: flex; gap: 32px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="isFragile" name="isFragile" <%= shipment.fragile ? 'checked' : '' %> 
+                           style="width: 18px; height: 18px; margin-right: 8px; accent-color: #032330;">
+                    <span style="font-weight: 600; color: #374151;">
+                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-right: 4px;"></i>
+                        Fragile Package
+                    </span>
+                </label>
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="insurance" name="insurance" <%= shipment.insuranceIncluded ? 'checked' : '' %> 
+                           style="width: 18px; height: 18px; margin-right: 8px; accent-color: #032330;">
+                    <span style="font-weight: 600; color: #374151;">
+                        <i class="fas fa-shield-alt" style="color: #10b981; margin-right: 4px;"></i>
+                        Insurance Coverage
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Shipment History Section -->
+        <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+                <i class="fas fa-history" style="margin-right: 8px; color: #6b7280;"></i>
+                Shipment History
+            </h3>
+            <div id="statusHistory" style="margin-bottom: 16px;">
+                <% if (shipment.statusHistory && shipment.statusHistory.length > 0) { %>
+                    <% shipment.statusHistory.forEach((history, index) => { %>
+                        <div style="background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 16px; align-items: end;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Date & Time</label>
+                                    <input type="datetime-local" name="statusHistory[<%= index %>][date]" required 
+                                           value="<%= (history.timestamp && !isNaN(new Date(history.timestamp).getTime())) ? new Date(history.timestamp).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16) %>" 
+                                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Status</label>
+                                    <select name="statusHistory[<%= index %>][status]" required 
+                                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white;">
+                                        <option value="Pending" <%= history.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="Processing" <%= history.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                        <option value="In Transit" <%= history.status === 'In Transit' ? 'selected' : '' %>>In Transit</option>
+                                        <option value="Out for Delivery" <%= history.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                                        <option value="Delivered" <%= history.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                        <option value="Delayed" <%= history.status === 'Delayed' ? 'selected' : '' %>>Delayed</option>
+                                        <option value="Failed Attempt" <%= history.status === 'Failed Attempt' ? 'selected' : '' %>>Failed Attempt</option>
+                                        <option value="Cancelled" <%= history.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">Location</label>
+                                    <input type="text" name="statusHistory[<%= index %>][location]" value="<%= history.location %>" required 
+                                           style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white;">
+                                </div>
+                                <div>
+                                    <button type="button" class="remove-history" <%= index === 0 ? 'disabled' : '' %> 
+                                            style="padding: 12px; background: #fee2e2; border: none; border-radius: 6px; color: #dc2626; cursor: pointer; <%= index === 0 ? 'opacity: 0.5; cursor: not-allowed;' : '' %>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px;">
+                                <input type="text" name="statusHistory[<%= index %>][note]" value="<%= history.note || '' %>" 
+                                       placeholder="Optional notes about this status" 
+                                       style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white;">
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>No status history available</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 2px solid #e5e7eb;">
+            <a href="/admin/shipments" style="padding: 12px 24px; background: #f3f4f6; border: 2px solid #e5e7eb; border-radius: 8px; color: #374151; text-decoration: none; font-weight: 600; transition: all 0.2s ease;" 
+               onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+                <i class="fas fa-arrow-left"></i>
+                Cancel
+            </a>
+            <button type="submit" id="submitBtn" style="padding: 12px 32px; background: #032330; border: none; border-radius: 8px; color: white; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.2s ease;" 
+                    onmouseover="this.style.background='#064e3b'" onmouseout="this.style.background='#032330'">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
         </div>
       </form>
     </div>
-  </div>
 </div>
 
-</main>
-
-<%- include('../layouts/admin-footer') %>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const submitBtn = document.getElementById('submitBtn');
     
     form.addEventListener('submit', function() {
-      // Disable the button
-      submitBtn.disabled = true;
-      
-      // Change button text to show loading
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        // Disable the button
+        submitBtn.disabled = true;
+        
+        // Change button text to show loading
+        submitBtn.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-right: 8px;"></span> Saving...';
     });
-
-    // Status history functionality
-    const statusHistoryContainer = document.getElementById('statusHistory');
-    const addStatusButton = document.getElementById('addStatusHistory');
-    
-    if (addStatusButton && statusHistoryContainer) {
-      addStatusButton.addEventListener('click', function() {
-        // Count existing history items
-        const historyItems = statusHistoryContainer.querySelectorAll('.status-history-item');
-        const newIndex = historyItems.length;
-        
-        // Create new status history entry
-        const newHistoryItem = document.createElement('div');
-        newHistoryItem.className = 'status-history-item mb-3';
-        newHistoryItem.innerHTML = `
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">Date</label>
-              <input
-                type="datetime-local"
-                class="form-control"
-                name="statusHistory[${newIndex}][date]"
-                value="${new Date().toISOString().slice(0, 16)}"
-                required
-              />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Status</label>
-              <select class="form-select" name="statusHistory[${newIndex}][status]" required>
-                <option value="Pending">Pending</option>
-                <option value="Processing">Processing</option>
-                <option value="In Transit" selected>In Transit</option>
-                <option value="Out for Delivery">Out for Delivery</option>
-                <option value="Delivered">Delivered</option>
-                <option value="Delayed">Delayed</option>
-                <option value="Failed Attempt">Failed Attempt</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div class="col-md-5">
-              <label class="form-label">Location</label>
-              <input
-                type="text"
-                class="form-control"
-                name="statusHistory[${newIndex}][location]"
-                placeholder="Enter location"
-                required
-              />
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-              <button type="button" class="btn btn-outline-danger remove-history">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-          <div class="row mt-2">
-            <div class="col-md-11">
-              <label class="form-label">Notes</label>
-              <input
-                type="text"
-                class="form-control"
-                name="statusHistory[${newIndex}][note]"
-                value=""
-                placeholder="Optional notes about this status"
-              />
-            </div>
-          </div>
-        `;
-        
-        // Add to container
-        statusHistoryContainer.appendChild(newHistoryItem);
-        
-        // Add event listener to new remove button
-        const newRemoveButton = newHistoryItem.querySelector('.remove-history');
-        if (newRemoveButton) {
-          newRemoveButton.addEventListener('click', function() {
-            statusHistoryContainer.removeChild(newHistoryItem);
-          });
-        }
-      });
-      
-      // Add event listeners to existing remove buttons
-      const removeButtons = statusHistoryContainer.querySelectorAll('.remove-history:not([disabled])');
-      removeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const historyItem = this.closest('.status-history-item');
-          if (historyItem) {
-            statusHistoryContainer.removeChild(historyItem);
-          }
-        });
-      });
-      
-      // Add submit event listener to handle form data
-      form.addEventListener('submit', function(e) {
-        // Don't remove this if you already have a submit handler above
-        // e.preventDefault();
-        
-        // If there are no status history items, make sure to add at least one
-        const historyItems = statusHistoryContainer.querySelectorAll('.status-history-item');
-        if (historyItems.length === 0) {
-          // If no status history, add a default one with current status
-          addStatusButton.click();
-        }
-      });
-    }
-  });
+});
 </script>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>

@@ -1,288 +1,218 @@
-<%- include('../layouts/admin-header') %>
-
-<!-- Main content -->
-<main id="main-content" class="dashboard-main ml-collapsed">
-
-  <% if (typeof message !== 'undefined' && message) { %>
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <%= message %>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-    ></button>
-  </div>
-  <% } %> <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <%= errorMessage %>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="alert"
-      aria-label="Close"
-    ></button>
-  </div>
-  <% } %>
-
-  <div class="dashboard-content">
-    <div class="row g-4 mx-0 mb-4">
-      <div class="col-md-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body p-0">
-            <div class="d-flex flex-column p-3">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <h6 class="text-uppercase text-muted fs-sm fw-semibold mb-0">
-                  Total Shipments
-                </h6>
-                <div class="icon-circle bg-primary-soft">
-                  <i class="fas fa-box text-primary"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="fw-bold mb-0"><%= counts.shipments || 0 %></h3>
-                <p class="text-muted mb-0 fs-sm">All time</p>
-              </div>
-            </div>
-            <div class="card-footer py-2 border-0 bg-light">
-              <a
-                href="/admin/shipments"
-                class="text-decoration-none d-flex justify-content-between align-items-center"
-              >
-                <span class="text-primary small">View details</span>
-                <i class="fas fa-arrow-right text-primary small"></i>
-              </a>
-            </div>
-          </div>
+<!-- Admin Dashboard Overview -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, #032330, #1a4c5a);">
+            <i class="fas fa-chart-line"></i>
         </div>
-      </div>
-
-      <div class="col-md-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body p-0">
-            <div class="d-flex flex-column p-3">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <h6 class="text-uppercase text-muted fs-sm fw-semibold mb-0">
-                  Pending
-                </h6>
-                <div class="icon-circle bg-warning-soft">
-                  <i class="fas fa-clock text-warning"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="fw-bold mb-0">
-                  <%= counts.pendingShipments || 0 %>
-                </h3>
-                <p class="text-muted mb-0 fs-sm">Waiting shipments</p>
-              </div>
-            </div>
-            <div class="card-footer py-2 border-0 bg-light">
-              <a
-                href="/admin/shipments?status=Pending"
-                class="text-decoration-none d-flex justify-content-between align-items-center"
-              >
-                <span class="text-warning small">View details</span>
-                <i class="fas fa-arrow-right text-warning small"></i>
-              </a>
-            </div>
-          </div>
+        <div>
+            <div class="card-title">Admin Dashboard</div>
+            <div class="card-subtitle">System overview and management</div>
         </div>
-      </div>
-
-      <div class="col-md-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body p-0">
-            <div class="d-flex flex-column p-3">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <h6 class="text-uppercase text-muted fs-sm fw-semibold mb-0">
-                  Delivered
-                </h6>
-                <div class="icon-circle bg-success-soft">
-                  <i class="fas fa-check-circle text-success"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="fw-bold mb-0">
-                  <%= counts.deliveredShipments || 0 %>
-                </h3>
-                <p class="text-muted mb-0 fs-sm">Completed</p>
-              </div>
-            </div>
-            <div class="card-footer py-2 border-0 bg-light">
-              <a
-                href="/admin/shipments?status=Delivered"
-                class="text-decoration-none d-flex justify-content-between align-items-center"
-              >
-                <span class="text-success small">View details</span>
-                <i class="fas fa-arrow-right text-success small"></i>
-              </a>
-            </div>
-          </div>
+        <div style="margin-left: auto;">
+            <a href="/admin/shipments/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Create Shipment
+            </a>
         </div>
-      </div>
-
-      <div class="col-md-3">
-        <div class="card shadow-sm h-100">
-          <div class="card-body p-0">
-            <div class="d-flex flex-column p-3">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <h6 class="text-uppercase text-muted fs-sm fw-semibold mb-0">
-                  Subscribers
-                </h6>
-                <div class="icon-circle bg-info-soft">
-                  <i class="fas fa-envelope text-info"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="fw-bold mb-0"><%= counts.newsletters || 0 %></h3>
-                <p class="text-muted mb-0 fs-sm">Newsletter</p>
-              </div>
-            </div>
-            <div class="card-footer py-2 border-0 bg-light">
-              <a
-                href="/admin/newsletter"
-                class="text-decoration-none d-flex justify-content-between align-items-center"
-              >
-                <span class="text-info small">View details</span>
-                <i class="fas fa-arrow-right text-info small"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
+</div>
 
-    <div class="row g-4 mx-0 mb-4">
-      <div class="col-md-8">
-        <div class="card shadow-sm h-100">
-          <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0 fw-semibold">Recent Shipments</h5>
-              <a href="/admin/shipments" class="btn btn-sm btn-outline-primary"
-                >View All</a
-              >
-            </div>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th>Tracking ID</th>
-                    <th>Customer</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% if (recentShipments && recentShipments.length > 0) { %> <%
-                  recentShipments.forEach(function(shipment) { %>
-                  <tr>
-                    <td class="fw-medium"><%= shipment.trackingId %></td>
-                    <td>
-                      <div><%= shipment.customerName %></div>
-                      <small class="text-muted"
-                        ><%= shipment.customerEmail %></small
-                      >
-                    </td>
-                    <td>
-                      <% let badgeClass = ''; %> <% if (shipment.status ===
-                      'Pending') { %> <% badgeClass = 'badge-pending'; %> <% }
-                      else if (shipment.status === 'In Transit') { %> <%
-                      badgeClass = 'badge-transit'; %> <% } else if
-                      (shipment.status === 'Delivered') { %> <% badgeClass =
-                      'badge-delivered'; %> <% } else if (shipment.status ===
-                      'Delayed') { %> <% badgeClass = 'badge-delayed'; %> <% }
-                      else if (shipment.status === 'Cancelled') { %> <%
-                      badgeClass = 'badge-cancelled'; %> <% } else { %> <%
-                      badgeClass = 'badge-secondary'; %> <% } %>
-                      <span class="badge <%= badgeClass %>"
-                        ><%= shipment.status %></span
-                      >
-                    </td>
-                    <td>
-                      <%= new Date(shipment.createdAt).toLocaleDateString() %>
-                    </td>
-                    <td>
-                      <a
-                        href="/admin/shipments/edit/<%= shipment._id %>"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        <i class="fas fa-edit"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  <% }); %> <% } else { %>
-                  <tr>
-                    <td colspan="5" class="text-center py-3">
-                      No recent shipments found
-                    </td>
-                  </tr>
-                  <% } %>
-                </tbody>
-              </table>
-            </div>
-          </div>
+<!-- Statistics Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+            <i class="fas fa-box"></i>
         </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-semibold">Quick Actions</h5>
-          </div>
-          <div class="card-body">
-            <div class="d-grid gap-3">
-              <a
-                href="/admin/shipments/create"
-                class="btn btn-primary d-flex align-items-center justify-content-between"
-              >
-                <span><i class="fas fa-plus me-2"></i> Create Shipment</span>
-                <i class="fas fa-arrow-right"></i>
-              </a>
-
-              <a
-                href="/admin/shipments"
-                class="btn btn-outline-secondary d-flex align-items-center justify-content-between"
-              >
-                <span><i class="fas fa-search me-2"></i> Manage Shipments</span>
-                <i class="fas fa-arrow-right"></i>
-              </a>
-
-              <a
-                href="/admin/newsletter"
-                class="btn btn-outline-info d-flex align-items-center justify-content-between"
-              >
-                <span><i class="fas fa-envelope me-2"></i> Newsletter</span>
-                <i class="fas fa-arrow-right"></i>
-              </a>
-
-              <a
-                href="/shipment/track"
-                target="_blank"
-                class="btn btn-outline-dark d-flex align-items-center justify-content-between"
-              >
-                <span
-                  ><i class="fas fa-search-location me-2"></i> Track
-                  Shipment</span
-                >
-                <i class="fas fa-external-link-alt"></i>
-              </a>
-            </div>
-          </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= counts.shipments || 0 %></div>
+            <div class="stat-label">Total Shipments</div>
+            <div class="stat-change neutral">All time</div>
         </div>
-      </div>
     </div>
-  </div>
-</main>
-<%- include('../layouts/admin-footer') %>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= counts.pendingShipments || 0 %></div>
+            <div class="stat-label">Pending Shipments</div>
+            <div class="stat-change neutral">Awaiting processing</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= counts.deliveredShipments || 0 %></div>
+            <div class="stat-label">Delivered</div>
+            <div class="stat-change positive">Successfully completed</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= counts.newsletters || 0 %></div>
+            <div class="stat-label">Newsletter Subscribers</div>
+            <div class="stat-change neutral">Active subscribers</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Shipments Table -->
+<div class="table-container" style="margin-bottom: 24px;">
+    <div class="table-header">
+        <h3 class="table-title">Recent Shipments</h3>
+        <a href="/admin/shipments" class="btn btn-secondary">
+            <i class="fas fa-eye"></i>
+            View All
+        </a>
+    </div>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Tracking ID</th>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Customer</th>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Route</th>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Status</th>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Date</th>
+                    <th style="padding: 16px; text-align: center; font-weight: 600; color: #374151;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (recentShipments && recentShipments.length > 0) { %>
+                    <% recentShipments.forEach(function(shipment) { %>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 16px; font-weight: 600; color: #032330;"><%= shipment.trackingId %></td>
+                        <td style="padding: 16px;">
+                            <div style="font-weight: 600; color: #374151;"><%= shipment.customerName %></div>
+                            <div style="font-size: 12px; color: #6b7280;"><%= shipment.customerEmail %></div>
+                        </td>
+                        <td style="padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-bottom: 4px;"></div>
+                                    <div style="width: 2px; height: 20px; background: #e5e7eb;"></div>
+                                    <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-top: 4px;"></div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">
+                                        <i class="fas fa-map-marker-alt" style="color: #10b981; margin-right: 4px;"></i>
+                                        <%= shipment.origin.city || shipment.origin %>, <%= shipment.origin.country || '' %>
+                                    </div>
+                                    <div style="font-weight: 600; color: #374151;">
+                                        <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 4px;"></i>
+                                        <%= shipment.destination.city || shipment.destination %>, <%= shipment.destination.country || '' %>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 16px; text-align: right;">
+                            <% let statusClass = 'pending'; %>
+                            <% if (shipment.status === 'Delivered') statusClass = 'delivered'; %>
+                            <% if (shipment.status === 'In Transit') statusClass = 'transit'; %>
+                            <% if (shipment.status === 'Cancelled') statusClass = 'cancelled'; %>
+                            <span class="status-badge <%= statusClass %>"><%= shipment.status %></span>
+                        </td>
+                        <td style="padding: 16px; color: #6b7280;"><%= new Date(shipment.createdAt).toLocaleDateString() %></td>
+                        <td style="padding: 16px; text-align: center;">
+                            <a href="/admin/shipments/edit/<%= shipment._id %>" style="padding: 8px; background: #f3f4f6; border: none; border-radius: 6px; color: #6b7280; text-decoration: none; transition: all 0.2s ease; display: inline-block;">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: #6b7280;">
+                            <i class="fas fa-box" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+                            <div>No recent shipments found</div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Actions Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <div>
+                <div class="card-title">Create New Shipment</div>
+                <div class="card-subtitle">Add a new shipment to the system</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/shipments/create" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-plus"></i>
+                Create Shipment
+            </a>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <i class="fas fa-search"></i>
+            </div>
+            <div>
+                <div class="card-title">Manage Shipments</div>
+                <div class="card-subtitle">View and edit all shipments</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/shipments" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-box"></i>
+                View All Shipments
+            </a>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div>
+                <div class="card-title">Newsletter Management</div>
+                <div class="card-subtitle">Manage newsletter subscribers</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/newsletter" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-users"></i>
+                Manage Subscribers
+            </a>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div>
+                <div class="card-title">System Settings</div>
+                <div class="card-subtitle">Configure system preferences</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/settings" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+        </div>
+    </div>
+</div>
 

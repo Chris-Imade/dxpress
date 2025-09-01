@@ -233,12 +233,10 @@ exports.getDashboard = async (req, res) => {
 
     res.render("admin/dashboard", {
       title: "Admin Dashboard",
-      layout: "layouts/admin",
+      layout: "layouts/admin-dashboard",
       path: "/admin/",
       counts,
       recentShipments,
-      stylesheets: "",
-      scripts: "",
     });
   } catch (error) {
     console.error("Get dashboard error:", error);
@@ -258,34 +256,83 @@ exports.getDashboard = async (req, res) => {
 // Settings
 exports.getSettings = async (req, res) => {
   try {
-    const user = await User.findById(req.session.user._id);
+    // Use req.user._id instead of req.session.user._id
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).render("admin/404", {
+        title: "User Not Found",
+        path: "/admin/error",
+        layout: "layouts/admin-dashboard",
+        stylesheets: "",
+        scripts: "",
+      });
+    }
+    
+    // Ensure user has default shipping rates if not set
+    if (!user.shippingRates) {
+      user.shippingRates = {
+        dhl: { baseRate: 45.99, additionalFees: 5.0 },
+        fedex: { baseRate: 35.5, additionalFees: 3.5 },
+        ups: { baseRate: 40.75, additionalFees: 4.25 }
+      };
+      await user.save();
+    }
+    
     res.render("admin/settings", {
       title: "Settings",
-      layout: "layouts/admin",
+      layout: "layouts/admin-dashboard",
       user,
       path: "/admin/settings",
+      stylesheets: "",
+      scripts: "",
+      req: req,
     });
   } catch (error) {
     console.error("Get settings error:", error);
-    res.status(500).redirect("/admin/dashboard");
+    res.status(500).render("admin/500", {
+      title: "Server Error",
+      path: "/500",
+      layout: "layouts/admin-dashboard",
+      error: process.env.NODE_ENV === "production" ? null : error,
+      stylesheets: "",
+      scripts: "",
+    });
   }
 };
 
 exports.postSettings = async (req, res) => {
   try {
     const { dhl, fedex, ups } = req.body;
-    await User.findByIdAndUpdate(req.session.user._id, {
-      "shippingRates.dhl.baseRate": dhl.baseRate,
-      "shippingRates.dhl.additionalFees": dhl.additionalFees,
-      "shippingRates.fedex.baseRate": fedex.baseRate,
-      "shippingRates.fedex.additionalFees": fedex.additionalFees,
-      "shippingRates.ups.baseRate": ups.baseRate,
-      "shippingRates.ups.additionalFees": ups.additionalFees,
+    
+    // Log the settings update
+    const AuditLog = require("../models/AuditLog");
+    await AuditLog.create({
+      userId: req.user._id,
+      action: "UPDATE_SETTINGS",
+      resource: "system",
+      details: {
+        dhl: { baseRate: dhl.baseRate, additionalFees: dhl.additionalFees },
+        fedex: { baseRate: fedex.baseRate, additionalFees: fedex.additionalFees },
+        ups: { baseRate: ups.baseRate, additionalFees: ups.additionalFees }
+      },
+      ipAddress: req.ip,
+      userAgent: req.get("User-Agent"),
     });
-    res.redirect("/admin/settings");
+    
+    await User.findByIdAndUpdate(req.user._id, {
+      "shippingRates.dhl.baseRate": parseFloat(dhl.baseRate),
+      "shippingRates.dhl.additionalFees": parseFloat(dhl.additionalFees),
+      "shippingRates.fedex.baseRate": parseFloat(fedex.baseRate),
+      "shippingRates.fedex.additionalFees": parseFloat(fedex.additionalFees),
+      "shippingRates.ups.baseRate": parseFloat(ups.baseRate),
+      "shippingRates.ups.additionalFees": parseFloat(ups.additionalFees),
+    });
+    
+    res.redirect("/admin/settings?success=1");
   } catch (error) {
     console.error("Post settings error:", error);
-    res.status(500).redirect("/admin/settings");
+    res.redirect("/admin/settings?error=1");
   }
 };
 
@@ -387,15 +434,20 @@ exports.getShipments = async (req, res) => {
     res.render("admin/shipments", {
       title: "Manage Shipments",
       path: "/admin/shipments",
+      layout: "layouts/admin-dashboard",
       shipments,
-      currentPage: page,
-      totalPages,
-      limit,
-      statusFilter,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        totalItems: totalShipments,
+      },
       searchQuery,
-      totalShipments,
+      statusFilter,
       req: req,
-      layout: false,
+      filters: { status: statusFilter },
+      stylesheets: "",
+      scripts: "",
     });
   } catch (error) {
     console.error("Get shipments error:", error);
@@ -411,9 +463,12 @@ exports.getShipments = async (req, res) => {
         totalItems: 0,
       },
       searchQuery: req.query.search || "",
+      statusFilter: "",
       req: req,
-      filters: {},
-      layout: false,
+      filters: { status: "" },
+      layout: "layouts/admin-dashboard",
+      stylesheets: "",
+      scripts: "",
     });
   }
 };
@@ -423,9 +478,11 @@ exports.getCreateShipment = (req, res) => {
   res.render("admin/create-shipment", {
     title: "Create New Shipment",
     path: "/admin/shipments/create",
+    layout: "layouts/admin-dashboard",
     errorMessage: null,
     formData: {},
-    layout: false,
+    stylesheets: "",
+    scripts: "",
   });
 };
 
@@ -541,9 +598,12 @@ exports.getEditShipment = async (req, res) => {
     res.render("admin/edit-shipment", {
       title: "Edit Shipment",
       path: "/admin/shipments/edit",
+      layout: "layouts/admin-dashboard",
       shipment,
       errorMessage: null,
-      layout: false,
+      stylesheets: "",
+      scripts: "",
+      req: req,
     });
   } catch (error) {
     console.error("Get edit shipment error:", error);
@@ -563,8 +623,14 @@ exports.updateShipment = async (req, res) => {
       customerName,
       customerEmail,
       customerPhone,
-      origin,
-      destination,
+      originAddress,
+      originCity,
+      originPostalCode,
+      originCountry,
+      destinationAddress,
+      destinationCity,
+      destinationPostalCode,
+      destinationCountry,
       estimatedDelivery,
       status,
       statusLocation,
@@ -594,8 +660,18 @@ exports.updateShipment = async (req, res) => {
     shipment.customerName = customerName;
     shipment.customerEmail = customerEmail;
     shipment.customerPhone = customerPhone;
-    shipment.origin = origin;
-    shipment.destination = destination;
+    shipment.origin = {
+      address: originAddress,
+      city: originCity,
+      postalCode: originPostalCode,
+      country: originCountry,
+    };
+    shipment.destination = {
+      address: destinationAddress,
+      city: destinationCity,
+      postalCode: destinationPostalCode,
+      country: destinationCountry,
+    };
     shipment.estimatedDelivery = new Date(estimatedDelivery);
     shipment.weight = weight;
     shipment.dimensions = {
@@ -664,7 +740,7 @@ exports.updateShipment = async (req, res) => {
         // If status changed but no valid history entries, add a default one
         shipment.statusHistory.unshift({
           status,
-          location: statusLocation || origin,
+          location: statusLocation || `${originCity}, ${originCountry}`,
           note: statusNote || "",
           timestamp: new Date(),
         });
@@ -720,10 +796,13 @@ exports.updateShipment = async (req, res) => {
     res.render("admin/edit-shipment", {
       title: "Edit Shipment",
       path: "/admin/shipments/edit",
+      layout: "layouts/admin-dashboard",
       shipment,
       errorMessage:
         "An error occurred while updating the shipment: " + error.message,
-      layout: false,
+      stylesheets: "",
+      scripts: "",
+      req: req,
     });
   }
 };
@@ -766,6 +845,7 @@ exports.getNewsletterSubscribers = async (req, res) => {
     res.render("admin/newsletter", {
       title: "Newsletter Subscribers",
       path: "/admin/newsletter",
+      layout: "layouts/admin-dashboard",
       subscribers,
       currentPage: page,
       totalPages,
@@ -773,7 +853,8 @@ exports.getNewsletterSubscribers = async (req, res) => {
       search,
       searchQuery: search,
       totalSubscribers,
-      layout: false,
+      stylesheets: "",
+      scripts: "",
     });
   } catch (error) {
     console.error("Get newsletter subscribers error:", error);

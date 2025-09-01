@@ -28,20 +28,20 @@
         /* Sidebar Styles */
         .sidebar {
             width: 280px;
-            background: linear-gradient(180deg, #032330 0%, #1a4c5a 100%);
+            height: 100vh;
+            background: linear-gradient(135deg, #032330, #053142);
             color: white;
             position: fixed;
-            height: 100vh;
             left: 0;
             top: 0;
             transform: translateX(0);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
             z-index: 1000;
             overflow-y: auto;
         }
 
         .sidebar.collapsed {
-            transform: translateX(-280px);
+            transform: translateX(-100%);
         }
 
         .sidebar-header {
@@ -133,6 +133,10 @@
         .user-avatar {
             width: 40px;
             height: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            max-width: 40px;
+            max-height: 40px;
             background: #4ade80;
             border-radius: 50%;
             display: flex;
@@ -141,6 +145,9 @@
             font-weight: 600;
             font-size: 16px;
             color: #032330;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .user-details h4 {
@@ -158,12 +165,14 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            transition: margin-left 0.3s ease;
+            transition: all 0.3s ease;
             min-height: 100vh;
+            width: calc(100% - 280px);
         }
 
         .main-content.expanded {
             margin-left: 0;
+            width: 100%;
         }
 
         .topbar {
@@ -422,33 +431,6 @@
             background: #e5e7eb;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-280px);
-            }
-
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .topbar {
-                padding: 12px 16px;
-            }
-
-            .content-area {
-                padding: 16px;
-            }
-        }
-
         /* Overlay for mobile */
         .sidebar-overlay {
             position: fixed;
@@ -463,6 +445,35 @@
 
         .sidebar-overlay.active {
             display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1001;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -587,6 +598,11 @@
                 sidebar.classList.toggle('mobile-open');
                 sidebarOverlay.classList.toggle('active');
             } else {
+                // Force remove any mobile classes first
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.remove('active');
+                
+                // Toggle desktop collapsed state
                 sidebar.classList.toggle('collapsed');
                 mainContent.classList.toggle('expanded');
             }
@@ -602,6 +618,10 @@
             if (!isMobile) {
                 sidebar.classList.remove('mobile-open');
                 sidebarOverlay.classList.remove('active');
+            } else {
+                // On mobile, remove desktop collapsed state
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
             }
         });
 
@@ -615,124 +635,10 @@
             });
         });
 
-        // Notification Modal Functionality
+        // Redirect to notifications page
         function toggleNotifications() {
-            const modal = document.getElementById('notificationModal');
-            if (modal) {
-                modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            } else {
-                createNotificationModal();
-            }
+            window.location.href = '/dashboard/notifications';
         }
-
-        function createNotificationModal() {
-            const modal = document.createElement('div');
-            modal.id = 'notificationModal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-            `;
-
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 16px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
-                    <div style="padding: 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin: 0; color: #032330; font-size: 20px;">Notifications</h3>
-                        <button onclick="closeNotificationModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">&times;</button>
-                    </div>
-                    <div style="padding: 20px;">
-                        <div style="margin-bottom: 16px; padding: 16px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 8px;">
-                            <div style="font-weight: 600; color: #1e40af; margin-bottom: 4px;">Shipment Delivered</div>
-                            <div style="font-size: 14px; color: #6b7280;">TRK001234567 has been delivered to Los Angeles</div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">2 hours ago</div>
-                        </div>
-                        <div style="margin-bottom: 16px; padding: 16px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px;">
-                            <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">Shipment Delayed</div>
-                            <div style="font-size: 14px; color: #6b7280;">TRK002345678 is experiencing delays due to weather</div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">4 hours ago</div>
-                        </div>
-                        <div style="margin-bottom: 16px; padding: 16px; background: #d1fae5; border-left: 4px solid #10b981; border-radius: 8px;">
-                            <div style="font-weight: 600; color: #065f46; margin-bottom: 4px;">New Invoice Generated</div>
-                            <div style="font-size: 14px; color: #6b7280;">Invoice #INV-2024-006 is ready for download</div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">1 day ago</div>
-                        </div>
-                        <div style="padding: 16px; background: #f9fafb; border-left: 4px solid #6b7280; border-radius: 8px;">
-                            <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">System Update</div>
-                            <div style="font-size: 14px; color: #6b7280;">Dashboard features have been updated with new tracking capabilities</div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 8px;">2 days ago</div>
-                        </div>
-                    </div>
-                    <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
-                        <button onclick="markAllAsRead()" style="background: #032330; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                            Mark All as Read
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            // Close modal when clicking outside
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeNotificationModal();
-                }
-            });
-        }
-
-        function closeNotificationModal() {
-            const modal = document.getElementById('notificationModal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-
-        function markAllAsRead() {
-            // Hide notification badge
-            const badge = document.querySelector('.notification-badge');
-            if (badge) {
-                badge.style.display = 'none';
-            }
-            closeNotificationModal();
-            
-            // Show success message
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                padding: 16px 20px;
-                border-radius: 8px;
-                font-weight: 600;
-                z-index: 10001;
-                animation: slideIn 0.3s ease;
-            `;
-            notification.textContent = 'All notifications marked as read';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

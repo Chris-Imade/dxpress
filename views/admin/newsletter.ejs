@@ -1,173 +1,140 @@
-<%- include('../layouts/admin-header') %>
-
-<main id="main-content" class="ml-collapsed">
-  <div class="dashboard-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="h3 mb-0">Newsletter Subscribers</h2>
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item">
-            <a href="/admin/dashboard">Dashboard</a>
-          </li>
-          <li class="breadcrumb-item active" aria-current="page">
-            Newsletter Subscribers
-          </li>
-        </ol>
-      </nav>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-white py-3">
-        <div class="row g-3 align-items-center">
-          <div class="col-md-6">
-            <form method="GET" action="/admin/newsletter" class="d-flex gap-2">
-              <input
-                type="search"
-                class="form-control"
-                name="search"
-                placeholder="Search by email"
-                value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
-              />
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i>
-              </button>
-            </form>
-          </div>
-          <div class="col-md-6 text-md-end">
-            <span class="text-muted"
-              >Total: <%= totalSubscribers %> subscribers</span
-            >
-          </div>
+<!-- Newsletter Management Page -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-envelope"></i>
         </div>
-      </div>
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Email</th>
-                <th>Subscribed On</th>
-                <th>Actions</th>
-              </tr>
+        <div>
+            <div class="card-title">Newsletter Management</div>
+            <div class="card-subtitle">Manage newsletter subscribers</div>
+        </div>
+        <div style="margin-left: auto;">
+            <a href="/admin/newsletter/export-csv" class="btn btn-secondary">
+                <i class="fas fa-download"></i>
+                Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div style="padding: 20px;">
+        <form method="GET" action="/admin/newsletter" style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Search Subscribers</label>
+                <input 
+                    type="search" 
+                    style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
+                    placeholder="Search by email address..." 
+                    name="search" 
+                    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                >
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: fit-content;">
+                <i class="fas fa-search"></i>
+                Search
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div style="margin-bottom: 16px; color: #6b7280; font-weight: 500;">
+    Total: <%= totalSubscribers %> subscribers found
+</div>
+
+<!-- Subscribers Table -->
+<div class="table-container" style="margin-bottom: 24px;">
+    <div class="table-header">
+        <h3 class="table-title">Newsletter Subscribers</h3>
+    </div>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Email Address</th>
+                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Subscribed Date</th>
+                    <th style="padding: 16px; text-align: center; font-weight: 600; color: #374151;">Actions</th>
+                </tr>
             </thead>
             <tbody>
-              <% if (subscribers && subscribers.length > 0) { %> <%
-              subscribers.forEach(function(subscriber) { %>
-              <tr>
-                <td><%= subscriber.email %></td>
-                <td>
-                  <%= new Date(subscriber.createdAt).toLocaleDateString() %>
-                </td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-outline-danger delete-subscriber-btn"
-                    data-id="<%= subscriber._id %>"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteSubscriberModal"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-              <% }); %> <% } else { %>
-              <tr>
-                <td colspan="3" class="text-center py-3">
-                  No subscribers found
-                </td>
-              </tr>
-              <% } %>
+                <% if (subscribers && subscribers.length > 0) { %>
+                    <% subscribers.forEach(function(subscriber) { %>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 16px; font-weight: 600; color: #032330;"><%= subscriber.email %></td>
+                        <td style="padding: 16px; color: #6b7280;"><%= new Date(subscriber.createdAt).toLocaleDateString() %></td>
+                        <td style="padding: 16px; text-align: center;">
+                            <button 
+                                class="delete-subscriber-btn" 
+                                data-id="<%= subscriber._id %>"
+                                style="padding: 8px; background: #fee2e2; border: none; border-radius: 6px; color: #dc2626; cursor: pointer; transition: all 0.2s ease;"
+                                onclick="confirmDeleteSubscriber('<%= subscriber._id %>')"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="3" style="padding: 40px; text-align: center; color: #6b7280;">
+                            <i class="fas fa-envelope" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+                            <div>No subscribers found</div>
+                        </td>
+                    </tr>
+                <% } %>
             </tbody>
-          </table>
-        </div>
-      </div>
+        </table>
     </div>
+</div>
 
-    <!-- Pagination -->
-    <% if (totalPages > 1) { %>
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
-          <a
-            class="page-link"
-            href="/admin/newsletter?page=<%= currentPage-1 %><%= searchQuery ? '&search='+searchQuery : '' %>"
-            tabindex="-1"
-            aria-disabled="<%= currentPage == 1 %>"
-            >Previous</a
-          >
-        </li>
-
-        <% for(let i = 1; i <= totalPages; i++) { %>
-        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
-          <a
-            class="page-link"
-            href="/admin/newsletter?page=<%= i %><%= searchQuery ? '&search='+searchQuery : '' %>"
-            ><%= i %></a
-          >
-        </li>
-        <% } %>
-
-        <li
-          class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>"
-        >
-          <a
-            class="page-link"
-            href="/admin/newsletter?page=<%= currentPage+1 %><%= searchQuery ? '&search='+searchQuery : '' %>"
-            aria-disabled="<%= currentPage == totalPages %>"
-            >Next</a
-          >
-        </li>
-      </ul>
-    </nav>
+<!-- Pagination -->
+<% if (totalPages > 1) { %>
+<div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px;">
+    <% if (currentPage > 1) { %>
+        <a href="/admin/newsletter?page=<%= currentPage-1 %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
+           style="padding: 8px 16px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;">
+            <i class="fas fa-chevron-left"></i> Previous
+        </a>
     <% } %>
+    
+    <% for(let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+            <span style="padding: 8px 12px; background: #032330; color: white; border-radius: 6px; font-weight: 600;"><%= i %></span>
+        <% } else { %>
+            <a href="/admin/newsletter?page=<%= i %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
+               style="padding: 8px 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;"><%= i %></a>
+        <% } %>
+    <% } %>
+    
+    <% if (currentPage < totalPages) { %>
+        <a href="/admin/newsletter?page=<%= currentPage+1 %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
+           style="padding: 8px 16px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;">
+            Next <i class="fas fa-chevron-right"></i>
+        </a>
+    <% } %>
+</div>
+<% } %>
 
-    <!-- Download CSV Button -->
-    <div class="text-end mt-4">
-      <a href="/admin/newsletter/export-csv" class="btn btn-success">
-        <i class="fas fa-file-csv me-1"></i> Download CSV
-      </a>
-    </div>
-  </div>
-
-  <!-- Delete Subscriber Modal -->
-  <div
-    class="modal fade"
-    id="deleteSubscriberModal"
-    tabindex="-1"
-    aria-labelledby="deleteSubscriberModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteSubscriberModalLabel">
-            Confirm Delete
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to delete this subscriber? This action cannot be
-          undone.
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Cancel
-          </button>
-          <form id="deleteSubscriberForm" method="POST" action="">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<%- include('../layouts/admin-footer') %>
+<script>
+function confirmDeleteSubscriber(subscriberId) {
+    if (confirm('Are you sure you want to delete this subscriber? This action cannot be undone.')) {
+        fetch(`/admin/newsletter/${subscriberId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error deleting subscriber: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the subscriber.');
+        });
+    }
+}
+</script>

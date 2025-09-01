@@ -31,6 +31,7 @@ const newsletterRoutes = require("./routes/newsletter");
 const ecommerceRoutes = require("./routes/ecommerce");
 const journalRoutes = require("./routes/journal");
 const shippingRoutes = require("./routes/shipping");
+const ratesRoutes = require("./routes/rates");
 
 // Import middleware
 const { isAuthenticated } = require("./middleware/auth");
@@ -206,6 +207,11 @@ app.use("/ecommerce-integration", ecommerceRoutes);
 app.use("/dxpress-journal", journalRoutes);
 app.use("/journal", journalRoutes);
 app.use("/international-shipping", shippingRoutes);
+app.use("/admin/rates", ratesRoutes);
+app.use("/admin/users", require("./routes/users"));
+app.use("/admin/audit-logs", require("./routes/auditLogs"));
+app.use("/api/tracking", require("./routes/tracking"));
+app.use("/", require("./routes/notifications"));
 
 // 404 handler
 app.use((req, res) => {
@@ -240,12 +246,16 @@ app.use((err, req, res, next) => {
   });
 
   // Render error page
-  res.status(err.status || 500).render("500", {
+  const isAdminRoute = req.path.startsWith('/admin');
+  const layoutToUse = isAdminRoute ? "layouts/admin-dashboard" : "layouts/main";
+  
+  res.status(err.status || 500).render(isAdminRoute ? "admin/500" : "500", {
     title: "Server Error",
     path: "/500",
-    error:
-      process.env.NODE_ENV === "production" ? "An error occurred" : err.message,
-    layout: false,
+    layout: layoutToUse,
+    error: process.env.NODE_ENV === "production" ? null : err,
+    stylesheets: "",
+    scripts: "",
   });
 });
 

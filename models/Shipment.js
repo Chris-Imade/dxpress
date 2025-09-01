@@ -77,13 +77,13 @@ const shipmentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "processing", "in_transit", "delivered", "cancelled"],
+      enum: ["draft", "pending", "processing", "in_transit", "delivered", "cancelled", "exception", "payment_failed"],
       default: "pending",
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+      enum: ["unpaid", "paid", "failed", "refunded"],
+      default: "unpaid",
     },
     paymentProvider: {
       type: String,

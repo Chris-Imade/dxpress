@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Management - DXpress Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #032330;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stat-card.success { border-left-color: #10b981; }
+        .stat-card.warning { border-left-color: #f59e0b; }
+        .stat-card.error { border-left-color: #ef4444; }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #032330;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .action-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #032330;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .recent-notifications {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .notification-icon.info { background: #dbeafe; color: #3b82f6; }
+        .notification-icon.success { background: #d1fae5; color: #10b981; }
+        .notification-icon.warning { background: #fef3c7; color: #f59e0b; }
+        .notification-icon.error { background: #fee2e2; color: #ef4444; }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #032330;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-message {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-meta {
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .success-message, .error-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <%- include('../partials/admin-sidebar') %>
+        
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-bell"></i>
+                    Notification Management
+                </h1>
+                <p class="page-subtitle">Send notifications to users and manage notification settings</p>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalNotifications">-</div>
+                    <div class="stat-label">Total Notifications</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="unreadNotifications">-</div>
+                    <div class="stat-label">Unread Notifications</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="activeUsers">-</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card error">
+                    <div class="stat-value" id="systemAlerts">-</div>
+                    <div class="stat-label">System Alerts</div>
+                </div>
+            </div>
+
+            <!-- Broadcast Notification -->
+            <div class="action-section">
+                <h2 class="section-title">
+                    <i class="fas fa-broadcast-tower"></i>
+                    Broadcast Notification
+                </h2>
+
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+
+                <form id="broadcastForm">
+                    <div class="form-group">
+                        <label class="form-label" for="notificationTitle">Title *</label>
+                        <input type="text" id="notificationTitle" class="form-input" placeholder="Enter notification title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="notificationMessage">Message *</label>
+                        <textarea id="notificationMessage" class="form-textarea" placeholder="Enter notification message" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="notificationType">Type</label>
+                            <select id="notificationType" class="form-select">
+                                <option value="info">Info</option>
+                                <option value="success">Success</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                                <option value="system">System</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="notificationPriority">Priority</label>
+                            <select id="notificationPriority" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="actionUrl">Action URL (Optional)</label>
+                            <input type="url" id="actionUrl" class="form-input" placeholder="https://example.com/action">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="actionText">Action Text (Optional)</label>
+                            <input type="text" id="actionText" class="form-input" placeholder="View Details">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="expiresAt">Expires At (Optional)</label>
+                        <input type="datetime-local" id="expiresAt" class="form-input">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Notification to All Users
+                    </button>
+                </form>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="recent-notifications">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    Recent Notifications
+                </h2>
+
+                <div id="recentNotificationsList" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading recent notifications...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load notification statistics
+        async function loadNotificationStats() {
+            try {
+                const response = await fetch('/api/admin/notifications/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('totalNotifications').textContent = stats.totalNotifications.toLocaleString();
+                    document.getElementById('unreadNotifications').textContent = stats.unreadNotifications.toLocaleString();
+                    document.getElementById('activeUsers').textContent = '0'; // Placeholder
+                    document.getElementById('systemAlerts').textContent = '0'; // Placeholder
+
+                    // Load recent notifications
+                    loadRecentNotifications(stats.recentNotifications);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent notifications
+        function loadRecentNotifications(notifications) {
+            const container = document.getElementById('recentNotificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 2rem;">No recent notifications found.</p>';
+                return;
+            }
+
+            container.innerHTML = notifications.map(notification => `
+                <div class="notification-item">
+                    <div class="notification-icon ${notification.type}">
+                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-meta">
+                            ${notification.userId?.name || 'System'} • ${new Date(notification.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get icon for notification type
+        function getNotificationIcon(type) {
+            const icons = {
+                info: 'info-circle',
+                success: 'check-circle',
+                warning: 'exclamation-triangle',
+                error: 'times-circle',
+                system: 'cog',
+                shipment: 'box',
+                payment: 'credit-card'
+            };
+            return icons[type] || 'bell';
+        }
+
+        // Handle broadcast form submission
+        document.getElementById('broadcastForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                title: document.getElementById('notificationTitle').value,
+                message: document.getElementById('notificationMessage').value,
+                type: document.getElementById('notificationType').value,
+                priority: document.getElementById('notificationPriority').value,
+                actionUrl: document.getElementById('actionUrl').value || undefined,
+                actionText: document.getElementById('actionText').value || undefined,
+                expiresAt: document.getElementById('expiresAt').value || undefined
+            };
+
+            try {
+                const response = await fetch('/api/admin/notifications/broadcast', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('success', `Notification sent successfully to ${result.count} users!`);
+                    this.reset();
+                    loadNotificationStats(); // Refresh stats
+                } else {
+                    showMessage('error', result.message || 'Failed to send notification');
+                }
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                showMessage('error', 'Failed to send notification');
+            }
+        });
+
+        // Show success/error messages
+        function showMessage(type, message) {
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+
+            // Hide both messages first
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            if (type === 'success') {
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+            } else {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successEl.style.display = 'none';
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotificationStats();
+        });
+    </script>
+</body>
+</html>

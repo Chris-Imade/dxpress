@@ -10,9 +10,9 @@
                 <div class="card-subtitle">This month</div>
             </div>
         </div>
-        <div class="card-value">247</div>
-        <div class="card-change positive">
-            <i class="fas fa-arrow-up"></i> +12% from last month
+        <div class="card-value" id="totalShipments">-</div>
+        <div class="card-change" id="totalShipmentsChange">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
     </div>
 
@@ -26,9 +26,9 @@
                 <div class="card-subtitle">Active shipments</div>
             </div>
         </div>
-        <div class="card-value">42</div>
-        <div class="card-change positive">
-            <i class="fas fa-arrow-up"></i> 8 new today
+        <div class="card-value" id="inTransitShipments">-</div>
+        <div class="card-change" id="inTransitChange">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
     </div>
 
@@ -42,9 +42,9 @@
                 <div class="card-subtitle">This week</div>
             </div>
         </div>
-        <div class="card-value">189</div>
-        <div class="card-change positive">
-            <i class="fas fa-arrow-up"></i> 98.5% success rate
+        <div class="card-value" id="deliveredShipments">-</div>
+        <div class="card-change" id="deliveredChange">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
     </div>
 
@@ -103,27 +103,10 @@
                 <div class="card-subtitle">Last 24 hours</div>
             </div>
         </div>
-        <div style="margin-top: 16px;">
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
-                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px;">Package DX-2024-001 delivered</div>
-                    <div style="font-size: 12px; color: #6b7280;">2 hours ago</div>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
-                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px;">New shipment created</div>
-                    <div style="font-size: 12px; color: #6b7280;">4 hours ago</div>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0;">
-                <div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px;">Payment received</div>
-                    <div style="font-size: 12px; color: #6b7280;">6 hours ago</div>
-                </div>
+        <div id="recentActivity" style="margin-top: 16px;">
+            <div style="text-align: center; padding: 20px; color: #6b7280;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 8px;"></i>
+                <div>Loading recent activity...</div>
             </div>
         </div>
     </div>
@@ -173,47 +156,11 @@
                     <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr style="border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 12px; font-weight: 600; color: #032330;">DX-2024-001</td>
-                    <td style="padding: 12px;">John Smith</td>
-                    <td style="padding: 12px;">New York, NY</td>
-                    <td style="padding: 12px;">
-                        <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">Delivered</span>
-                    </td>
-                    <td style="padding: 12px; color: #6b7280;">Jan 15, 2024</td>
-                    <td style="padding: 12px;">
-                        <a href="/dashboard/tracking?id=DX-2024-001" style="color: #032330; text-decoration: none; font-weight: 600;">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                    </td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 12px; font-weight: 600; color: #032330;">DX-2024-002</td>
-                    <td style="padding: 12px;">Sarah Johnson</td>
-                    <td style="padding: 12px;">Los Angeles, CA</td>
-                    <td style="padding: 12px;">
-                        <span style="background: #dbeafe; color: #1d4ed8; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">In Transit</span>
-                    </td>
-                    <td style="padding: 12px; color: #6b7280;">Jan 14, 2024</td>
-                    <td style="padding: 12px;">
-                        <a href="/dashboard/tracking?id=DX-2024-002" style="color: #032330; text-decoration: none; font-weight: 600;">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                    </td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e5e7eb;">
-                    <td style="padding: 12px; font-weight: 600; color: #032330;">DX-2024-003</td>
-                    <td style="padding: 12px;">Mike Davis</td>
-                    <td style="padding: 12px;">Chicago, IL</td>
-                    <td style="padding: 12px;">
-                        <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">Processing</span>
-                    </td>
-                    <td style="padding: 12px; color: #6b7280;">Jan 13, 2024</td>
-                    <td style="padding: 12px;">
-                        <a href="/dashboard/tracking?id=DX-2024-003" style="color: #032330; text-decoration: none; font-weight: 600;">
-                            <i class="fas fa-eye"></i> View
-                        </a>
+            <tbody id="recentShipmentsTable">
+                <tr>
+                    <td colspan="6" style="padding: 20px; text-align: center; color: #6b7280;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 8px;"></i>
+                        <div>Loading recent shipments...</div>
                     </td>
                 </tr>
             </tbody>
@@ -227,35 +174,339 @@
     </div>
 </div>
 
+<style>
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #032330;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+</style>
+
 <script>
-    // Initialize mini map
-    document.addEventListener('DOMContentLoaded', function() {
-        const miniMap = L.map('mini-map', {
-            zoomControl: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false,
-            boxZoom: false,
-            keyboard: false,
-            dragging: false,
-            tap: false,
-            touchZoom: false
-        }).setView([40.7128, -74.0060], 10);
+let miniMap;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(miniMap);
-
-        // Add sample markers
-        const deliveryIcon = L.divIcon({
-            html: '<i class="fas fa-truck" style="color: #032330; font-size: 16px;"></i>',
-            iconSize: [20, 20],
-            className: 'custom-div-icon'
-        });
-
-        L.marker([40.7589, -73.9851], {icon: deliveryIcon}).addTo(miniMap)
-            .bindPopup('Package DX-2024-002<br>In Transit');
+// Load dashboard statistics
+async function loadDashboardStats() {
+    try {
+        const response = await fetch('/api/dashboard/stats');
+        const stats = await response.json();
         
-        L.marker([40.6892, -74.0445], {icon: deliveryIcon}).addTo(miniMap)
-            .bindPopup('Package DX-2024-004<br>Out for Delivery');
+        if (response.ok) {
+            updateStatsDisplay(stats);
+        } else {
+            showStatsError();
+        }
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        showStatsError();
+    }
+}
+
+// Update statistics display
+function updateStatsDisplay(stats) {
+    // Total shipments
+    document.getElementById('totalShipments').textContent = stats.totalShipments || 0;
+    const totalChange = document.getElementById('totalShipmentsChange');
+    if (stats.totalShipmentsChange) {
+        totalChange.innerHTML = `<i class="fas fa-arrow-${stats.totalShipmentsChange > 0 ? 'up' : 'down'}"></i> ${Math.abs(stats.totalShipmentsChange)}% from last month`;
+        totalChange.className = `card-change ${stats.totalShipmentsChange > 0 ? 'positive' : 'negative'}`;
+    } else {
+        totalChange.innerHTML = 'No data available';
+        totalChange.className = 'card-change';
+    }
+    
+    // In transit shipments
+    document.getElementById('inTransitShipments').textContent = stats.inTransitShipments || 0;
+    const inTransitChange = document.getElementById('inTransitChange');
+    if (stats.newToday !== undefined) {
+        inTransitChange.innerHTML = `<i class="fas fa-arrow-up"></i> ${stats.newToday} new today`;
+        inTransitChange.className = 'card-change positive';
+    } else {
+        inTransitChange.innerHTML = 'No data available';
+        inTransitChange.className = 'card-change';
+    }
+    
+    // Delivered shipments
+    document.getElementById('deliveredShipments').textContent = stats.deliveredShipments || 0;
+    const deliveredChange = document.getElementById('deliveredChange');
+    if (stats.successRate !== undefined) {
+        deliveredChange.innerHTML = `<i class="fas fa-arrow-up"></i> ${stats.successRate}% success rate`;
+        deliveredChange.className = 'card-change positive';
+    } else {
+        deliveredChange.innerHTML = 'No data available';
+        deliveredChange.className = 'card-change';
+    }
+}
+
+// Show error state for stats
+function showStatsError() {
+    document.getElementById('totalShipments').textContent = '-';
+    document.getElementById('totalShipmentsChange').innerHTML = 'Error loading data';
+    document.getElementById('inTransitShipments').textContent = '-';
+    document.getElementById('inTransitChange').innerHTML = 'Error loading data';
+    document.getElementById('deliveredShipments').textContent = '-';
+    document.getElementById('deliveredChange').innerHTML = 'Error loading data';
+}
+
+// Load recent activity
+async function loadRecentActivity() {
+    try {
+        const response = await fetch('/api/dashboard/recent-activity');
+        const activities = await response.json();
+        
+        if (response.ok) {
+            displayRecentActivity(activities);
+        } else {
+            showActivityError();
+        }
+    } catch (error) {
+        console.error('Error loading recent activity:', error);
+        showActivityError();
+    }
+}
+
+// Display recent activity
+function displayRecentActivity(activities) {
+    const container = document.getElementById('recentActivity');
+    
+    if (!activities || activities.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-clock"></i>
+                <h3>No Recent Activity</h3>
+                <p>Your recent activity will appear here</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = activities.map((activity, index) => {
+        const isLast = index === activities.length - 1;
+        const statusColors = {
+            delivered: '#10b981',
+            created: '#3b82f6',
+            payment: '#f59e0b',
+            updated: '#8b5cf6'
+        };
+        
+        return `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; ${!isLast ? 'border-bottom: 1px solid #e5e7eb;' : ''}">
+                <div style="width: 8px; height: 8px; background: ${statusColors[activity.type] || '#6b7280'}; border-radius: 50%;"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px;">${activity.message}</div>
+                    <div style="font-size: 12px; color: #6b7280;">${formatTimeAgo(activity.timestamp)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = html;
+}
+
+// Show error state for activity
+function showActivityError() {
+    document.getElementById('recentActivity').innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error Loading Activity</h3>
+            <p>Unable to load recent activity</p>
+        </div>
+    `;
+}
+
+// Load recent shipments
+async function loadRecentShipments() {
+    try {
+        const response = await fetch('/api/shipments?limit=10&sort=createdAt&order=desc');
+        const data = await response.json();
+        
+        if (response.ok) {
+            displayRecentShipments(data.shipments || []);
+        } else {
+            showShipmentsError();
+        }
+    } catch (error) {
+        console.error('Error loading recent shipments:', error);
+        showShipmentsError();
+    }
+}
+
+// Display recent shipments
+function displayRecentShipments(shipments) {
+    const tbody = document.getElementById('recentShipmentsTable');
+    
+    if (!shipments || shipments.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No Shipments Yet</h3>
+                    <p>Your recent shipments will appear here</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const html = shipments.map(shipment => {
+        const statusColors = {
+            delivered: { bg: '#dcfce7', color: '#166534' },
+            'in-transit': { bg: '#dbeafe', color: '#1d4ed8' },
+            processing: { bg: '#fef3c7', color: '#92400e' },
+            pending: { bg: '#f3f4f6', color: '#374151' }
+        };
+        
+        const status = shipment.status?.toLowerCase() || 'pending';
+        const statusStyle = statusColors[status] || statusColors.pending;
+        
+        return `
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 12px; font-weight: 600; color: #032330;">${shipment.trackingNumber || 'N/A'}</td>
+                <td style="padding: 12px;">${shipment.recipientName || 'N/A'}</td>
+                <td style="padding: 12px;">${shipment.destinationAddress || 'N/A'}</td>
+                <td style="padding: 12px;">
+                    <span style="background: ${statusStyle.bg}; color: ${statusStyle.color}; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                        ${shipment.status || 'Pending'}
+                    </span>
+                </td>
+                <td style="padding: 12px; color: #6b7280;">${formatDate(shipment.createdAt)}</td>
+                <td style="padding: 12px;">
+                    <a href="/dashboard/tracking?id=${shipment.trackingNumber}" style="color: #032330; text-decoration: none; font-weight: 600;">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    tbody.innerHTML = html;
+}
+
+// Show error state for shipments
+function showShipmentsError() {
+    document.getElementById('recentShipmentsTable').innerHTML = `
+        <tr>
+            <td colspan="6" class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Error Loading Shipments</h3>
+                <p>Unable to load recent shipments</p>
+            </td>
+        </tr>
+    `;
+}
+
+// Initialize mini map with live data
+async function initializeMiniMap() {
+    miniMap = L.map('mini-map', {
+        zoomControl: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        dragging: false,
+        tap: false,
+        touchZoom: false
+    }).setView([40.7128, -74.0060], 10);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(miniMap);
+
+    // Load active shipments for map markers
+    try {
+        const response = await fetch('/api/shipments?status=in-transit&limit=5');
+        const data = await response.json();
+        
+        if (response.ok && data.shipments) {
+            addMapMarkers(data.shipments);
+        }
+    } catch (error) {
+        console.error('Error loading map data:', error);
+    }
+}
+
+// Add markers to mini map
+function addMapMarkers(shipments) {
+    const deliveryIcon = L.divIcon({
+        html: '<i class="fas fa-truck" style="color: #032330; font-size: 16px;"></i>',
+        iconSize: [20, 20],
+        className: 'custom-div-icon'
     });
+
+    shipments.forEach(shipment => {
+        if (shipment.currentLocation && shipment.currentLocation.coordinates) {
+            const [lng, lat] = shipment.currentLocation.coordinates;
+            L.marker([lat, lng], {icon: deliveryIcon}).addTo(miniMap)
+                .bindPopup(`${shipment.trackingNumber}<br>${shipment.status}`);
+        }
+    });
+}
+
+// Utility functions
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function formatTimeAgo(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+    loadRecentActivity();
+    loadRecentShipments();
+    initializeMiniMap();
+});
 </script>

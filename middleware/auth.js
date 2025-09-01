@@ -97,7 +97,11 @@ exports.isAuthenticated = (req, res, next) => {
 exports.isAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     req.session.errorMessage = "You do not have permission to access this page";
-    return res.redirect("/admin/dashboard");
+    // Redirect based on user role
+    if (req.user && req.user.role === "user") {
+      return res.redirect("/dashboard");
+    }
+    return res.redirect("/auth");
   }
   next();
 };

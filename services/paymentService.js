@@ -1,7 +1,11 @@
 /**
  * Payment Service
- * Handles payment processing for shipments
+ * Handles payment processing for shipments with integrated notifications
  */
+
+const Payment = require('../models/Payment');
+const Shipment = require('../models/Shipment');
+const Notification = require('../models/Notification');
 
 let stripe;
 const initializeStripe = () => {
@@ -207,6 +211,156 @@ exports.completePayment = async (provider, completionDetails) => {
     }
   } catch (error) {
     console.error("Payment completion error:", error);
+    throw error;
+  }
+};
+
+/**
+ * Create payment record and process payment
+ * @param {Object} shipmentData - Shipment information
+ * @param {Object} paymentData - Payment details
+ * @returns {Promise<Object>} Payment processing result
+ */
+exports.processShipmentPayment = async (shipmentData, paymentData) => {
+  try {
+    const { userId, shipmentId, amount, currency, paymentMethod } = paymentData;
+    
+    // Create payment record
+    const payment = new Payment({
+      shipmentId,
+      userId,
+      amount,
+      currency,
+      status: 'pending',
+      paymentMethod
+    });
+    
+    await payment.save();
+    
+    // Create notification for payment initiated
+    await Notification.createNotification({
+      userId,
+      title: 'Payment Processing',
+      message: `Payment of ${currency} ${amount.toFixed(2)} is being processed for your shipment.`,
+      type: 'payment',
+      category: 'payment_status',
+      relatedId: payment._id,
+      relatedModel: 'Payment',
+      actionUrl: `/dashboard/orders`,
+      actionText: 'View Order'
+    });
+    
+    // Process payment based on method
+    let paymentResult;
+    if (paymentMethod === 'stripe') {
+      paymentResult = await this.initiatePayment('stripe', {
+        amount,
+        currency,
+        shipmentId,
+        customerEmail: shipmentData.customerEmail
+      });
+      
+      payment.paymentIntentId = paymentResult.id;
+    } else if (paymentMethod === 'paypal') {
+      paymentResult = await this.initiatePayment('paypal', {
+        amount,
+        currency,
+        shipmentId,
+        customerEmail: shipmentData.customerEmail
+      });
+    }
+    
+    await payment.save();
+    
+    return {
+      success: true,
+      payment,
+      paymentResult
+    };
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update payment status and shipment accordingly
+ * @param {String} paymentId - Payment record ID
+ * @param {String} status - New payment status
+ * @param {Object} details - Additional payment details
+ * @returns {Promise<Object>} Update result
+ */
+exports.updatePaymentStatus = async (paymentId, status, details = {}) => {
+  try {
+    const payment = await Payment.findById(paymentId).populate('shipmentId');
+    if (!payment) {
+      throw new Error('Payment not found');
+    }
+    
+    const oldStatus = payment.status;
+    payment.status = status;
+    
+    if (details.transactionId) {
+      payment.transactionId = details.transactionId;
+    }
+    
+    if (details.paymentDetails) {
+      payment.paymentDetails = details.paymentDetails;
+    }
+    
+    if (details.failureReason) {
+      payment.failureReason = details.failureReason;
+    }
+    
+    await payment.save();
+    
+    // Update shipment status based on payment
+    const shipment = payment.shipmentId;
+    if (status === 'completed') {
+      shipment.paymentStatus = 'paid';
+      shipment.status = 'processing'; // Move to processing after payment
+      
+      // Create success notification
+      await Notification.createNotification({
+        userId: payment.userId,
+        title: 'Payment Successful',
+        message: `Payment of ${payment.currency} ${payment.amount.toFixed(2)} completed successfully. Your shipment is now being processed.`,
+        type: 'success',
+        category: 'payment_status',
+        relatedId: shipment._id,
+        relatedModel: 'Shipment',
+        actionUrl: `/dashboard/tracking?id=${shipment.trackingId}`,
+        actionText: 'Track Shipment'
+      });
+    } else if (status === 'failed') {
+      shipment.paymentStatus = 'unpaid';
+      shipment.status = 'payment_failed';
+      
+      // Create failure notification
+      await Notification.createNotification({
+        userId: payment.userId,
+        title: 'Payment Failed',
+        message: `Payment of ${payment.currency} ${payment.amount.toFixed(2)} failed. Please try again or contact support.`,
+        type: 'error',
+        category: 'payment_status',
+        relatedId: payment._id,
+        relatedModel: 'Payment',
+        priority: 'high',
+        actionUrl: `/dashboard/orders`,
+        actionText: 'Retry Payment'
+      });
+    }
+    
+    await shipment.save();
+    
+    return {
+      success: true,
+      payment,
+      shipment,
+      statusChanged: oldStatus !== status
+    };
+  } catch (error) {
+    console.error('Payment status update error:', error);
     throw error;
   }
 };

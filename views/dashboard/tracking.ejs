@@ -101,54 +101,8 @@
             <div class="card-subtitle">Your recently tracked packages</div>
         </div>
     </div>
-    <div style="margin-top: 16px;">
-        <div class="recent-tracking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease;" onclick="quickTrack('DX-2024-001')">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">DX-2024-001</div>
-                    <div style="font-size: 14px; color: #6b7280;">To: John Smith, New York</div>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">Delivered</div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">2 hours ago</div>
-            </div>
-        </div>
-
-        <div class="recent-tracking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease;" onclick="quickTrack('DX-2024-002')">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">DX-2024-002</div>
-                    <div style="font-size: 14px; color: #6b7280;">To: Sarah Johnson, Los Angeles</div>
-                </div>
-            </div>
-            <div style="text-align: right; position: relative;">
-                <div style="background: #dbeafe; color: #1d4ed8; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; position: relative; right: -70px; width: fit-content;">In Transit</div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Last updated: 1 hour ago</div>
-            </div>
-        </div>
-
-        <div class="recent-tracking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer; transition: all 0.3s ease;" onclick="quickTrack('DX-2024-003')">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">DX-2024-003</div>
-                    <div style="font-size: 14px; color: #6b7280;">To: Mike Davis, Chicago</div>
-                </div>
-            </div>
-            <div style="text-align: right; position: relative;">
-                <div style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; position: relative; right: -35px; width: fit-content;">Processing</div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">Started: 3 hours ago</div>
-            </div>
-        </div>
+    <div id="recentTrackingContainer" style="margin-top: 16px;">
+        <!-- Recent tracking items will be populated by JavaScript -->
     </div>
 </div>
 
@@ -221,6 +175,9 @@
 let trackingMap;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Load recent tracking history
+    loadRecentTracking();
+    
     // Handle tracking form submission
     document.getElementById('trackingForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -239,6 +196,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function loadRecentTracking() {
+    fetch('/dashboard/api/shipments?limit=5&sort=recent')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.shipments && data.shipments.length > 0) {
+                renderRecentTracking(data.shipments);
+            } else {
+                showEmptyRecentTracking();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent tracking:', error);
+            showEmptyRecentTracking();
+        });
+}
+
+function renderRecentTracking(shipments) {
+    const container = document.getElementById('recentTrackingContainer');
+    container.innerHTML = shipments.map(shipment => {
+        const statusClass = getStatusClass(shipment.status);
+        const statusText = shipment.status?.toUpperCase() || 'UNKNOWN';
+        
+        return `
+            <div class="recent-tracking-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease;" onclick="quickTrack('${shipment.trackingId}')">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #032330;">${shipment.trackingId}</div>
+                        <div style="font-size: 14px; color: #6b7280;">To: ${shipment.destination?.name || 'N/A'}, ${shipment.destination?.city || 'N/A'}</div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="status-badge ${statusClass}" style="padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">${statusText}</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">${new Date(shipment.updatedAt).toLocaleDateString()}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function showEmptyRecentTracking() {
+    const container = document.getElementById('recentTrackingContainer');
+    container.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
+            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+            <h4>No Recent Tracking History</h4>
+            <p style="margin-bottom: 20px;">You haven't tracked any packages yet. Start by entering a tracking number above.</p>
+            <button class="btn btn-primary" onclick="document.getElementById('trackingNumber').focus()">
+                <i class="fas fa-search me-2"></i>Track Your First Package
+            </button>
+        </div>
+    `;
+}
+
+function getStatusClass(status) {
+    switch(status?.toLowerCase()) {
+        case 'delivered': return 'delivered';
+        case 'in_transit': 
+        case 'processing': return 'transit';
+        case 'pending':
+        case 'draft': return 'pending';
+        default: return 'pending';
+    }
+}
+
 function trackPackage(trackingNumber) {
     // Show loading state
     const resultsDiv = document.getElementById('trackingResults');
@@ -247,13 +271,113 @@ function trackPackage(trackingNumber) {
     // Update tracking ID
     document.getElementById('trackingId').textContent = trackingNumber;
     
-    // Simulate API call - replace with actual API integration
-    setTimeout(() => {
-        displayTrackingResults(trackingNumber);
-    }, 1000);
+    // Show loading spinner
+    document.getElementById('trackingTimeline').innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Fetching tracking information...</p></div>';
+    
+    // Call API for real tracking data
+    fetch(`/dashboard/api/shipments?trackingId=${encodeURIComponent(trackingNumber)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.shipments && data.shipments.length > 0) {
+                displayTrackingResults(data.shipments[0]);
+            } else {
+                showTrackingNotFound(trackingNumber);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('trackingTimeline').innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;">Failed to fetch tracking information. Please try again.</div>';
+        });
 }
 
-function displayTrackingResults(trackingNumber) {
+function displayTrackingResults(shipment) {
+    // Update tracking information from shipment data
+    document.getElementById('packageStatus').textContent = shipment.status?.toUpperCase() || 'UNKNOWN';
+    document.getElementById('estimatedDelivery').textContent = shipment.estimatedDelivery ? new Date(shipment.estimatedDelivery).toLocaleDateString() : 'TBD';
+    document.getElementById('carrier').textContent = shipment.carrier || 'N/A';
+    document.getElementById('packageWeight').textContent = `${shipment.weight || 0} kg`;
+    
+    // Create timeline from shipment data
+    const timeline = createTimelineFromShipment(shipment);
+    document.getElementById('trackingTimeline').innerHTML = timeline;
+    
+    // Update map if coordinates available
+    if (shipment.origin && shipment.destination) {
+        const originCoords = [shipment.origin.latitude || 0, shipment.origin.longitude || 0];
+        const destCoords = [shipment.destination.latitude || 0, shipment.destination.longitude || 0];
+        initializeTrackingMap(originCoords, destCoords);
+    }
+}
+
+function createTimelineFromShipment(shipment) {
+    const events = [];
+    
+    // Add events based on shipment status and dates
+    if (shipment.status === 'delivered') {
+        events.push({
+            title: 'Package Delivered',
+            description: `Delivered to ${shipment.destination?.name || 'recipient'}`,
+            time: new Date(shipment.deliveredAt || shipment.updatedAt).toLocaleString(),
+            status: 'completed'
+        });
+    }
+    
+    if (['delivered', 'in_transit'].includes(shipment.status)) {
+        events.push({
+            title: 'In Transit',
+            description: `Package is on its way to ${shipment.destination?.city || 'destination'}`,
+            time: new Date(shipment.shippedAt || shipment.updatedAt).toLocaleString(),
+            status: shipment.status === 'delivered' ? 'completed' : 'current'
+        });
+    }
+    
+    if (['delivered', 'in_transit', 'processing'].includes(shipment.status)) {
+        events.push({
+            title: 'Package Processed',
+            description: `Package processed at ${shipment.origin?.city || 'origin'} facility`,
+            time: new Date(shipment.createdAt).toLocaleString(),
+            status: ['delivered', 'in_transit'].includes(shipment.status) ? 'completed' : 'current'
+        });
+    }
+    
+    events.push({
+        title: 'Label Created',
+        description: 'Shipping label created and package prepared',
+        time: new Date(shipment.createdAt).toLocaleString(),
+        status: 'completed'
+    });
+    
+    return events.map(event => `
+        <div class="timeline-item ${event.status}">
+            <div class="timeline-content">
+                <div class="timeline-title">${event.title}</div>
+                <div class="timeline-description">${event.description}</div>
+                <div class="timeline-time">${event.time}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showTrackingNotFound(trackingNumber) {
+    document.getElementById('trackingTimeline').innerHTML = `
+        <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
+            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5; color: #ef4444;"></i>
+            <h4>Tracking Number Not Found</h4>
+            <p style="margin-bottom: 20px;">We couldn't find any shipment with tracking number: <strong>${trackingNumber}</strong></p>
+            <p style="margin-bottom: 20px;">Please check the tracking number and try again, or contact support if you believe this is an error.</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-secondary" onclick="document.getElementById('trackingNumber').focus(); document.getElementById('trackingNumber').select();">
+                    <i class="fas fa-edit me-2"></i>Try Again
+                </button>
+                <button class="btn btn-primary" onclick="window.location.href='/dashboard/create-shipment'">
+                    <i class="fas fa-plus me-2"></i>Create Shipment
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function displayTrackingResultsOld(trackingNumber) {
     // Sample tracking data - replace with actual API data
     const trackingData = {
         'DX-2024-001': {
@@ -320,41 +444,54 @@ function displayTrackingResults(trackingNumber) {
     initializeTrackingMap(data.coordinates);
 }
 
-function initializeTrackingMap(coordinates) {
+function initializeTrackingMap(originCoords, destCoords) {
     if (trackingMap) {
         trackingMap.remove();
     }
 
-    trackingMap = L.map('trackingMap').setView(coordinates, 12);
+    // Use destination coordinates as center, fallback to origin or default
+    const centerCoords = destCoords[0] !== 0 ? destCoords : (originCoords[0] !== 0 ? originCoords : [40.7128, -74.0060]);
+    trackingMap = L.map('trackingMap').setView(centerCoords, 10);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(trackingMap);
 
-    // Add package marker
-    const packageIcon = L.divIcon({
-        html: '<i class="fas fa-box" style="color: #032330; font-size: 20px;"></i>',
-        iconSize: [30, 30],
-        className: 'custom-div-icon'
-    });
+    // Add origin marker if coordinates available
+    if (originCoords[0] !== 0) {
+        const originIcon = L.divIcon({
+            html: '<i class="fas fa-play" style="color: #10b981; font-size: 16px;"></i>',
+            iconSize: [25, 25],
+            className: 'custom-div-icon'
+        });
+        L.marker(originCoords, {icon: originIcon}).addTo(trackingMap)
+            .bindPopup('Origin Location');
+    }
 
-    L.marker(coordinates, {icon: packageIcon}).addTo(trackingMap)
-        .bindPopup('Current Package Location')
-        .openPopup();
+    // Add destination marker if coordinates available
+    if (destCoords[0] !== 0) {
+        const destIcon = L.divIcon({
+            html: '<i class="fas fa-map-marker-alt" style="color: #ef4444; font-size: 16px;"></i>',
+            iconSize: [25, 25],
+            className: 'custom-div-icon'
+        });
+        L.marker(destCoords, {icon: destIcon}).addTo(trackingMap)
+            .bindPopup('Destination Location');
+    }
 
-    // Add delivery route (sample)
-    const routeCoordinates = [
-        [coordinates[0] - 0.1, coordinates[1] - 0.1],
-        [coordinates[0] - 0.05, coordinates[1] - 0.05],
-        coordinates,
-        [coordinates[0] + 0.05, coordinates[1] + 0.05]
-    ];
-
-    L.polyline(routeCoordinates, {
-        color: '#032330',
-        weight: 4,
-        opacity: 0.7
-    }).addTo(trackingMap);
+    // Add route line if both coordinates available
+    if (originCoords[0] !== 0 && destCoords[0] !== 0) {
+        L.polyline([originCoords, destCoords], {
+            color: '#032330',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '5, 10'
+        }).addTo(trackingMap);
+        
+        // Fit map to show both markers
+        const group = new L.featureGroup([L.marker(originCoords), L.marker(destCoords)]);
+        trackingMap.fitBounds(group.getBounds().pad(0.1));
+    }
 }
 
 function quickTrack(trackingNumber) {
@@ -366,4 +503,35 @@ function quickTrack(trackingNumber) {
         behavior: 'smooth' 
     });
 }
+
+// Add CSS for status badges
+const style = document.createElement('style');
+style.textContent = `
+    .status-badge.delivered {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .status-badge.transit {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #032330;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
 </script>

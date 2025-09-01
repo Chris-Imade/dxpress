@@ -556,18 +556,53 @@ function createShipment() {
         return;
     }
     
-    // Simulate shipment creation
+    // Collect form data
+    const formData = {};
+    requiredFields.forEach(fieldId => {
+        formData[fieldId] = document.getElementById(fieldId).value.trim();
+    });
+    
+    // Add optional fields
+    formData.senderCompany = document.getElementById('senderCompany').value.trim();
+    formData.recipientCompany = document.getElementById('recipientCompany').value.trim();
+    formData.recipientEmail = document.getElementById('recipientEmail').value.trim();
+    formData.packageValue = document.getElementById('packageValue').value.trim();
+    formData.selectedCarrier = selectedOption.dataset.carrier || 'DHL Express';
+    formData.selectedService = selectedOption.dataset.service || 'Express Worldwide';
+    formData.shippingCost = selectedOption.dataset.price || '45.99';
+    
+    // Show loading state
     showNotification('Creating shipment...', 'info');
     
-    setTimeout(() => {
-        const trackingNumber = 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        showNotification(`Shipment created successfully! Tracking: ${trackingNumber}`, 'success');
-        
-        // Redirect to tracking page
-        setTimeout(() => {
-            window.location.href = `/dashboard/tracking?id=${trackingNumber}`;
-        }, 2000);
-    }, 2000);
+    // Submit to API
+    fetch('/dashboard/api/create-shipment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Shipment created successfully! Tracking: ${data.trackingNumber}`, 'success');
+            
+            // Reset form
+            document.getElementById('shipmentForm').reset();
+            updateShippingCost();
+            
+            // Redirect to tracking page
+            setTimeout(() => {
+                window.location.href = `/dashboard/tracking?id=${data.trackingNumber}`;
+            }, 2000);
+        } else {
+            showNotification(data.message || 'Failed to create shipment', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Failed to create shipment', 'error');
+    });
 }
 
 function showNotification(message, type) {

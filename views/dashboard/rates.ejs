@@ -11,13 +11,15 @@
     </div>
     <form id="ratesForm" style="margin-top: 20px;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-            <div style="min-width: 0;">
+            <div style="min-width: 0; position: relative;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">From</label>
-                <input type="text" id="fromAddress" placeholder="Origin address" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;" required>
+                <input type="text" id="fromAddress" placeholder="Origin address" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;" required autocomplete="off">
+                <div id="fromSuggestions" class="address-suggestions" style="display: none;"></div>
             </div>
-            <div style="min-width: 0;">
+            <div style="min-width: 0; position: relative;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">To</label>
-                <input type="text" id="toAddress" placeholder="Destination address" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;" required>
+                <input type="text" id="toAddress" placeholder="Destination address" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;" required autocomplete="off">
+                <div id="toSuggestions" class="address-suggestions" style="display: none;"></div>
             </div>
             <div style="min-width: 0;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Weight (kg)</label>
@@ -68,53 +70,10 @@
             <div class="card-subtitle">Your recent shipping rate queries</div>
         </div>
     </div>
-    <div style="margin-top: 16px;">
-        <div class="rate-history-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-route"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">New York → Los Angeles</div>
-                    <div style="font-size: 14px; color: #6b7280;">2.5 kg • 30×20×15 cm</div>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-weight: 600; color: #032330;">From $45.99</div>
-                <div style="font-size: 12px; color: #6b7280;">2 hours ago</div>
-            </div>
-        </div>
-
-        <div class="rate-history-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-route"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">Chicago → Miami</div>
-                    <div style="font-size: 14px; color: #6b7280;">1.8 kg • 25×15×10 cm</div>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-weight: 600; color: #032330;">From $38.50</div>
-                <div style="font-size: 12px; color: #6b7280;">1 day ago</div>
-            </div>
-        </div>
-
-        <div class="rate-history-item" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #032330, #1a4c5a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                    <i class="fas fa-route"></i>
-                </div>
-                <div>
-                    <div style="font-weight: 600; color: #032330;">Seattle → Boston</div>
-                    <div style="font-size: 14px; color: #6b7280;">3.2 kg • 40×30×20 cm</div>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-weight: 600; color: #032330;">From $52.75</div>
-                <div style="font-size: 12px; color: #6b7280;">3 days ago</div>
-            </div>
+    <div id="recentRatesContainer" style="margin-top: 16px;">
+        <div style="text-align: center; padding: 40px; color: #6b7280;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 8px;"></i>
+            <div>Loading recent calculations...</div>
         </div>
     </div>
 </div>
@@ -195,6 +154,47 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.address-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #f9fafb;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-main {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+}
+
+.suggestion-detail {
+    font-size: 12px;
+    color: #6b7280;
+}
 </style>
 
 <script>
@@ -225,10 +225,81 @@ function calculateRates() {
     resultsDiv.style.display = 'block';
     container.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Calculating shipping rates...</p></div>';
 
-    // Simulate API call
-    setTimeout(() => {
-        displayRates(fromAddress, toAddress, weight, length, width, height);
-    }, 2000);
+    // Call API for real rates
+    const params = new URLSearchParams({
+        from: fromAddress,
+        to: toAddress,
+        weight: weight,
+        length: length,
+        width: width,
+        height: height
+    });
+
+    fetch(`/dashboard/api/rates?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayRatesFromAPI(data.rates);
+            } else {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;">Failed to calculate rates. Please try again.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;">Failed to calculate rates. Please try again.</div>';
+        });
+}
+
+function displayRatesFromAPI(rates) {
+    const container = document.getElementById('ratesContainer');
+    
+    if (!rates || rates.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #6b7280;">No rates available for this route.</div>';
+        return;
+    }
+    
+    container.innerHTML = rates.map(rate => {
+        const isAvailable = rate.available !== false;
+        const comingSoon = rate.comingSoon === true;
+        
+        return `
+            <div class="rate-card ${!isAvailable ? 'disabled' : ''}" ${isAvailable ? `onclick="selectRate('${rate.service}', '${rate.baseRate}')"` : ''}>
+                <div class="rate-header">
+                    <div class="carrier-info">
+                        <div class="carrier-logo">${rate.carrier}</div>
+                        <div class="service-name">${rate.service}</div>
+                    </div>
+                    <div class="rate-price">
+                        <span class="currency">£</span>
+                        <span class="amount">${rate.baseRate.toFixed(2)}</span>
+                        ${comingSoon ? '<span class="coming-soon-badge">Coming Soon</span>' : ''}
+                    </div>
+                </div>
+                <div class="rate-details">
+                    <div class="delivery-time">
+                        <i class="fas fa-clock"></i>
+                        <span>${rate.deliveryTime}</span>
+                    </div>
+                    <div class="rate-features">
+                        ${isAvailable ? 
+                            '<span class="feature">✓ Live Tracking</span><span class="feature">✓ Insurance Available</span>' :
+                            '<span class="feature disabled">⏳ Integration Pending</span>'
+                        }
+                    </div>
+                </div>
+                ${isAvailable ? 
+                    `<button class="select-rate-btn" onclick="createShipmentWithRate('${rate.service}', '${rate.baseRate}')">
+                        <i class="fas fa-shipping-fast"></i>
+                        Select & Ship
+                    </button>` :
+                    `<button class="select-rate-btn disabled" disabled>
+                        <i class="fas fa-clock"></i>
+                        ${comingSoon ? 'Coming Soon' : 'Unavailable'}
+                    </button>`
+                }
+            </div>
+        `;
+    }).join('');
 }
 
 function displayRates(from, to, weight, length, width, height) {
@@ -319,39 +390,311 @@ function createShipmentWithRate(carrierName, price) {
     window.location.href = shipmentUrl;
 }
 
-// Auto-complete for addresses (you can integrate with Google Places API or similar)
+// Address autocomplete using OpenStreetMap Nominatim API
 function initializeAddressAutocomplete() {
     const fromInput = document.getElementById('fromAddress');
     const toInput = document.getElementById('toAddress');
+    const fromSuggestions = document.getElementById('fromSuggestions');
+    const toSuggestions = document.getElementById('toSuggestions');
     
-    // Sample implementation - replace with actual autocomplete service
-    const commonCities = [
-        'New York, NY',
-        'Los Angeles, CA',
-        'Chicago, IL',
-        'Houston, TX',
-        'Phoenix, AZ',
-        'Philadelphia, PA',
-        'San Antonio, TX',
-        'San Diego, CA',
-        'Dallas, TX',
-        'San Jose, CA'
-    ];
+    let debounceTimer;
     
-    [fromInput, toInput].forEach(input => {
+    function setupAutocomplete(input, suggestionsContainer) {
         input.addEventListener('input', function() {
-            const value = this.value.toLowerCase();
-            if (value.length > 2) {
-                const matches = commonCities.filter(city => 
-                    city.toLowerCase().includes(value)
-                );
-                // You can implement a dropdown here
-                console.log('Address suggestions:', matches);
+            const query = this.value.trim();
+            
+            if (query.length < 3) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+            
+            // Debounce API calls
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                searchAddresses(query, suggestionsContainer, input);
+            }, 300);
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.style.display = 'none';
             }
         });
-    });
+        
+        // Handle keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+            const activeItem = suggestionsContainer.querySelector('.suggestion-item.active');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (activeItem) {
+                    activeItem.classList.remove('active');
+                    const next = activeItem.nextElementSibling || items[0];
+                    next.classList.add('active');
+                } else if (items.length > 0) {
+                    items[0].classList.add('active');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (activeItem) {
+                    activeItem.classList.remove('active');
+                    const prev = activeItem.previousElementSibling || items[items.length - 1];
+                    prev.classList.add('active');
+                }
+            } else if (e.key === 'Enter' && activeItem) {
+                e.preventDefault();
+                selectAddress(activeItem.dataset.address, input, suggestionsContainer);
+            } else if (e.key === 'Escape') {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+    }
+    
+    function searchAddresses(query, suggestionsContainer, input) {
+        // Show loading state
+        suggestionsContainer.innerHTML = '<div class="suggestion-item" style="color: #6b7280;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+        suggestionsContainer.style.display = 'block';
+        
+        // Use OpenStreetMap Nominatim API for geocoding
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(query)}&addressdetails=1`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                displaySuggestions(data, suggestionsContainer, input);
+            })
+            .catch(error => {
+                console.error('Geocoding error:', error);
+                suggestionsContainer.innerHTML = '<div class="suggestion-item" style="color: #ef4444;">Error loading suggestions</div>';
+            });
+    }
+    
+    function displaySuggestions(results, suggestionsContainer, input) {
+        if (!results || results.length === 0) {
+            suggestionsContainer.innerHTML = '<div class="suggestion-item" style="color: #6b7280;">No results found</div>';
+            return;
+        }
+        
+        const html = results.map(result => {
+            const address = result.display_name;
+            const parts = address.split(', ');
+            const main = parts.slice(0, 2).join(', ');
+            const detail = parts.slice(2).join(', ');
+            
+            return `
+                <div class="suggestion-item" data-address="${address}" data-lat="${result.lat}" data-lon="${result.lon}">
+                    <div class="suggestion-main">${main}</div>
+                    <div class="suggestion-detail">${detail}</div>
+                </div>
+            `;
+        }).join('');
+        
+        suggestionsContainer.innerHTML = html;
+        
+        // Add click handlers
+        suggestionsContainer.querySelectorAll('.suggestion-item').forEach(item => {
+            if (item.dataset.address) {
+                item.addEventListener('click', () => {
+                    selectAddress(item.dataset.address, input, suggestionsContainer);
+                });
+            }
+        });
+    }
+    
+    function selectAddress(address, input, suggestionsContainer) {
+        input.value = address;
+        suggestionsContainer.style.display = 'none';
+        
+        // Store coordinates for potential future use
+        const selectedItem = suggestionsContainer.querySelector(`[data-address="${address}"]`);
+        if (selectedItem) {
+            input.dataset.lat = selectedItem.dataset.lat;
+            input.dataset.lon = selectedItem.dataset.lon;
+        }
+    }
+    
+    setupAutocomplete(fromInput, fromSuggestions);
+    setupAutocomplete(toInput, toSuggestions);
 }
 
-// Initialize autocomplete when page loads
-initializeAddressAutocomplete();
+// Load recent rate calculations from database
+async function loadRecentRates() {
+    try {
+        const response = await fetch('/api/rates/recent');
+        const data = await response.json();
+        
+        if (response.ok && data.calculations) {
+            displayRecentRates(data.calculations);
+        } else {
+            showRecentRatesError();
+        }
+    } catch (error) {
+        console.error('Error loading recent rates:', error);
+        showRecentRatesError();
+    }
+}
+
+function displayRecentRates(calculations) {
+    const container = document.getElementById('recentRatesContainer');
+    
+    if (!calculations || calculations.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-calculator" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">No Recent Calculations</h3>
+                <p style="margin: 0; font-size: 14px;">Your recent rate calculations will appear here</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = calculations.map(calc => `
+        <div style="padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease;" 
+             onclick="loadCalculation('${calc._id}')"
+             onmouseover="this.style.borderColor='#032330'; this.style.boxShadow='0 2px 8px rgba(3,35,48,0.1)'"
+             onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px; font-size: 14px;">${calc.originAddress}</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">
+                        <i class="fas fa-arrow-right" style="margin: 0 4px;"></i>
+                    </div>
+                    <div style="font-weight: 600; color: #374151; font-size: 14px;">${calc.destinationAddress}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 12px; color: #6b7280;">${formatTimeAgo(calc.createdAt)}</div>
+                    ${calc.selectedRate ? 
+                        `<div style="font-weight: 600; color: #10b981; margin-top: 4px;">£${calc.selectedRate.price.toFixed(2)}</div>` : 
+                        calc.calculatedRates.length > 0 ? 
+                        `<div style="font-weight: 600; color: #032330; margin-top: 4px;">from £${Math.min(...calc.calculatedRates.map(r => r.price)).toFixed(2)}</div>` : ''
+                    }
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <span style="background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                    <i class="fas fa-weight"></i> ${calc.packageDetails.weight}kg
+                </span>
+                <span style="background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                    <i class="fas fa-truck"></i> ${calc.calculatedRates.length} rates
+                </span>
+                ${calc.calculationMetadata?.distance ? 
+                    `<span style="background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                        <i class="fas fa-route"></i> ${Math.round(calc.calculationMetadata.distance)}km
+                    </span>` : ''
+                }
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+function showRecentRatesError() {
+    document.getElementById('recentRatesContainer').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #ef4444;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Error Loading Recent Rates</h3>
+            <p style="margin: 0; font-size: 14px;">Unable to load recent calculations</p>
+        </div>
+    `;
+}
+
+function loadCalculation(calculationId) {
+    // Show loading state
+    const container = document.getElementById('ratesContainer');
+    container.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Loading calculation...</p></div>';
+    
+    // Load a previous calculation and populate the form
+    fetch(`/api/rates/calculation/${calculationId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.calculation) {
+                const calc = data.calculation;
+                
+                // Populate form fields
+                document.getElementById('fromAddress').value = calc.originAddress;
+                document.getElementById('toAddress').value = calc.destinationAddress;
+                document.getElementById('weight').value = calc.packageDetails.weight;
+                document.getElementById('length').value = calc.packageDetails.dimensions.length;
+                document.getElementById('width').value = calc.packageDetails.dimensions.width;
+                document.getElementById('height').value = calc.packageDetails.dimensions.height;
+                
+                // Store coordinates if available
+                if (calc.originCoordinates) {
+                    document.getElementById('fromAddress').dataset.lat = calc.originCoordinates.coordinates[1];
+                    document.getElementById('fromAddress').dataset.lon = calc.originCoordinates.coordinates[0];
+                }
+                if (calc.destinationCoordinates) {
+                    document.getElementById('toAddress').dataset.lat = calc.destinationCoordinates.coordinates[1];
+                    document.getElementById('toAddress').dataset.lon = calc.destinationCoordinates.coordinates[0];
+                }
+                
+                // Display the rates
+                displayRates(calc.calculatedRates, calc._id);
+                
+                // Show success message
+                showNotification('Previous calculation loaded successfully', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading calculation:', error);
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;"><p>Error loading calculation</p></div>';
+            showNotification('Failed to load calculation', 'error');
+        });
+}
+
+function formatTimeAgo(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+    };
+    notification.style.background = colors[type] || colors.info;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Initialize autocomplete and load recent rates when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAddressAutocomplete();
+    loadRecentRates();
+});
 </script>

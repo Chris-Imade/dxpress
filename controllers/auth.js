@@ -70,6 +70,9 @@ const login = async (req, res) => {
     
     const { email, password } = req.body;
 
+    // Check if this is a JSON request (from frontend forms)
+    const isJsonRequest = req.headers['content-type'] === 'application/json';
+
     // Find user by email
     console.log("Looking for user with email:", email);
     const user = await User.findOne({ email: email.toLowerCase().trim() });
@@ -77,41 +80,27 @@ const login = async (req, res) => {
     
     if (!user) {
       console.log("No user found with this email");
-      return res.json({
-        success: false,
-        message: "Invalid email or password"
-      });
+      if (isJsonRequest) {
+        return res.json({ success: false, message: "Invalid email or password" });
+      }
+      req.session.errorMessage = "Invalid email or password";
+      return res.redirect("/admin/login");
     }
 
     // Check password using bcrypt comparison (passwords are already hashed in DB)
     console.log("Comparing passwords...");
-    console.log("Plain password provided:", password);
-    console.log("Hashed password from DB:", user.password);
     
     // Use bcrypt.compare to check plain password against hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     console.log("Password match result:", isMatch);
     
-    // Additional debug: try with trimmed password in case of whitespace issues
-    if (!isMatch) {
-      const trimmedMatch = await bcrypt.compare(password.trim(), user.password);
-      console.log("Trimmed password match result:", trimmedMatch);
-      if (trimmedMatch) {
-        console.log("Password matched after trimming whitespace");
-        return res.json({
-          success: true,
-          message: "Login successful",
-          redirect: user.role === 'admin' ? "/admin/dashboard" : "/dashboard"
-        });
-      }
-    }
-    
     if (!isMatch) {
       console.log("Password comparison failed");
-      return res.json({
-        success: false,
-        message: "Invalid email or password"
-      });
+      if (isJsonRequest) {
+        return res.json({ success: false, message: "Invalid email or password" });
+      }
+      req.session.errorMessage = "Invalid email or password";
+      return res.redirect("/admin/login");
     }
     
     console.log("Login successful for user:", user._id);
@@ -119,7 +108,7 @@ const login = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "your_jwt_secret",
       { expiresIn: "24h" }
     );
 
@@ -130,18 +119,42 @@ const login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    // Return success response
-    res.json({
-      success: true,
-      message: "Login successful",
-      redirect: user.role === 'admin' ? "/admin/dashboard" : "/dashboard"
-    });
+    // Store user in session
+    req.session.user = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Return appropriate response
+    if (isJsonRequest) {
+      return res.json({ 
+        success: true, 
+        message: "Login successful", 
+        redirect: user.role === 'admin' ? "/admin" : "/dashboard" 
+      });
+    }
+
+    // Redirect based on role
+    res.redirect(user.role === 'admin' ? "/admin" : "/dashboard");
   } catch (error) {
     console.error("Login error:", error);
-    res.json({
-      success: false,
-      message: "An error occurred during login"
-    });
+    
+    // Check if this is a JSON request
+    const isJsonRequest = req.headers['content-type'] === 'application/json';
+    
+    if (isJsonRequest) {
+      return res.json({ success: false, message: "An error occurred during login" });
+    }
+    
+    req.session.errorMessage = "An error occurred during login";
+    res.redirect("/admin/login");
   }
 };
 
@@ -157,45 +170,35 @@ const register = async (req, res) => {
     
     const { name, email, password, confirmPassword } = req.body;
 
+    // Check if this is a JSON request
+    const isJsonRequest = req.headers['content-type'] === 'application/json';
+
     // Validate input
     if (!name || !email || !password || !confirmPassword) {
       console.log("Validation failed - missing fields");
-      return res.json({
-        success: false,
-        message: "All fields are required"
-      });
+      const errorResponse = { success: false, message: "All fields are required" };
+      return isJsonRequest ? res.json(errorResponse) : res.redirect("/auth?error=missing_fields");
     }
 
     if (password !== confirmPassword) {
-      return res.json({
-        success: false,
-        message: "Passwords do not match"
-      });
+      const errorResponse = { success: false, message: "Passwords do not match" };
+      return isJsonRequest ? res.json(errorResponse) : res.redirect("/auth?error=password_mismatch");
     }
 
     if (password.length < 8) {
-      return res.json({
-        success: false,
-        message: "Password must be at least 8 characters long"
-      });
+      const errorResponse = { success: false, message: "Password must be at least 8 characters long" };
+      return isJsonRequest ? res.json(errorResponse) : res.redirect("/auth?error=password_length");
     }
 
     // Check if user already exists
     console.log("Checking for existing user with email:", email);
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     console.log("Existing user found:", existingUser ? existingUser._id : "None");
-    console.log("Database query result:", existingUser);
-    
-    // Also check with a count to verify database connectivity
-    const userCount = await User.countDocuments({ email: email.toLowerCase().trim() });
-    console.log("User count for this email:", userCount);
     
     if (existingUser) {
       console.log("User already exists - blocking registration");
-      return res.json({
-        success: false,
-        message: "An account with this email already exists"
-      });
+      const errorResponse = { success: false, message: "User with this email already exists" };
+      return isJsonRequest ? res.json(errorResponse) : res.redirect("/auth?error=user_exists");
     }
     
     console.log("No existing user found - proceeding with registration");
@@ -313,11 +316,13 @@ const logout = (req, res) => {
     });
   }
   
-  res.json({
-    success: true,
-    message: "Logged out successfully",
-    redirect: "/"
-  });
+  // Check if this is an admin logout based on the request path
+  if (req.path.startsWith('/admin') || req.originalUrl.includes('/admin/')) {
+    return res.redirect('/admin/login');
+  }
+  
+  // For regular user logout, redirect to home
+  res.redirect('/');
 };
 
 exports.logout = logout;
