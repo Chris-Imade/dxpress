@@ -32,26 +32,43 @@
         <h3 style="margin: 0 0 8px 0; color: #374151; font-size: 18px; font-weight: 600;">Shipping Rates Configuration</h3>
         <p style="margin: 0 0 24px 0; color: #6b7280; font-size: 14px;">Update base rates and additional fees for different carriers</p>
         
-        <form action="/admin/settings" method="POST">
+        <form action="/admin/settings" method="POST" id="settingsForm">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
                 <!-- DHL Settings -->
-                <div style="padding: 20px; border: 2px solid #e5e7eb; border-radius: 12px; background: #f8fafc;">
-                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                            <i class="fas fa-shipping-fast" style="color: white; font-size: 16px;"></i>
+                <div style="padding: 20px; border: 2px solid #10b981; border-radius: 12px; background: #ecfdf5;">
+                    <div style="display: flex; align-items: center; justify-content: between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-shipping-fast" style="color: white; font-size: 16px;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">DHL Express</h4>
+                                <div style="display: flex; align-items: center; margin-top: 4px;">
+                                    <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 8px;">
+                                        <i class="fas fa-check-circle" style="margin-right: 4px;"></i>API Integrated
+                                    </span>
+                                    <% if (shippingRates.dhl.isLive) { %>
+                                        <span style="background: #059669; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                            <i class="fas fa-wifi" style="margin-right: 4px;"></i>Live Rates
+                                        </span>
+                                    <% } else { %>
+                                        <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                            <i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i>Fallback
+                                        </span>
+                                    <% } %>
+                                </div>
+                            </div>
                         </div>
-                        <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">DHL Express</h4>
                     </div>
                     
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 14px;">Base Rate ($)</label>
-                        <input 
-                            type="number" 
-                            name="dhl[baseRate]" 
-                            value="<%= user.shippingRates.dhl.baseRate %>" 
-                            step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                        >
+                    <div style="margin-bottom: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-api" style="font-size: 24px; color: #059669; margin-bottom: 8px;"></i>
+                            <div style="font-weight: 600; color: #059669; margin-bottom: 4px;">DHL API Integration Active</div>
+                            <div style="font-size: 14px; color: #065f46;">
+                                Base rates are calculated in real-time using DHL's API based on actual shipment details entered by users.
+                            </div>
+                        </div>
                     </div>
                     
                     <div>
@@ -59,74 +76,77 @@
                         <input 
                             type="number" 
                             name="dhl[additionalFees]" 
-                            value="<%= user.shippingRates.dhl.additionalFees %>" 
+                            value="<%= shippingRates.dhl.additionalFees %>" 
                             step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #10b981; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
+                            placeholder="Enter additional fees to add to API rate"
                         >
+                        <div style="margin-top: 8px; padding: 8px; background: #eff6ff; border-radius: 6px;">
+                            <div style="font-size: 12px; color: #1e40af; font-weight: 600;">Additional Fees Info:</div>
+                            <div style="font-size: 14px; color: #1e40af;">
+                                This amount will be added to the real-time DHL API rates for each shipment calculation.
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- FedEx Settings -->
-                <div style="padding: 20px; border: 2px solid #e5e7eb; border-radius: 12px; background: #f8fafc;">
-                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                            <i class="fas fa-plane" style="color: white; font-size: 16px;"></i>
+                <div style="padding: 20px; border: 2px solid #fbbf24; border-radius: 12px; background: #fef3c7; opacity: 0.7;">
+                    <div style="display: flex; align-items: center; justify-content: between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-plane" style="color: white; font-size: 16px;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">FedEx</h4>
+                                <div style="display: flex; align-items: center; margin-top: 4px;">
+                                    <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 8px;">
+                                        <i class="fas fa-tools" style="margin-right: 4px;"></i>Under Maintenance
+                                    </span>
+                                    <span style="background: #6b7280; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                        <i class="fas fa-times-circle" style="margin-right: 4px;"></i>No API
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">FedEx</h4>
                     </div>
                     
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 14px;">Base Rate ($)</label>
-                        <input 
-                            type="number" 
-                            name="fedex[baseRate]" 
-                            value="<%= user.shippingRates.fedex.baseRate %>" 
-                            step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                        >
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 14px;">Additional Fees ($)</label>
-                        <input 
-                            type="number" 
-                            name="fedex[additionalFees]" 
-                            value="<%= user.shippingRates.fedex.additionalFees %>" 
-                            step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                        >
+                    <div style="padding: 16px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; text-align: center;">
+                        <i class="fas fa-wrench" style="font-size: 24px; color: #d97706; margin-bottom: 8px;"></i>
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">Service Under Maintenance</div>
+                        <div style="font-size: 14px; color: #a16207;">
+                            FedEx integration is currently being developed. This service will be available soon with full API integration.
+                        </div>
                     </div>
                 </div>
                 
                 <!-- UPS Settings -->
-                <div style="padding: 20px; border: 2px solid #e5e7eb; border-radius: 12px; background: #f8fafc;">
-                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                            <i class="fas fa-truck" style="color: white; font-size: 16px;"></i>
+                <div style="padding: 20px; border: 2px solid #fbbf24; border-radius: 12px; background: #fef3c7; opacity: 0.7;">
+                    <div style="display: flex; align-items: center; justify-content: between; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                <i class="fas fa-truck" style="color: white; font-size: 16px;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">UPS</h4>
+                                <div style="display: flex; align-items: center; margin-top: 4px;">
+                                    <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 8px;">
+                                        <i class="fas fa-tools" style="margin-right: 4px;"></i>Under Maintenance
+                                    </span>
+                                    <span style="background: #6b7280; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                        <i class="fas fa-times-circle" style="margin-right: 4px;"></i>No API
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <h4 style="margin: 0; color: #374151; font-size: 16px; font-weight: 600;">UPS</h4>
                     </div>
                     
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 14px;">Base Rate ($)</label>
-                        <input 
-                            type="number" 
-                            name="ups[baseRate]" 
-                            value="<%= user.shippingRates.ups.baseRate %>" 
-                            step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                        >
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151; font-size: 14px;">Additional Fees ($)</label>
-                        <input 
-                            type="number" 
-                            name="ups[additionalFees]" 
-                            value="<%= user.shippingRates.ups.additionalFees %>" 
-                            step="0.01"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                        >
+                    <div style="padding: 16px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; text-align: center;">
+                        <i class="fas fa-wrench" style="font-size: 24px; color: #d97706; margin-bottom: 8px;"></i>
+                        <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">Service Under Maintenance</div>
+                        <div style="font-size: 14px; color: #a16207;">
+                            UPS integration is currently being developed. This service will be available soon with full API integration.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,17 +174,30 @@ function resetForm() {
 
 // Add form submission feedback
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
+    const form = document.getElementById('settingsForm');
     const saveBtn = document.getElementById('saveBtn');
     const saveIcon = document.getElementById('saveIcon');
     const saveText = document.getElementById('saveText');
     
+    console.log('🔧 [DEBUG] Settings form initialized');
+    console.log('📋 [DEBUG] Form element:', form);
+    console.log('🔘 [DEBUG] Save button:', saveBtn);
+    
     form.addEventListener('submit', function(e) {
+        console.log('📤 [DEBUG] Form submission started');
+        console.log('📋 [DEBUG] Form data being submitted:', new FormData(form));
+        
         // Show loading state
         saveBtn.disabled = true;
         saveBtn.style.opacity = '0.7';
         saveIcon.className = 'fas fa-spinner fa-spin';
         saveText.textContent = 'Saving...';
+        
+        // Log form data for debugging
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            console.log(`📝 [DEBUG] ${key}: ${value}`);
+        }
     });
     
     // Auto-hide success/error messages after 5 seconds

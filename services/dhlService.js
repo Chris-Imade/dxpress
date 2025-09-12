@@ -3,43 +3,92 @@ const ShipmentRate = require("../models/ShipmentRate");
 
 class DHLService {
   constructor() {
-    this.baseURL = process.env.DHL_API_BASE_URL || "https://api-eu.dhl.com";
-    this.clientId = process.env.DHL_CLIENT_ID;
-    this.clientSecret = process.env.DHL_CLIENT_SECRET;
+    this.apiKey = process.env.DHL_CLIENT_ID;  // DHL Express uses API Key
+    this.apiSecret = process.env.DHL_CLIENT_SECRET;  // DHL Express uses API Secret
     this.accountNumber = process.env.DHL_ACCOUNT_NUMBER;
     this.pickupAccount = process.env.DHL_PICKUP_ACCOUNT;
-    this.accessToken = null;
-    this.tokenExpiry = null;
+    
+    // DHL Express MyDHL API uses the same base URL for sandbox and production
+    // Environment is controlled by the API credentials provided
+    this.baseURL = 'https://express.api.dhl.com';
+    
+    // Create Basic Auth header for DHL Express MyDHL API
+    this.authHeader = this.apiKey && this.apiSecret 
+      ? `Basic ${Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64')}`
+      : null;
+    
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    console.log(`🚚 [DHL] Initialized with ${isDevelopment ? 'SANDBOX' : 'PRODUCTION'} credentials`);
+    console.log(`🚚 [DHL] Base URL: ${this.baseURL}`);
+    console.log(`🚚 [DHL] API Key: ${this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'NOT SET'}`);
+    console.log(`🚚 [DHL] Account Number: ${this.accountNumber ? this.accountNumber.substring(0, 6) + '...' : 'NOT SET'}`);
   }
 
-  // Get OAuth access token
-  async getAccessToken() {
-    if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
-      return this.accessToken;
+  // Test DHL Express MyDHL API authentication
+  async testAuthentication() {
+    if (!this.authHeader) {
+      throw new Error('DHL API credentials not configured. Please set DHL_CLIENT_ID and DHL_CLIENT_SECRET.');
     }
 
     try {
-      const response = await axios.post(
-        `${this.baseURL}/oauth/token`,
-        {
-          grant_type: "client_credentials",
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+      console.log('🔐 [DHL] Testing authentication with MyDHL API...');
+      
+      // Test with a simple API call (accounts endpoint)
+      const response = await axios.get(`${this.baseURL}/mydhlapi/test/accounts/${this.accountNumber}`, {
+        headers: {
+          "Authorization": this.authHeader,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
         },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
+        timeout: 15000
+      });
 
-      this.accessToken = response.data.access_token;
-      this.tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000; // Refresh 1 minute early
-
-      return this.accessToken;
+      console.log('✅ [DHL] Authentication successful!');
+      return { success: true, data: response.data };
     } catch (error) {
-      console.error("DHL OAuth Error:", error.response?.data || error.message);
-      throw new Error("Failed to authenticate with DHL API");
+      console.error("❌ [DHL] Authentication Error Details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url
+      });
+      
+      throw new Error('DHL API authentication failed. Please verify your API Key, API Secret, and Account Number.');
+    }
+  }
+
+  // Test DHL Express MyDHL API authentication
+  async testAuthentication() {
+    if (!this.authHeader) {
+      throw new Error('DHL API credentials not configured. Please set DHL_CLIENT_ID and DHL_CLIENT_SECRET.');
+    }
+
+    try {
+      console.log('🔐 [DHL] Testing authentication with MyDHL API...');
+      
+      // Test with a simple API call (accounts endpoint)
+      const response = await axios.get(`${this.baseURL}/mydhlapi/test/accounts/${this.accountNumber}`, {
+        headers: {
+          "Authorization": this.authHeader,
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        timeout: 15000
+      });
+
+      console.log('✅ [DHL] Authentication successful!');
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("❌ [DHL] Authentication Error Details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url
+      });
+      
+      throw new Error('DHL API authentication failed. Please verify your API Key, API Secret, and Account Number.');
     }
   }
 
@@ -367,6 +416,106 @@ class DHLService {
       "unknown": "pending",
     };
     return statusMap[dhlStatus?.toLowerCase()] || "pending";
+  }
+
+  // Calculate rates with additional fees for real shipment data
+  async calculateRatesWithFees(shipmentData, additionalFees = 0) {
+    console.log('🔍 [DHL] Starting rate calculation with data:', {
+      origin: shipmentData.origin,
+      destination: shipmentData.destination,
+      weight: shipmentData.weight,
+      dimensions: shipmentData.dimensions,
+      additionalFees
+    });
+
+    // Check if DHL API credentials are configured
+    if (!this.clientId || !this.clientSecret || !this.accountNumber) {
+      console.warn('⚠️ [DHL] API credentials not configured, using dynamic fallback rates');
+      return this.generateDynamicFallbackRates(shipmentData, additionalFees);
+    }
+
+    try {
+      const rates = await this.calculateRates(shipmentData);
+      
+      if (rates && rates.length > 0) {
+        console.log('✅ [DHL] Successfully calculated real API rates:', rates.length, 'rates');
+        return rates.map(rate => ({
+          ...rate,
+          originalBaseRate: rate.baseRate,
+          additionalFees: additionalFees,
+          totalRate: rate.baseRate + additionalFees,
+          currency: rate.currency || "GBP",
+          isLive: true
+        }));
+      }
+      
+      console.warn('⚠️ [DHL] API returned no rates, using dynamic fallback');
+      return this.generateDynamicFallbackRates(shipmentData, additionalFees);
+    } catch (error) {
+      console.error("❌ [DHL] API error, using dynamic fallback:", error.message);
+      return this.generateDynamicFallbackRates(shipmentData, additionalFees);
+    }
+  }
+
+  // Generate dynamic fallback rates based on shipment parameters
+  generateDynamicFallbackRates(shipmentData, additionalFees = 0) {
+    const { weight, dimensions, origin, destination } = shipmentData;
+    
+    // Calculate base rate using weight and dimensions
+    const volumeWeight = (dimensions.length * dimensions.width * dimensions.height) / 5000; // DHL volumetric formula
+    const chargeableWeight = Math.max(weight, volumeWeight);
+    
+    // Base rate calculation (simplified but dynamic)
+    let baseRate = 25.00; // Starting rate
+    baseRate += chargeableWeight * 2.50; // Per kg rate
+    
+    // Distance factor (simplified)
+    const isInternational = this.isInternational(shipmentData);
+    if (isInternational) {
+      baseRate *= 1.8; // International multiplier
+    }
+    
+    // Country-specific adjustments
+    const destCountryCode = this.getCountryCode(destination.country);
+    const countryMultipliers = {
+      'US': 1.5,
+      'AU': 1.7,
+      'DE': 1.2,
+      'FR': 1.2,
+      'GB': 1.0
+    };
+    baseRate *= (countryMultipliers[destCountryCode] || 1.3);
+    
+    // Round to 2 decimal places
+    baseRate = Math.round(baseRate * 100) / 100;
+    
+    console.log('📊 [DHL] Generated dynamic fallback rate:', {
+      weight,
+      volumeWeight: Math.round(volumeWeight * 100) / 100,
+      chargeableWeight,
+      isInternational,
+      baseRate,
+      totalRate: baseRate + additionalFees
+    });
+
+    return [{
+      service: "DHL Express (Estimated)",
+      serviceCode: "P",
+      originalBaseRate: baseRate,
+      baseRate: baseRate,
+      additionalFees: additionalFees,
+      totalRate: baseRate + additionalFees,
+      currency: "GBP",
+      deliveryTime: isInternational ? "2-4 business days" : "1-2 business days",
+      isApiFallback: true,
+      isDynamic: true
+    }];
+  }
+
+  // Apply markup and additional fees to DHL rates
+  applyMarkupAndFees(baseRate, additionalFees = 0, markupPercentage = 0) {
+    const markedUpRate = baseRate * (1 + markupPercentage / 100);
+    return markedUpRate + additionalFees;
   }
 }
 

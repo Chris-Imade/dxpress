@@ -55,8 +55,31 @@
                 <input type="email" id="senderEmail" value="john@acme.com" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
             </div>
             <div style="grid-column: 1 / -1;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Address *</label>
-                <input type="text" id="senderAddress" value="123 Business St, New York, NY 10001" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Street Address *</label>
+                <input type="text" id="senderAddress" value="123 Business St" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">City *</label>
+                <input type="text" id="senderCity" value="New York" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Postal Code *</label>
+                <input type="text" id="senderPostalCode" value="10001" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Country *</label>
+                <select id="senderCountry" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom" selected>United Kingdom</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Italy">Italy</option>
+                    <option value="Spain">Spain</option>
+                    <option value="Netherlands">Netherlands</option>
+                    <option value="Belgium">Belgium</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                </select>
             </div>
         </div>
     </div>
@@ -96,8 +119,32 @@
                 <input type="email" id="recipientEmail" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
             </div>
             <div style="grid-column: 1 / -1;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Address *</label>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Street Address *</label>
                 <input type="text" id="recipientAddress" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">City *</label>
+                <input type="text" id="recipientCity" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Postal Code *</label>
+                <input type="text" id="recipientPostalCode" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Country *</label>
+                <select id="recipientCountry" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+                    <option value="">Select Country</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Italy">Italy</option>
+                    <option value="Spain">Spain</option>
+                    <option value="Netherlands">Netherlands</option>
+                    <option value="Belgium">Belgium</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                </select>
             </div>
         </div>
     </div>
@@ -420,87 +467,147 @@ function loadFromAddressBook() {
     showNotification('Address loaded from address book!', 'success');
 }
 
-function calculateRates() {
+async function calculateRates() {
     const weight = document.getElementById('packageWeight').value;
     const length = document.getElementById('packageLength').value;
     const width = document.getElementById('packageWidth').value;
     const height = document.getElementById('packageHeight').value;
+    const packageType = document.getElementById('packageType').value;
+    const packageValue = document.getElementById('packageValue').value;
+    // Collect structured address data
     const senderAddress = document.getElementById('senderAddress').value;
-    const recipientAddress = document.getElementById('recipientAddress').value;
+    const senderCity = document.getElementById('senderCity').value;
+    const senderPostalCode = document.getElementById('senderPostalCode').value;
+    const senderCountry = document.getElementById('senderCountry').value;
     
-    if (!weight || !length || !width || !height || !senderAddress || !recipientAddress) {
-        showNotification('Please fill in package dimensions and addresses first', 'warning');
+    const recipientAddress = document.getElementById('recipientAddress').value;
+    const recipientCity = document.getElementById('recipientCity').value;
+    const recipientPostalCode = document.getElementById('recipientPostalCode').value;
+    const recipientCountry = document.getElementById('recipientCountry').value;
+    
+    if (!weight || !length || !width || !height || !senderAddress || !senderCity || !senderPostalCode || !senderCountry || 
+        !recipientAddress || !recipientCity || !recipientPostalCode || !recipientCountry || !packageType) {
+        showNotification('Please fill in all required package information and address fields first', 'warning');
         return;
     }
     
     // Show loading
     const optionsContainer = document.getElementById('shippingOptions');
-    optionsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Calculating shipping rates...</p></div>';
+    optionsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Fetching real-time shipping rates...</p></div>';
     
-    // Simulate rate calculation
-    setTimeout(() => {
-        displayShippingOptions();
-    }, 2000);
+    try {
+        // Build query parameters for API call with structured addresses
+        const params = new URLSearchParams({
+            'origin.address': senderAddress,
+            'origin.city': senderCity,
+            'origin.postalCode': senderPostalCode,
+            'origin.country': senderCountry,
+            'destination.address': recipientAddress,
+            'destination.city': recipientCity,
+            'destination.postalCode': recipientPostalCode,
+            'destination.country': recipientCountry,
+            weight: weight,
+            length: length,
+            width: width,
+            height: height,
+            packageType: packageType,
+            declaredValue: packageValue || '100'
+        });
+
+        console.log('📦 [DEBUG] Fetching dashboard rates with params:', params.toString());
+
+        // Call the API endpoint
+        const response = await fetch(`/dashboard/api/rates?${params}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to calculate rates');
+        }
+
+        // Display the real-time rates
+        displayRealTimeShippingOptions(data.rates);
+
+    } catch (error) {
+        console.error('💥 [DEBUG] Rate calculation error:', error);
+        optionsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>Failed to calculate shipping rates. Please try again.</p>
+                <button class="btn btn-secondary" onclick="calculateRates()" style="margin-top: 16px;">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+            </div>
+        `;
+    }
 }
 
-function displayShippingOptions() {
+function displayRealTimeShippingOptions(rates) {
     const optionsContainer = document.getElementById('shippingOptions');
-    const volume = parseFloat(document.getElementById('packageLength').value) * 
-                  parseFloat(document.getElementById('packageWidth').value) * 
-                  parseFloat(document.getElementById('packageHeight').value) / 1000;
-    const weight = parseFloat(document.getElementById('packageWeight').value);
-    const basePrice = Math.max(weight * 15, volume * 10);
     
-    const options = [
-        {
-            carrier: 'DHL Express',
-            service: 'Next Day Delivery',
-            price: (basePrice * 1.5).toFixed(2),
-            delivery: '1 business day',
-            logo: 'DHL'
-        },
-        {
-            carrier: 'FedEx Priority',
-            service: 'Priority Overnight',
-            price: (basePrice * 1.3).toFixed(2),
-            delivery: '1-2 business days',
-            logo: 'FedEx'
-        },
-        {
-            carrier: 'UPS Ground',
-            service: 'Ground Shipping',
-            price: (basePrice * 0.9).toFixed(2),
-            delivery: '3-5 business days',
-            logo: 'UPS'
-        },
-        {
-            carrier: 'USPS Priority',
-            service: 'Priority Mail',
-            price: (basePrice * 0.8).toFixed(2),
-            delivery: '2-3 business days',
-            logo: 'USPS'
-        }
-    ];
+    if (!rates || rates.length === 0) {
+        optionsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No shipping rates available for this route.</p>
+            </div>
+        `;
+        return;
+    }
     
-    optionsContainer.innerHTML = options.map((option, index) => `
-        <div class="shipping-option" onclick="selectShippingOption(${index})">
-            <input type="radio" name="shippingOption" value="${index}" id="option${index}">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div class="carrier-logo">${option.logo}</div>
-                    <div>
-                        <div style="font-weight: 600; color: #032330; font-size: 16px;">${option.carrier}</div>
-                        <div style="color: #6b7280; font-size: 14px;">${option.service}</div>
-                        <div style="color: #6b7280; font-size: 12px;">Delivery: ${option.delivery}</div>
+    optionsContainer.innerHTML = rates.map((rate, index) => {
+        const isAvailable = rate.available === true;
+        const isMaintenanceMode = rate.maintenanceMode === true;
+        const isDHL = rate.carrier === 'DHL';
+        
+        return `
+            <div class="shipping-option ${!isAvailable ? 'disabled' : ''}" ${isAvailable ? `onclick="selectShippingOption(${index})"` : ''} style="${!isAvailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
+                <input type="radio" name="shippingOption" value="${index}" id="option${index}" ${!isAvailable ? 'disabled' : ''}>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="carrier-logo" style="background: ${isDHL ? '#dc2626' : isMaintenanceMode ? '#f59e0b' : '#6b7280'}; color: white;">
+                            ${rate.carrier}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #032330; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                ${rate.service}
+                                ${isDHL && isAvailable && rate.isLive ? 
+                                    '<span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;"><i class="fas fa-wifi"></i> LIVE</span>' : ''
+                                }
+                                ${isDHL && isAvailable && !rate.isLive && rate.isDynamic ? 
+                                    '<span style="background: #3b82f6; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;"><i class="fas fa-calculator"></i> ESTIMATED</span>' : ''
+                                }
+                                ${isMaintenanceMode ? 
+                                    '<span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;"><i class="fas fa-tools"></i> MAINTENANCE</span>' : ''
+                                }
+                            </div>
+                            <div style="color: #6b7280; font-size: 14px;">Delivery: ${rate.deliveryTime}</div>
+                            ${isMaintenanceMode ? 
+                                `<div style="color: #f59e0b; font-size: 12px;"><i class="fas fa-exclamation-triangle"></i> ${rate.message || 'API integration in development'}</div>` : ''
+                            }
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        ${isAvailable ? 
+                            `<div style="font-size: 24px; font-weight: 700; color: #10b981;">£${rate.baseRate.toFixed(2)}</div>` :
+                            `<div style="font-size: 16px; font-weight: 600; color: #6b7280;">Unavailable</div>`
+                        }
+                        ${isAvailable && isDHL && rate.isLive ? '<div style="font-size: 12px; color: #10b981;">Live API rate</div>' : ''}
+                        ${isAvailable && isDHL && !rate.isLive && rate.isDynamic ? '<div style="font-size: 12px; color: #3b82f6;">Dynamic estimate</div>' : ''}
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 24px; font-weight: 700; color: #032330;">$${option.price}</div>
-                    <div style="font-size: 12px; color: #6b7280;">+ taxes & fees</div>
-                </div>
+                ${isAvailable && isDHL ? 
+                    `<div style="margin-top: 12px; display: flex; flex-wrap: gap: 8px;">
+                        <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Real-time Tracking</span>
+                        <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Live GPS</span>
+                        <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Insurance Available</span>
+                    </div>` : ''
+                }
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+    
+    // Store rate data for form submission
+    window.availableRates = rates;
 }
 
 function selectShippingOption(index) {
@@ -521,8 +628,194 @@ function saveDraft() {
 
 function previewShipment() {
     console.log('Opening shipment preview...');
-    // Here you would open a preview modal or new page
-    showNotification('Opening shipment preview...', 'info');
+    
+    // Validate required fields first
+    const requiredFields = [
+        'senderName', 'senderPhone', 'senderEmail', 'senderAddress',
+        'recipientName', 'recipientPhone', 'recipientAddress',
+        'packageType', 'packageWeight', 'packageLength', 'packageWidth', 'packageHeight', 'packageDescription'
+    ];
+    
+    let isValid = true;
+    const formData = {};
+    
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            field.style.borderColor = '#ef4444';
+            isValid = false;
+        } else {
+            field.style.borderColor = '#e5e7eb';
+            formData[fieldId] = field.value.trim();
+        }
+    });
+    
+    if (!isValid) {
+        showNotification('Please fill in all required fields before preview', 'error');
+        return;
+    }
+    
+    // Get optional fields
+    formData.senderCompany = document.getElementById('senderCompany').value.trim();
+    formData.recipientCompany = document.getElementById('recipientCompany').value.trim();
+    formData.recipientEmail = document.getElementById('recipientEmail').value.trim();
+    formData.packageValue = document.getElementById('packageValue').value.trim();
+    
+    // Get selected shipping option if available
+    const selectedOption = document.querySelector('input[name="shippingOption"]:checked');
+    let shippingInfo = null;
+    if (selectedOption && window.availableRates) {
+        const selectedIndex = parseInt(selectedOption.value);
+        const selectedRate = window.availableRates[selectedIndex];
+        if (selectedRate) {
+            shippingInfo = {
+                carrier: selectedRate.carrier,
+                service: selectedRate.service,
+                cost: selectedRate.baseRate.toFixed(2),
+                deliveryTime: selectedRate.deliveryTime
+            };
+        }
+    }
+    
+    // Create and show preview modal
+    showPreviewModal(formData, shippingInfo);
+}
+
+function showPreviewModal(formData, shippingInfo) {
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    modalContent.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
+            <h3 style="margin: 0; color: #032330; font-size: 20px;">Shipment Preview</h3>
+            <button onclick="closePreviewModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">&times;</button>
+        </div>
+        
+        <div style="display: grid; gap: 20px;">
+            <!-- Sender Information -->
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Sender Information</h4>
+                <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                    <p style="margin: 4px 0;"><strong>Name:</strong> ${formData.senderName}</p>
+                    ${formData.senderCompany ? `<p style="margin: 4px 0;"><strong>Company:</strong> ${formData.senderCompany}</p>` : ''}
+                    <p style="margin: 4px 0;"><strong>Phone:</strong> ${formData.senderPhone}</p>
+                    <p style="margin: 4px 0;"><strong>Email:</strong> ${formData.senderEmail}</p>
+                    <p style="margin: 4px 0;"><strong>Address:</strong> ${formData.senderAddress}</p>
+                </div>
+            </div>
+            
+            <!-- Recipient Information -->
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Recipient Information</h4>
+                <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                    <p style="margin: 4px 0;"><strong>Name:</strong> ${formData.recipientName}</p>
+                    ${formData.recipientCompany ? `<p style="margin: 4px 0;"><strong>Company:</strong> ${formData.recipientCompany}</p>` : ''}
+                    <p style="margin: 4px 0;"><strong>Phone:</strong> ${formData.recipientPhone}</p>
+                    ${formData.recipientEmail ? `<p style="margin: 4px 0;"><strong>Email:</strong> ${formData.recipientEmail}</p>` : ''}
+                    <p style="margin: 4px 0;"><strong>Address:</strong> ${formData.recipientAddress}</p>
+                </div>
+            </div>
+            
+            <!-- Package Information -->
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Package Information</h4>
+                <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                    <p style="margin: 4px 0;"><strong>Type:</strong> ${formData.packageType}</p>
+                    <p style="margin: 4px 0;"><strong>Weight:</strong> ${formData.packageWeight} kg</p>
+                    <p style="margin: 4px 0;"><strong>Dimensions:</strong> ${formData.packageLength} × ${formData.packageWidth} × ${formData.packageHeight} cm</p>
+                    ${formData.packageValue ? `<p style="margin: 4px 0;"><strong>Declared Value:</strong> $${formData.packageValue}</p>` : ''}
+                    <p style="margin: 4px 0;"><strong>Description:</strong> ${formData.packageDescription}</p>
+                </div>
+            </div>
+            
+            ${shippingInfo ? `
+            <!-- Shipping Information -->
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Shipping Information</h4>
+                <div style="background: #ecfdf5; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <p style="margin: 4px 0;"><strong>Carrier:</strong> ${shippingInfo.carrier}</p>
+                    <p style="margin: 4px 0;"><strong>Service:</strong> ${shippingInfo.service}</p>
+                    <p style="margin: 4px 0;"><strong>Cost:</strong> £${shippingInfo.cost}</p>
+                    <p style="margin: 4px 0;"><strong>Delivery Time:</strong> ${shippingInfo.deliveryTime}</p>
+                </div>
+            </div>
+            ` : `
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Shipping Information</h4>
+                <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 4px 0; color: #92400e;"><i class="fas fa-exclamation-triangle"></i> Please calculate shipping rates first</p>
+                </div>
+            </div>
+            `}
+            
+            <!-- Additional Services -->
+            <div>
+                <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Additional Services</h4>
+                <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                    <p style="margin: 4px 0;"><strong>Insurance:</strong> ${document.getElementById('insurance').checked ? 'Yes' : 'No'}</p>
+                    <p style="margin: 4px 0;"><strong>Signature Required:</strong> ${document.getElementById('signature').checked ? 'Yes' : 'No'}</p>
+                    <p style="margin: 4px 0;"><strong>Real-time Tracking:</strong> ${document.getElementById('tracking').checked ? 'Yes' : 'No'}</p>
+                    <p style="margin: 4px 0;"><strong>Notifications:</strong> ${document.getElementById('notifications').checked ? 'Yes' : 'No'}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <button onclick="closePreviewModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Close
+            </button>
+            <button onclick="proceedFromPreview()" class="btn btn-primary">
+                <i class="fas fa-check"></i>
+                Looks Good - Create Shipment
+            </button>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Store modal reference for closing
+    window.currentPreviewModal = modalOverlay;
+}
+
+function closePreviewModal() {
+    if (window.currentPreviewModal) {
+        window.currentPreviewModal.remove();
+        window.currentPreviewModal = null;
+    }
+}
+
+function proceedFromPreview() {
+    closePreviewModal();
+    // Trigger the form submission
+    document.getElementById('shipmentForm').dispatchEvent(new Event('submit'));
 }
 
 function createShipment() {
@@ -567,15 +860,30 @@ function createShipment() {
     formData.recipientCompany = document.getElementById('recipientCompany').value.trim();
     formData.recipientEmail = document.getElementById('recipientEmail').value.trim();
     formData.packageValue = document.getElementById('packageValue').value.trim();
-    formData.selectedCarrier = selectedOption.dataset.carrier || 'DHL Express';
-    formData.selectedService = selectedOption.dataset.service || 'Express Worldwide';
-    formData.shippingCost = selectedOption.dataset.price || '45.99';
+    
+    // Get selected rate data from stored rates
+    const selectedIndex = parseInt(selectedOption.value);
+    const selectedRate = window.availableRates ? window.availableRates[selectedIndex] : null;
+    
+    if (selectedRate) {
+        formData.selectedCarrier = selectedRate.carrier;
+        formData.selectedService = selectedRate.service;
+        // Use totalRate (includes admin fees) instead of baseRate
+        formData.shippingCost = parseFloat(selectedRate.totalRate || selectedRate.baseRate).toFixed(2);
+        formData.serviceCode = selectedRate.serviceCode;
+    } else {
+        formData.selectedCarrier = 'DHL Express';
+        formData.selectedService = 'Express Worldwide';
+        formData.shippingCost = '45.99';
+    }
+    
+    console.log('Form data shipping cost:', formData.shippingCost, typeof formData.shippingCost);
     
     // Show loading state
-    showNotification('Creating shipment...', 'info');
+    showNotification('Saving shipment as draft...', 'info');
     
-    // Submit to API
-    fetch('/dashboard/api/create-shipment', {
+    // Save as draft first
+    fetch('/dashboard/api/save-shipment-data', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -585,24 +893,441 @@ function createShipment() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showNotification(`Shipment created successfully! Tracking: ${data.trackingNumber}`, 'success');
+            showNotification('Shipment saved as draft successfully!', 'success');
             
-            // Reset form
-            document.getElementById('shipmentForm').reset();
-            updateShippingCost();
+            // Store shipment ID for payment
+            window.currentShipmentId = data.shipmentId;
             
-            // Redirect to tracking page
+            // Show payment modal after brief delay
             setTimeout(() => {
-                window.location.href = `/dashboard/tracking?id=${data.trackingNumber}`;
-            }, 2000);
+                showPaymentModal(formData, selectedRate);
+            }, 1000);
         } else {
-            showNotification(data.message || 'Failed to create shipment', 'error');
+            showNotification(data.message || 'Failed to save shipment data', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Failed to create shipment', 'error');
+        showNotification('Failed to save shipment data', 'error');
     });
+}
+
+function showPaymentModal(formData, selectedRate) {
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    const shippingCost = selectedRate ? parseFloat(selectedRate.totalRate || selectedRate.baseRate).toFixed(2) : parseFloat(formData.shippingCost).toFixed(2);
+    const serviceName = selectedRate ? selectedRate.service : formData.selectedService;
+    const carrierName = selectedRate ? selectedRate.carrier : formData.selectedCarrier;
+    
+    // Store payment amount globally for easy access
+    window.currentPaymentAmount = parseFloat(shippingCost);
+    
+    console.log('Payment modal - shipping cost:', shippingCost, typeof shippingCost);
+    console.log('Payment modal - stored amount:', window.currentPaymentAmount, typeof window.currentPaymentAmount);
+    
+    modalContent.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
+            <h3 style="margin: 0; color: #032330; font-size: 20px;">Complete Payment</h3>
+            <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">&times;</button>
+        </div>
+        
+        <!-- Order Summary -->
+        <div style="margin-bottom: 24px;">
+            <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Order Summary</h4>
+            <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>From:</span>
+                    <span style="font-weight: 500;">${formData.senderName}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>To:</span>
+                    <span style="font-weight: 500;">${formData.recipientName}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Service:</span>
+                    <span style="font-weight: 500;">${carrierName} - ${serviceName}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Package:</span>
+                    <span style="font-weight: 500;">${formData.packageType} (${formData.packageWeight}kg)</span>
+                </div>
+                <hr style="margin: 12px 0; border: none; border-top: 1px solid #e5e7eb;">
+                <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; color: #032330;">
+                    <span>Total:</span>
+                    <span>£${shippingCost}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Methods -->
+        <div style="margin-bottom: 24px;">
+            <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Select Payment Method</h4>
+            <div style="display: grid; gap: 12px;">
+                <button onclick="processPayment('stripe')" class="payment-btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    padding: 16px;
+                    border: 2px solid #e5e7eb;
+                    border-radius: 8px;
+                    background: white;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-size: 16px;
+                    font-weight: 500;
+                " onmouseover="this.style.borderColor='#3b82f6'; this.style.backgroundColor='#eff6ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white';">
+                    <i class="fab fa-cc-stripe" style="font-size: 24px; color: #635bff;"></i>
+                    Pay with Stripe
+                </button>
+                
+                <button onclick="processPayment('paypal')" class="payment-btn" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    padding: 16px;
+                    border: 2px solid #e5e7eb;
+                    border-radius: 8px;
+                    background: white;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-size: 16px;
+                    font-weight: 500;
+                " onmouseover="this.style.borderColor='#0070ba'; this.style.backgroundColor='#f0f8ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white';">
+                    <i class="fab fa-paypal" style="font-size: 24px; color: #0070ba;"></i>
+                    Pay with PayPal
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="paymentLoading" style="display: none; text-align: center; padding: 20px;">
+            <div style="display: inline-block; width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 12px; color: #6b7280;">Processing payment...</p>
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <button onclick="closePaymentModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Store modal reference for closing
+    window.currentPaymentModal = modalOverlay;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function closePaymentModal() {
+    if (window.currentPaymentModal) {
+        window.currentPaymentModal.remove();
+        window.currentPaymentModal = null;
+    }
+}
+
+async function processPayment(method) {
+    if (!window.currentShipmentId) {
+        showNotification('Shipment ID not found. Please try again.', 'error');
+        return;
+    }
+    
+    console.log('Processing payment:', {
+        method: method,
+        shipmentId: window.currentShipmentId,
+        amount: window.currentPaymentAmount,
+        amountType: typeof window.currentPaymentAmount
+    });
+    
+    // Show loading state
+    const loadingDiv = document.getElementById('paymentLoading');
+    const paymentBtns = document.querySelectorAll('.payment-btn');
+    
+    paymentBtns.forEach(btn => btn.style.display = 'none');
+    loadingDiv.style.display = 'block';
+    
+    try {
+        if (method === 'stripe') {
+            // Create payment intent
+            const response = await fetch('/api/payments/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    shipmentId: window.currentShipmentId,
+                    provider: 'stripe',
+                    amount: window.currentPaymentAmount
+                })
+            });
+            
+            const responseData = await response.json();
+            
+            if (!responseData.success) {
+                throw new Error(responseData.message || 'Failed to create payment');
+            }
+            
+            const { clientSecret } = responseData.data;
+            
+            if (!clientSecret) {
+                throw new Error('No client secret received from server');
+            }
+            
+            // Initialize Stripe Elements
+            if (!window.stripePublishableKey || window.stripePublishableKey === 'pk_test_your_stripe_key') {
+                throw new Error('Stripe is not properly configured. Please contact support.');
+            }
+            const stripe = Stripe(window.stripePublishableKey);
+            const elements = stripe.elements({
+                clientSecret,
+                appearance: {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#0d6efd',
+                        colorBackground: '#ffffff',
+                        colorText: '#212529',
+                        colorDanger: '#dc3545',
+                        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        spacingUnit: '4px',
+                        borderRadius: '4px',
+                    },
+                },
+            });
+            
+            // Replace payment modal content with Stripe Elements
+            const modalContent = document.querySelector('#paymentLoading').parentNode;
+            modalContent.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
+                    <h3 style="margin: 0; color: #032330; font-size: 20px;">Complete Payment</h3>
+                    <button onclick="closePaymentModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">&times;</button>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <p style="margin: 0; color: #374151;">Amount: <strong>£${window.currentPaymentAmount.toFixed(2)}</strong></p>
+                </div>
+                
+                <div id="stripe-payment-element" style="margin-bottom: 20px;"></div>
+                
+                <button id="stripe-submit-btn" disabled style="
+                    width: 100%;
+                    padding: 12px;
+                    background: #635bff;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    opacity: 0.6;
+                ">
+                    Loading payment form...
+                </button>
+                
+                <div id="payment-status" style="margin-top: 16px;"></div>
+            `;
+            
+            // Wait for DOM to be ready then create and mount payment element
+            setTimeout(() => {
+                try {
+                    const paymentElementContainer = document.getElementById('stripe-payment-element');
+                    if (!paymentElementContainer) {
+                        throw new Error('Payment element container not found');
+                    }
+                    
+                    const paymentElement = elements.create('payment');
+                    
+                    // Store payment element globally for confirmation
+                    window.currentPaymentElement = paymentElement;
+                    
+                    paymentElement.mount('#stripe-payment-element');
+                    
+                    // Handle mounting events
+                    paymentElement.on('ready', () => {
+                        console.log('Stripe Elements ready');
+                        const submitBtn = document.getElementById('stripe-submit-btn');
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.innerHTML = `Pay £${window.currentPaymentAmount.toFixed(2)}`;
+                    });
+                    
+                    paymentElement.on('change', (event) => {
+                        const statusElement = document.getElementById('payment-status');
+                        if (event.error) {
+                            statusElement.innerHTML = `
+                                <div style="color: #dc3545; padding: 12px; background: #f8d7da; border-radius: 4px;">
+                                    ${event.error.message}
+                                </div>
+                            `;
+                        } else {
+                            statusElement.innerHTML = '';
+                        }
+                    });
+                    
+                    paymentElement.on('loaderror', (event) => {
+                        console.error('Stripe Elements load error:', event.error);
+                        document.getElementById('payment-status').innerHTML = `
+                            <div style="color: #dc3545; padding: 12px; background: #f8d7da; border-radius: 4px;">
+                                Failed to load payment form: ${event.error.message}
+                            </div>
+                        `;
+                    });
+                } catch (error) {
+                    console.error('Payment element creation error:', error);
+                    document.getElementById('payment-status').innerHTML = `
+                        <div style="color: #dc3545; padding: 12px; background: #f8d7da; border-radius: 4px;">
+                            Failed to initialize payment form: ${error.message}
+                        </div>
+                    `;
+                }
+            }, 200);
+            
+            // Handle payment submission
+            document.getElementById('stripe-submit-btn').addEventListener('click', async function() {
+                const submitBtn = this;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Processing...';
+                
+                try {
+                    // Check if payment element is properly mounted
+                    if (!window.currentPaymentElement) {
+                        throw new Error('Payment form not ready. Please wait and try again.');
+                    }
+                    
+                    const { error, paymentIntent } = await stripe.confirmPayment({
+                        elements,
+                        confirmParams: {
+                            return_url: `${window.location.origin}/dashboard/tracking?created=true`,
+                        },
+                        redirect: 'if_required'
+                    });
+                    
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                    
+                    if (paymentIntent.status === 'succeeded') {
+                        // Update shipment status
+                        const updateResponse = await fetch('/dashboard/api/process-payment', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                shipmentId: window.currentShipmentId,
+                                paymentMethod: 'stripe',
+                                amount: window.currentPaymentAmount
+                            })
+                        });
+                        
+                        const updateData = await updateResponse.json();
+                        
+                        if (updateData.success) {
+                            closePaymentModal();
+                            showNotification(`Payment successful! Tracking: ${updateData.trackingNumber}`, 'success');
+                            
+                            // Reset form and redirect
+                            document.getElementById('shipmentForm').reset();
+                            setTimeout(() => {
+                                window.location.href = `/dashboard/tracking?id=${updateData.trackingNumber}`;
+                            }, 2000);
+                        } else {
+                            throw new Error(updateData.message || 'Failed to update shipment');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    document.getElementById('payment-status').innerHTML = `
+                        <div style="color: #dc3545; padding: 12px; background: #f8d7da; border-radius: 4px;">
+                            Payment failed: ${error.message}
+                        </div>
+                    `;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `Pay £${window.currentPaymentAmount.toFixed(2)}`;
+                }
+            });
+            
+        } else if (method === 'paypal') {
+            // Create PayPal order with fixed amount
+            const response = await fetch('/api/payments/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    shipmentId: window.currentShipmentId,
+                    provider: 'paypal',
+                    amount: window.currentPaymentAmount
+                })
+            });
+            
+            const responseData = await response.json();
+            
+            if (!responseData.success) {
+                throw new Error(responseData.message || 'Failed to create PayPal order');
+            }
+            
+            // Redirect to PayPal approval URL with fixed amount
+            window.location.href = responseData.data.approvalUrl;
+        }
+        
+    } catch (error) {
+        console.error('Payment error:', error);
+        
+        // Hide loading and show buttons again
+        loadingDiv.style.display = 'none';
+        paymentBtns.forEach(btn => btn.style.display = 'flex');
+        
+        showNotification('Payment processing failed: ' + error.message, 'error');
+    }
 }
 
 function showNotification(message, type) {

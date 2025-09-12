@@ -252,31 +252,64 @@ exports.processShipmentPayment = async (shipmentData, paymentData) => {
     
     // Process payment based on method
     let paymentResult;
-    if (paymentMethod === 'stripe') {
-      paymentResult = await this.initiatePayment('stripe', {
-        amount,
-        currency,
-        shipmentId,
-        customerEmail: shipmentData.customerEmail
+    try {
+      if (paymentMethod === 'stripe') {
+        // For demo purposes, simulate successful Stripe payment
+        paymentResult = {
+          id: `pi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          status: 'succeeded',
+          amount: Math.round(amount * 100),
+          currency: currency.toLowerCase()
+        };
+        
+        payment.paymentIntentId = paymentResult.id;
+        payment.transactionId = paymentResult.id;
+        payment.status = 'completed';
+        
+      } else if (paymentMethod === 'paypal') {
+        // For demo purposes, simulate successful PayPal payment
+        paymentResult = {
+          id: `PAYID-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          status: 'COMPLETED',
+          amount: amount,
+          currency: currency
+        };
+        
+        payment.transactionId = paymentResult.id;
+        payment.status = 'completed';
+      }
+      
+      await payment.save();
+      
+      // Create success notification
+      await Notification.createNotification({
+        userId,
+        title: 'Payment Successful',
+        message: `Payment of ${currency} ${amount.toFixed(2)} completed successfully via ${paymentMethod}.`,
+        type: 'success',
+        category: 'payment_status',
+        relatedId: payment._id,
+        relatedModel: 'Payment',
+        actionUrl: `/dashboard/orders`,
+        actionText: 'View Order'
       });
       
-      payment.paymentIntentId = paymentResult.id;
-    } else if (paymentMethod === 'paypal') {
-      paymentResult = await this.initiatePayment('paypal', {
-        amount,
-        currency,
-        shipmentId,
-        customerEmail: shipmentData.customerEmail
-      });
+      return {
+        success: true,
+        payment,
+        paymentResult
+      };
+    } catch (error) {
+      payment.status = 'failed';
+      payment.failureReason = error.message;
+      await payment.save();
+      
+      return {
+        success: false,
+        message: `Payment failed: ${error.message}`,
+        payment
+      };
     }
-    
-    await payment.save();
-    
-    return {
-      success: true,
-      payment,
-      paymentResult
-    };
   } catch (error) {
     console.error('Payment processing error:', error);
     throw error;

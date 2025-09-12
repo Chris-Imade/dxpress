@@ -5,50 +5,123 @@
             <i class="fas fa-chart-line"></i>
         </div>
         <div>
-            <div class="card-title">Admin Dashboard</div>
-            <div class="card-subtitle">System overview and management</div>
+            <div class="card-title">Production Admin Dashboard</div>
+            <div class="card-subtitle">Advanced analytics & system management</div>
         </div>
-        <div style="margin-left: auto;">
-            <a href="/admin/shipments/create" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                Create Shipment
+        <div style="margin-left: auto; display: flex; gap: 10px;">
+            <a href="/admin/users" class="btn btn-secondary">
+                <i class="fas fa-users"></i>
+                Manage Users
+            </a>
+            <a href="/admin/notifications" class="btn btn-primary">
+                <i class="fas fa-bell"></i>
+                Send Notification
             </a>
         </div>
     </div>
 </div>
 
-<!-- Statistics Cards -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px;">
+<!-- Key Performance Metrics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px;">
     <div class="stat-card">
         <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-            <i class="fas fa-box"></i>
+            <i class="fas fa-users"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-number"><%= counts.shipments || 0 %></div>
-            <div class="stat-label">Total Shipments</div>
-            <div class="stat-change neutral">All time</div>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-            <i class="fas fa-clock"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-number"><%= counts.pendingShipments || 0 %></div>
-            <div class="stat-label">Pending Shipments</div>
-            <div class="stat-change neutral">Awaiting processing</div>
+            <div class="stat-number"><%= analytics.totalUsers || 0 %></div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-change positive">+<%= analytics.newUsersToday || 0 %> today | <%= analytics.activeUsers || 0 %> active</div>
         </div>
     </div>
     
     <div class="stat-card">
         <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-box"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-number"><%= counts.deliveredShipments || 0 %></div>
-            <div class="stat-label">Delivered</div>
-            <div class="stat-change positive">Successfully completed</div>
+            <div class="stat-number"><%= analytics.totalShipments || 0 %></div>
+            <div class="stat-label">Total Shipments</div>
+            <div class="stat-change positive">+<%= analytics.shipmentsThisMonth || 0 %> this month</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-pound-sign"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">£<%= (analytics.totalRevenue || 0).toLocaleString() %></div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-change positive">£<%= (analytics.monthlyRevenue || 0).toLocaleString() %> this month</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= analytics.deliveryRate || 0 %>%</div>
+            <div class="stat-label">Delivery Success Rate</div>
+            <div class="stat-change positive"><%= analytics.onTimeDeliveries || 0 %> on-time deliveries</div>
+        </div>
+    </div>
+</div>
+
+<!-- System Health & Performance -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= analytics.pendingShipments || 0 %></div>
+            <div class="stat-label">Pending Shipments</div>
+            <div class="stat-change neutral">Requires attention</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+            <i class="fas fa-server"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= analytics.uptimePercent || 0 %>%</div>
+            <div class="stat-label">System Uptime</div>
+            <div class="stat-change positive"><%= analytics.uptimeHours || 0 %> hours</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #84cc16, #65a30d);">
+            <i class="fas fa-memory"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= analytics.memoryUsedMB || 0 %>MB</div>
+            <div class="stat-label">Memory Usage</div>
+            <div class="stat-change neutral">/ <%= analytics.memoryTotalMB || 0 %>MB total</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= analytics.totalSubscribers || 0 %></div>
+            <div class="stat-label">Newsletter Subscribers</div>
+            <div class="stat-change neutral">Awaiting processing</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">$<%= counts.totalRevenue || 0 %></div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-change positive">+$<%= counts.revenueToday || 0 %> today</div>
         </div>
     </div>
     
@@ -60,6 +133,17 @@
             <div class="stat-number"><%= counts.newsletters || 0 %></div>
             <div class="stat-label">Newsletter Subscribers</div>
             <div class="stat-change neutral">Active subscribers</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= counts.notifications || 0 %></div>
+            <div class="stat-label">Notifications Sent</div>
+            <div class="stat-change neutral">This month</div>
         </div>
     </div>
 </div>
@@ -141,22 +225,53 @@
     </div>
 </div>
 
+<!-- System Analytics -->  
+<div class="dashboard-card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div>
+            <div class="card-title">System Analytics</div>
+            <div class="card-subtitle">Real-time system performance metrics</div>
+        </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+        <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 700; color: #032330;"><%= counts.activeUsers || 0 %></div>
+            <div style="font-size: 12px; color: #6b7280;">Active Users (24h)</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 700; color: #032330;"><%= counts.shipmentsToday || 0 %></div>
+            <div style="font-size: 12px; color: #6b7280;">Shipments Today</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 700; color: #032330;"><%= counts.avgDeliveryTime || 0 %> days</div>
+            <div style="font-size: 12px; color: #6b7280;">Avg Delivery Time</div>
+        </div>
+        <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 700; color: #032330;"><%= counts.systemUptime || '99.9' %>%</div>
+            <div style="font-size: 12px; color: #6b7280;">System Uptime</div>
+        </div>
+    </div>
+</div>
+
 <!-- Quick Actions Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
     <div class="dashboard-card">
         <div class="card-header">
-            <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                <i class="fas fa-plus-circle"></i>
+            <div class="card-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                <i class="fas fa-bell"></i>
             </div>
             <div>
-                <div class="card-title">Create New Shipment</div>
-                <div class="card-subtitle">Add a new shipment to the system</div>
+                <div class="card-title">Send Notifications</div>
+                <div class="card-subtitle">Create and send notifications to users</div>
             </div>
         </div>
         <div style="margin-top: 16px;">
-            <a href="/admin/shipments/create" class="btn btn-primary" style="width: 100%; justify-content: center;">
+            <a href="/admin/notifications" class="btn btn-primary" style="width: 100%; justify-content: center;">
                 <i class="fas fa-plus"></i>
-                Create Shipment
+                Create Notification
             </a>
         </div>
     </div>
@@ -164,11 +279,29 @@
     <div class="dashboard-card">
         <div class="card-header">
             <div class="card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-users"></i>
             </div>
             <div>
-                <div class="card-title">Manage Shipments</div>
-                <div class="card-subtitle">View and edit all shipments</div>
+                <div class="card-title">User Management</div>
+                <div class="card-subtitle">Manage all registered users</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/users" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-users"></i>
+                Manage Users
+            </a>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-box"></i>
+            </div>
+            <div>
+                <div class="card-title">Shipment Overview</div>
+                <div class="card-subtitle">Monitor all shipments</div>
             </div>
         </div>
         <div style="margin-top: 16px;">
@@ -185,14 +318,32 @@
                 <i class="fas fa-envelope"></i>
             </div>
             <div>
-                <div class="card-title">Newsletter Management</div>
-                <div class="card-subtitle">Manage newsletter subscribers</div>
+                <div class="card-title">Newsletter Campaign</div>
+                <div class="card-subtitle">Create rich newsletters</div>
             </div>
         </div>
         <div style="margin-top: 16px;">
             <a href="/admin/newsletter" class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                <i class="fas fa-users"></i>
-                Manage Subscribers
+                <i class="fas fa-edit"></i>
+                Create Newsletter
+            </a>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+                <div class="card-title">Revenue Analytics</div>
+                <div class="card-subtitle">Financial performance tracking</div>
+            </div>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/admin/analytics" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-chart-bar"></i>
+                View Analytics
             </a>
         </div>
     </div>

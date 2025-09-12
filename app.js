@@ -1,10 +1,16 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const path = require("path");
+const express = require('express');
+const http = require('http');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const flash = require('connect-flash');
+const expressLayouts = require('express-ejs-layouts');
+const path = require('path');
+const methodOverride = require('method-override');
 const bodyParser = require("body-parser");
-const expressLayouts = require("express-ejs-layouts");
 const cookieParser = require("cookie-parser");
-const session = require("express-session");
+const { initializeSocket } = require('./config/socket');
+require('dotenv').config();
 // const ejsLocals = require("ejs-locals");
 require("dotenv").config();
 
@@ -101,8 +107,18 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`🌐 [DEBUG] ${req.method} ${req.path}`);
+  if (req.method === 'POST') {
+    console.log('📋 [DEBUG] POST body:', req.body);
+  }
+  next();
+});
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/admin", express.static(path.join(__dirname, "public/admin")));
@@ -261,8 +277,14 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+initializeSocket(server);
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`WebSocket server initialized for real-time notifications`);
 });
 
 module.exports = app;

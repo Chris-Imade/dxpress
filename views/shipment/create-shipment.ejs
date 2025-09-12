@@ -1091,6 +1091,7 @@
   const PAYPAL_CLIENT_ID = "<%= process.env.PAYPAL_CLIENT_ID %>";
 
   document.addEventListener("DOMContentLoaded", function () {
+    console.log('🚀 [DEBUG] DOM Content Loaded - Initializing create shipment page');
     let stripe = null;
     let elements = null;
 
@@ -1143,6 +1144,21 @@
     );
     const stripePaymentForm = document.getElementById("stripePaymentForm");
     const paypalPaymentForm = document.getElementById("paypalPaymentForm");
+
+    console.log('🔍 [DEBUG] Elements found:', {
+      stepProgressBar: !!stepProgressBar,
+      stepLabels: stepLabels.length,
+      stepContents: stepContents.length,
+      shipmentDetailsForm: !!shipmentDetailsForm,
+      insuranceRequired: !!insuranceRequired,
+      insuranceDetails: !!insuranceDetails,
+      backButtons: backButtons.length,
+      selectRateBtn: !!selectRateBtn,
+      processPaymentBtn: !!processPaymentBtn,
+      paymentMethodRadios: paymentMethodRadios.length,
+      stripePaymentForm: !!stripePaymentForm,
+      paypalPaymentForm: !!paypalPaymentForm
+    });
 
     // Current step
     let currentStep = 1;
@@ -1222,6 +1238,14 @@
         pattern: /^[A-Za-z0-9\s\-]{3,10}$/,
         message: 'Please enter a valid postal code'
       },
+      originCountry: {
+        required: true,
+        message: 'Please select origin country'
+      },
+      destCountry: {
+        required: true,
+        message: 'Please select destination country'
+      },
       packageType: {
         required: true,
         message: 'Please select a package type'
@@ -1235,11 +1259,15 @@
     };
 
     // Initialize form validation
+    console.log('📋 [DEBUG] Initializing form validation...');
     initializeFormValidation();
+    console.log('✅ [DEBUG] Form validation initialized');
 
     // Show insurance fields if insurance is checked
     if (insuranceRequired && insuranceDetails) {
+      console.log('🛡️ [DEBUG] Setting up insurance checkbox handler');
       insuranceRequired.addEventListener("change", function () {
+        console.log('🛡️ [DEBUG] Insurance checkbox changed:', this.checked);
         insuranceDetails.style.display = this.checked ? "block" : "none";
         const declaredValueField = document.getElementById('declaredValue');
         if (this.checked) {
@@ -1251,11 +1279,28 @@
             max: 10000,
             message: 'Please enter a valid declared value (£1-£10,000)'
           };
+          
+          // Add event listeners to the declared value field
+          declaredValueField.addEventListener('input', () => {
+            console.log('💰 [DEBUG] Declared value input event');
+            validateField('declaredValue');
+          });
+          declaredValueField.addEventListener('blur', () => {
+            console.log('💰 [DEBUG] Declared value blur event');
+            validateField('declaredValue');
+          });
+          declaredValueField.addEventListener('change', () => {
+            console.log('💰 [DEBUG] Declared value change event');
+            validateField('declaredValue');
+          });
+          
+          console.log('🛡️ [DEBUG] Insurance enabled, declared value field is now required');
         } else {
           declaredValueField.removeAttribute('required');
           delete formValidation.declaredValue;
           delete validationRules.declaredValue;
           declaredValueField.classList.remove('is-valid', 'is-invalid');
+          console.log('🛡️ [DEBUG] Insurance disabled, declared value field removed from validation');
         }
         updateFormProgress();
       });
@@ -1265,7 +1310,9 @@
     const provideDimensionsCheckbox = document.getElementById('provideDimensions');
     const dimensionsSection = document.getElementById('dimensionsSection');
     if (provideDimensionsCheckbox && dimensionsSection) {
+      console.log('📐 [DEBUG] Setting up dimensions checkbox handler');
       provideDimensionsCheckbox.addEventListener('change', function () {
+        console.log('📐 [DEBUG] Dimensions checkbox changed:', this.checked);
         dimensionsSection.style.display = this.checked ? 'block' : 'none';
       });
     }
@@ -1275,7 +1322,9 @@
     const destinationFields = document.getElementById('destinationFields');
     
     if (copyAddressCheckbox && destinationFields) {
+      console.log('📋 [DEBUG] Setting up address copy checkbox handler');
       copyAddressCheckbox.addEventListener('change', function() {
+        console.log('📋 [DEBUG] Address copy checkbox changed:', this.checked);
         if (this.checked) {
           // Copy origin address to destination
           document.getElementById('destAddress').value = document.getElementById('originAddress').value;
@@ -1291,6 +1340,7 @@
           validateField('destCity');
           validateField('destPostalCode');
           validateField('destCountry');
+          console.log('📋 [DEBUG] Address copied and validated');
         } else {
           // Show destination fields
           destinationFields.style.display = 'block';
@@ -1307,6 +1357,7 @@
             element.classList.remove('is-valid', 'is-invalid');
             formValidation[field] = false;
           });
+          console.log('📋 [DEBUG] Address fields cleared and shown');
         }
         updateFormProgress();
       });
@@ -1314,60 +1365,70 @@
 
     // Handle step navigation
     function goToStep(step) {
+      console.log(`🔄 [DEBUG] Navigating to step ${step}`);
       currentStep = step;
 
       // Update progress bar
+      const progressPercentage = ((step - 1) / 3) * 100;
       if (stepProgressBar) {
-        const progress = ((step - 1) / 3) * 100;
-        stepProgressBar.style.width = `${progress}%`;
-        stepProgressBar.setAttribute("aria-valuenow", progress);
+        stepProgressBar.style.width = progressPercentage + "%";
+        stepProgressBar.setAttribute("aria-valuenow", progressPercentage);
+        console.log(`📊 [DEBUG] Progress bar updated to ${progressPercentage}%`);
       }
 
       // Update step labels
-      if (stepLabels && stepLabels.length) {
-        stepLabels.forEach((label, index) => {
-          const stepNum = index + 1;
-          if (stepNum < step) {
-            label.classList.add("completed");
-            label.classList.remove("active", "disabled");
-          } else if (stepNum === step) {
-            label.classList.add("active");
-            label.classList.remove("completed", "disabled");
-          } else {
-            label.classList.add("disabled");
-            label.classList.remove("active", "completed");
-          }
-        });
-      }
+      stepLabels.forEach((label, index) => {
+        const labelStep = index + 1;
+        if (labelStep < step) {
+          label.classList.add("completed");
+          label.classList.remove("active");
+        } else if (labelStep === step) {
+          label.classList.add("active");
+          label.classList.remove("completed");
+        } else {
+          label.classList.remove("active", "completed");
+        }
+      });
 
-      // Show current step content, hide others
-      if (stepContents && stepContents.length) {
-        stepContents.forEach((content, index) => {
-          if (index + 1 === step) {
-            content.style.display = "block";
-          } else {
-            content.style.display = "none";
-          }
-        });
-      }
+      // Show/hide step content
+      stepContents.forEach((content, index) => {
+        const contentStep = index + 1;
+        if (contentStep === step) {
+          content.style.display = "block";
+          console.log(`👁️ [DEBUG] Showing step ${contentStep} content`);
+        } else {
+          content.style.display = "none";
+        }
+      });
+      
+      console.log(`✅ [DEBUG] Successfully navigated to step ${step}`);
     }
 
     // Add click handlers to step labels
     if (stepLabels && stepLabels.length) {
-      stepLabels.forEach((label) => {
+      console.log(`🎯 [DEBUG] Adding click handlers to ${stepLabels.length} step labels`);
+      stepLabels.forEach((label, index) => {
         label.addEventListener("click", function () {
+          console.log(`🖱️ [DEBUG] Step label ${index + 1} clicked`);
           if (!this.classList.contains("disabled")) {
             const targetStep = parseInt(this.getAttribute("data-step"));
+            console.log(`🎯 [DEBUG] Navigating to step ${targetStep} from label click`);
             goToStep(targetStep);
+          } else {
+            console.log(`⚠️ [DEBUG] Step label ${index + 1} is disabled`);
           }
         });
       });
+    } else {
+      console.warn('⚠️ [DEBUG] No step labels found for click handlers');
     }
 
     // Handle form submission (Step 1)
     if (shipmentDetailsForm) {
+      console.log('📝 [DEBUG] Setting up form submission handler');
       shipmentDetailsForm.addEventListener("submit", function (e) {
         e.preventDefault();
+        console.log('🚀 [DEBUG] Form submitted - Step 1');
 
         // Validate all fields before submission
         let isFormValid = true;
@@ -1376,6 +1437,8 @@
             isFormValid = false;
           }
         });
+
+        console.log('✅ [DEBUG] Form validation result:', isFormValid);
 
         if (!isFormValid) {
           // Show error message
@@ -1407,93 +1470,84 @@
         // Move to Step 2
         goToStep(2);
 
-        // Simulate API call to get rates
-        setTimeout(function () {
-          // Hide loading, show rates
-          if (loadingRates) {
-            loadingRates.style.display = "none";
-          }
-
-          if (shippingRates) {
-            shippingRates.style.display = "block";
-          }
-
-          // Populate rates
-          populateShippingRates();
-        }, 2000);
+        // Calculate real-time DHL API rates
+        calculateRealTimeRates();
       });
     }
 
     // Handle selecting a rate
     if (selectRateBtn) {
+      console.log('🎯 [DEBUG] Setting up rate selection button handler');
       selectRateBtn.addEventListener("click", function () {
+        console.log('🖱️ [DEBUG] Select rate button clicked');
         if (selectedRate) {
+          console.log('📦 [DEBUG] Selected rate:', selectedRate);
+          
           // Populate summary elements if they exist
           const summaryElements = {
-            carrier: document.getElementById("summaryCarrier"),
-            service: document.getElementById("summaryService"),
-            delivery: document.getElementById("summaryDelivery"),
-            baseRate: document.getElementById("summaryBaseRate"),
-            additional: document.getElementById("summaryAdditional"),
-            total: document.getElementById("summaryTotal"),
-            stripeTotal: document.getElementById("stripeTotalPrice"),
-            paypalTotal: document.getElementById("paypalTotalPrice"),
+            summaryOrigin: document.getElementById('summaryOrigin'),
+            summaryDestination: document.getElementById('summaryDestination'),
+            summaryPackageType: document.getElementById('summaryPackageType'),
+            summaryWeight: document.getElementById('summaryWeight'),
+            summaryCarrier: document.getElementById('summaryCarrier'),
+            summaryService: document.getElementById('summaryService'),
+            summaryPrice: document.getElementById('summaryPrice'),
+            summaryDeliveryTime: document.getElementById('summaryDeliveryTime'),
+            stripeTotalPrice: document.getElementById('stripeTotalPrice'),
+            paypalTotalPrice: document.getElementById('paypalTotalPrice')
           };
 
-          // Update summary elements if they exist
-          if (summaryElements.carrier) {
-            summaryElements.carrier.textContent = selectedRate.carrier;
-          }
+          console.log('📋 [DEBUG] Summary elements found:', Object.keys(summaryElements).filter(key => summaryElements[key]));
 
-          if (summaryElements.service) {
-            summaryElements.service.textContent = selectedRate.service;
+          // Populate summary with form data and selected rate
+          const formData = new FormData(shipmentDetailsForm);
+          if (summaryElements.summaryOrigin) {
+            summaryElements.summaryOrigin.textContent = `${formData.get('originAddress')}, ${formData.get('originCity')}, ${formData.get('originPostalCode')}, ${formData.get('originCountry')}`;
           }
-
-          if (summaryElements.delivery) {
-            summaryElements.delivery.textContent = selectedRate.deliveryDays;
+          if (summaryElements.summaryDestination) {
+            summaryElements.summaryDestination.textContent = `${formData.get('destAddress')}, ${formData.get('destCity')}, ${formData.get('destPostalCode')}, ${formData.get('destCountry')}`;
           }
-
-          if (summaryElements.baseRate) {
-            summaryElements.baseRate.textContent =
-              selectedRate.baseRate.toFixed(2);
+          if (summaryElements.summaryPackageType) {
+            summaryElements.summaryPackageType.textContent = formData.get('packageType');
           }
-
-          if (summaryElements.additional) {
-            summaryElements.additional.textContent =
-              selectedRate.additionalFees.toFixed(2);
+          if (summaryElements.summaryWeight) {
+            summaryElements.summaryWeight.textContent = formData.get('weight') + ' kg';
           }
-
-          if (summaryElements.total) {
-            summaryElements.total.textContent =
-              selectedRate.totalRate.toFixed(2);
+          if (summaryElements.summaryCarrier) {
+            summaryElements.summaryCarrier.textContent = selectedRate.carrier;
           }
-
-          // Update payment form totals
-          if (summaryElements.stripeTotal) {
-            summaryElements.stripeTotal.textContent =
-              selectedRate.totalRate.toFixed(2);
+          if (summaryElements.summaryService) {
+            summaryElements.summaryService.textContent = selectedRate.service;
           }
-
-          if (summaryElements.paypalTotal) {
-            summaryElements.paypalTotal.textContent =
-              selectedRate.totalRate.toFixed(2);
+          if (summaryElements.summaryPrice) {
+            summaryElements.summaryPrice.textContent = '£' + selectedRate.price;
+          }
+          if (summaryElements.summaryDeliveryTime) {
+            summaryElements.summaryDeliveryTime.textContent = selectedRate.deliveryTime;
+          }
+          if (summaryElements.stripeTotalPrice) {
+            summaryElements.stripeTotalPrice.textContent = selectedRate.price;
+          }
+          if (summaryElements.paypalTotalPrice) {
+            summaryElements.paypalTotalPrice.textContent = selectedRate.price;
           }
 
           // Update PayPal button with new amount
-          try {
-            if (typeof updatePayPalButton === "function") {
-              updatePayPalButton(selectedRate.totalRate);
-            } else {
-              console.error("updatePayPalButton function not found");
-            }
-          } catch (error) {
-            console.error("Error updating PayPal button:", error);
+          if (typeof updatePayPalButton === 'function') {
+            console.log('💳 [DEBUG] Updating PayPal button with amount:', selectedRate.price);
+            updatePayPalButton(parseFloat(selectedRate.price));
           }
 
           // Go to payment step
+          console.log('🔄 [DEBUG] Proceeding to payment step');
           goToStep(3);
+        } else {
+          console.warn('⚠️ [DEBUG] No rate selected when button clicked');
+          showNotification('Please select a shipping rate before proceeding.', 'error');
         }
       });
+    } else {
+      console.warn('⚠️ [DEBUG] Select rate button not found');
     }
 
     // Handle payment method change
@@ -1669,12 +1723,8 @@
                     return_url: `${window.location.origin}/shipment/confirmation?shipmentId=${shipmentId}`,
                     payment_method_data: {
                       billing_details: {
-                        name:
-                          document.getElementById("customerName")?.value ||
-                          "Customer",
-                        email:
-                          document.getElementById("customerEmail")?.value ||
-                          "customer@example.com",
+                        name: document.getElementById("customerName")?.value || "Customer",
+                        email: document.getElementById("customerEmail")?.value || "customer@example.com",
                       },
                     },
                   },
@@ -1752,8 +1802,77 @@
       });
     }
 
-    // Populate shipping rates
-    async function populateShippingRates() {
+    // Calculate real-time rates using actual shipment data
+    async function calculateRealTimeRates() {
+      const loadingRates = document.getElementById("loadingRates");
+      const shippingRates = document.getElementById("shippingRates");
+      const ratesContainer = document.getElementById("ratesContainer");
+
+      try {
+        // Get form data
+        const formData = new FormData(shipmentDetailsForm);
+        
+        // Build query parameters for API call
+        const params = new URLSearchParams({
+          from: `${formData.get('originAddress')}, ${formData.get('originCity')}, ${formData.get('originPostalCode')}, ${formData.get('originCountry')}`,
+          to: `${formData.get('destAddress')}, ${formData.get('destCity')}, ${formData.get('destPostalCode')}, ${formData.get('destCountry')}`,
+          weight: formData.get('weight'),
+          length: formData.get('length') || '20',
+          width: formData.get('width') || '15',
+          height: formData.get('height') || '10',
+          packageType: formData.get('packageType'),
+          declaredValue: formData.get('declaredValue') || '100'
+        });
+
+        console.log('📦 [DEBUG] Fetching real-time rates with params:', params.toString());
+
+        // Call the API endpoint
+        const response = await fetch(`/api/shipping-rates?${params}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to calculate rates');
+        }
+
+        // Hide loading, show rates
+        if (loadingRates) {
+          loadingRates.style.display = "none";
+        }
+        if (shippingRates) {
+          shippingRates.style.display = "block";
+        }
+
+        // Display the rates
+        displayRealTimeRates(data.rates);
+
+      } catch (error) {
+        console.error('💥 [DEBUG] Rate calculation error:', error);
+        
+        // Hide loading
+        if (loadingRates) {
+          loadingRates.style.display = "none";
+        }
+        
+        // Show error message
+        if (ratesContainer) {
+          ratesContainer.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Failed to calculate shipping rates. Please try again.
+              </div>
+            </div>
+          `;
+        }
+        
+        if (shippingRates) {
+          shippingRates.style.display = "block";
+        }
+      }
+    }
+
+    // Display real-time rates from API
+    function displayRealTimeRates(rates) {
       const ratesContainer = document.getElementById("ratesContainer");
       if (!ratesContainer) {
         console.error("Rates container not found");
@@ -1762,82 +1881,84 @@
 
       ratesContainer.innerHTML = "";
 
-      try {
-        const response = await fetch("/api/shipping-rates");
-        const data = await response.json();
+      if (!rates || rates.length === 0) {
+        ratesContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-warning">
+              <i class="fas fa-info-circle me-2"></i>
+              No shipping rates available for this route.
+            </div>
+          </div>
+        `;
+        return;
+      }
 
-        if (!data.success) {
-          throw new Error(data.message);
-        }
-
-        const dbRates = data.rates;
-        const rates = [
-          {
-            id: "dhl-express",
-            carrier: "DHL",
-            logo: "/assets/images/carrier/dhl.png",
-            service: "Express",
-            deliveryDays: "1-2 Business Days",
-            baseRate: dbRates.dhl.baseRate,
-            additionalFees: dbRates.dhl.additionalFees,
-            totalRate: dbRates.dhl.baseRate + dbRates.dhl.additionalFees,
-          },
-          {
-            id: "fedex-standard",
-            carrier: "FedEx",
-            logo: "/assets/images/carrier/fedex.png",
-            service: "Standard",
-            deliveryDays: "2-3 Business Days",
-            baseRate: dbRates.fedex.baseRate,
-            additionalFees: dbRates.fedex.additionalFees,
-            totalRate: dbRates.fedex.baseRate + dbRates.fedex.additionalFees,
-          },
-          {
-            id: "ups-express",
-            carrier: "UPS",
-            logo: "/assets/images/carrier/ups.png",
-            service: "Express Saver",
-            deliveryDays: "1-3 Business Days",
-            baseRate: dbRates.ups.baseRate,
-            additionalFees: dbRates.ups.additionalFees,
-            totalRate: dbRates.ups.baseRate + dbRates.ups.additionalFees,
-          },
-        ];
-
-        // Create rate cards
-        rates.forEach((rate) => {
-          const rateCard = document.createElement("div");
-          rateCard.className = "col-md-4 mb-4";
-          rateCard.innerHTML = `
-            <div class="card rate-card" data-rate-id="${rate.id}">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <img src="${rate.logo}" alt="${rate.carrier
-            }" class="carrier-logo me-3">
-                  <div>
-                    <h5 class="mb-1">${rate.carrier} ${rate.service}</h5>
-                    <div class="delivery-info">
-                      <i class="fas fa-truck"></i>
-                      <span>${rate.deliveryDays}</span>
-                    </div>
+      // Create rate cards
+      rates.forEach((rate) => {
+        const isAvailable = rate.available === true;
+        const isMaintenanceMode = rate.maintenanceMode === true;
+        const isDHL = rate.carrier === 'DHL';
+        
+        const rateCard = document.createElement("div");
+        rateCard.className = "col-md-4 mb-4";
+        rateCard.innerHTML = `
+          <div class="card rate-card ${!isAvailable ? 'disabled' : ''}" data-rate-id="${rate.serviceCode || rate.service}" ${!isAvailable ? 'style="opacity: 0.6; cursor: not-allowed;"' : ''}>
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="carrier-logo me-3" style="background: ${isDHL ? '#dc2626' : isMaintenanceMode ? '#f59e0b' : '#6b7280'}; color: white; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 12px;">
+                  ${rate.carrier}
+                </div>
+                <div>
+                  <h5 class="mb-1 d-flex align-items-center gap-2">
+                    ${rate.service}
+                    ${isDHL && isAvailable ? 
+                      '<span class="badge bg-success" style="font-size: 10px;"><i class="fas fa-wifi"></i> LIVE</span>' : ''
+                    }
+                    ${isMaintenanceMode ? 
+                      '<span class="badge bg-warning" style="font-size: 10px;"><i class="fas fa-tools"></i> MAINTENANCE</span>' : ''
+                    }
+                  </h5>
+                  <div class="delivery-info">
+                    <i class="fas fa-truck"></i>
+                    <span>${rate.deliveryTime}</span>
                   </div>
+                  ${isMaintenanceMode ? '<small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>' + (rate.message || 'Under development') + '</small>' : ''}
                 </div>
-                <div class="rate-details">
-                  <p class="mb-2"><strong>Base Rate:</strong> £${rate.baseRate.toFixed(
-              2
-            )}</p>
-                  <p class="mb-2"><strong>Additional Fees:</strong> £${rate.additionalFees.toFixed(
-              2
-            )}</p>
-                  <p class="mb-0"><strong>Total:</strong> £${rate.totalRate.toFixed(
-              2
-            )}</p>
-                </div>
-                <div class="mt-3 d-grid">
-                  <button class="btn btn-outline-primary select-rate-btn">
-                    Select Rate
+              </div>
+              
+              ${isMaintenanceMode ? 
+                `<div class="alert alert-warning py-2 mb-3">
+                  <small><i class="fas fa-info-circle me-1"></i>API integration in development</small>
+                </div>` : ''
+              }
+              
+              <div class="rate-details">
+                ${isAvailable ? 
+                  `<p class="mb-0 text-center"><strong style="font-size: 1.2em; color: #10b981;">£${rate.baseRate.toFixed(2)}</strong></p>` :
+                  `<p class="mb-0 text-center"><strong style="color: #6b7280;">Service Unavailable</strong></p>`
+                }
+              </div>
+              
+              <div class="mt-3">
+                ${isAvailable && isDHL ? 
+                  `<div class="d-flex flex-wrap gap-1 mb-3">
+                    <small class="badge bg-light text-dark">✓ Real-time Tracking</small>
+                    <small class="badge bg-light text-dark">✓ Live GPS</small>
+                    <small class="badge bg-light text-dark">✓ Insurance</small>
+                  </div>` :
+                  isMaintenanceMode ?
+                  `<div class="d-flex flex-wrap gap-1 mb-3">
+                    <small class="badge bg-warning text-dark">⏳ Coming Soon</small>
+                    <small class="badge bg-warning text-dark">🔧 In Development</small>
+                  </div>` : ''
+                }
+                
+                <div class="d-grid">
+                  <button class="btn ${isAvailable ? 'btn-primary' : 'btn-outline-secondary'} select-rate-btn" ${!isAvailable ? 'disabled' : ''}>
+                    ${isAvailable ? 'Select Rate' : isMaintenanceMode ? 'Under Development' : 'Unavailable'}
                   </button>
                 </div>
+              </div>
               </div>
             </div>
           `;
@@ -1850,55 +1971,83 @@
           }
         });
 
-        // Add event listeners to rate cards
-        const rateCards = document.querySelectorAll(".rate-card");
-        if (rateCards && rateCards.length) {
-          rateCards.forEach((card) => {
-            card.addEventListener("click", function () {
-              // Remove selected class from all cards
-              document.querySelectorAll(".rate-card").forEach((c) => {
-                c.classList.remove("selected");
+        // Add click handlers for rate selection
+        ratesContainer.addEventListener("click", function (e) {
+          const selectBtn = e.target.closest(".select-rate-btn");
+          if (selectBtn && !selectBtn.disabled) {
+            const rateCard = selectBtn.closest(".rate-card");
+            if (rateCard) {
+              // Remove previous selections
+              document.querySelectorAll(".rate-card").forEach((card) => {
+                card.classList.remove("selected");
               });
 
-              // Add selected class to clicked card
-              this.classList.add("selected");
+              // Select this card
+              rateCard.classList.add("selected");
+
+              // Store selected rate data
+              const rateData = JSON.parse(rateCard.dataset.rate || "{}");
+              selectedRate = {
+                id: rateData.serviceCode || rateData.service,
+                carrier: rateData.carrier,
+                service: rateData.service,
+                price: rateData.baseRate.toFixed(2),
+                deliveryTime: rateData.deliveryTime,
+              };
+
+              console.log("Selected rate:", selectedRate);
 
               // Enable continue button
               if (selectRateBtn) {
                 selectRateBtn.disabled = false;
               }
-
-              // Store selected rate
-              if (this.dataset.rate) {
-                try {
-                  selectedRate = JSON.parse(this.dataset.rate);
-                } catch (error) {
-                  console.error("Error parsing rate data:", error);
-                }
-              }
-            });
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching shipping rates:", error);
-        ratesContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger">Failed to load shipping rates. Please try again later.</div></div>`;
-      }
+            }
+          }
+        });
     };
 
     // Form validation functions
     function initializeFormValidation() {
+      console.log('🔧 [DEBUG] Starting form validation initialization');
+      
+      // Initialize formValidation object with all fields set to false
+      Object.keys(validationRules).forEach(fieldName => {
+        formValidation[fieldName] = false;
+      });
+      
+      console.log('📋 [DEBUG] Initial formValidation state:', formValidation);
+      
       // Add event listeners to all form fields
       Object.keys(validationRules).forEach(fieldName => {
         const field = document.getElementById(fieldName);
         if (field) {
+          console.log(`✅ [DEBUG] Adding listeners to field: ${fieldName}`);
           // Real-time validation on input/change
-          field.addEventListener('input', () => validateField(fieldName));
-          field.addEventListener('blur', () => validateField(fieldName));
-          field.addEventListener('change', () => validateField(fieldName));
+          field.addEventListener('input', () => {
+            console.log(`📝 [DEBUG] Input event on ${fieldName}`);
+            validateField(fieldName);
+          });
+          field.addEventListener('blur', () => {
+            console.log(`👁️ [DEBUG] Blur event on ${fieldName}`);
+            validateField(fieldName);
+          });
+          field.addEventListener('change', () => {
+            console.log(`🔄 [DEBUG] Change event on ${fieldName}`);
+            validateField(fieldName);
+          });
+          
+          // Validate field immediately if it has a value
+          if (field.value && field.value.trim() !== '') {
+            console.log(`🔍 [DEBUG] Field ${fieldName} has initial value, validating...`);
+            validateField(fieldName);
+          }
+        } else {
+          console.warn(`⚠️ [DEBUG] Field not found: ${fieldName}`);
         }
       });
 
       // Initialize progress tracking
+      console.log('📊 [DEBUG] Updating initial form progress');
       updateFormProgress();
     }
 
@@ -1906,11 +2055,16 @@
       const field = document.getElementById(fieldName);
       const rule = validationRules[fieldName];
 
-      if (!field || !rule) return true;
+      if (!field || !rule) {
+        console.log(`⚠️ [DEBUG] Field or rule not found for: ${fieldName}`);
+        return true;
+      }
 
       const value = field.value.trim();
       let isValid = true;
       let errorMessage = '';
+
+      console.log(`🔍 [DEBUG] Validating field: ${fieldName}, value: "${value}"`);
 
       // Required validation
       if (rule.required && !value) {
@@ -1932,13 +2086,22 @@
         errorMessage = rule.message;
       }
       // Number validation
-      else if (rule.min && parseFloat(value) < rule.min) {
+      else if (rule.min && (isNaN(parseFloat(value)) || parseFloat(value) < rule.min)) {
         isValid = false;
         errorMessage = `${getFieldLabel(fieldName)} must be at least ${rule.min}`;
       }
-      else if (rule.max && parseFloat(value) > rule.max) {
+      else if (rule.max && (isNaN(parseFloat(value)) || parseFloat(value) > rule.max)) {
         isValid = false;
         errorMessage = `${getFieldLabel(fieldName)} must be no more than ${rule.max}`;
+      }
+
+      console.log(`✅ [DEBUG] Field ${fieldName} validation result: ${isValid ? 'VALID' : 'INVALID'} - ${errorMessage || 'No errors'}`);
+
+      // Special handling for select fields (country dropdowns)
+      if ((fieldName === 'originCountry' || fieldName === 'destCountry') && value && value !== '') {
+        isValid = true;
+        errorMessage = '';
+        console.log(`🌍 [DEBUG] Country field ${fieldName} has value: ${value}`);
       }
 
       // Update field appearance
@@ -1955,6 +2118,7 @@
 
       // Update validation state
       formValidation[fieldName] = isValid;
+      console.log(`🔄 [DEBUG] Updated formValidation[${fieldName}] = ${isValid}`);
       updateFormProgress();
 
       return isValid;
@@ -1971,6 +2135,13 @@
       const validFields = Object.values(formValidation).filter(Boolean).length;
       const progress = totalFields > 0 ? (validFields / totalFields) * 100 : 0;
 
+      console.log(`📊 [DEBUG] Form progress: ${validFields}/${totalFields} fields valid (${progress.toFixed(1)}%)`);
+      console.log(`📊 [DEBUG] Form validation state:`, formValidation);
+
+      // List invalid fields for debugging
+      const invalidFields = Object.keys(formValidation).filter(key => !formValidation[key]);
+      console.log(`❌ [DEBUG] Invalid/incomplete fields:`, invalidFields);
+
       // Update progress text
       const progressElement = document.getElementById('validationProgress');
       const compareButton = document.getElementById('compareRatesBtn');
@@ -1981,12 +2152,15 @@
           if (compareButton) {
             compareButton.disabled = false;
             compareButton.classList.add('pulse');
+            console.log('✅ [DEBUG] Compare button ENABLED - all fields valid');
           }
         } else {
           progressElement.innerHTML = `<i class="fas fa-info-circle me-1"></i>Progress: ${validFields}/${totalFields} fields completed`;
           if (compareButton) {
             compareButton.disabled = true;
             compareButton.classList.remove('pulse');
+            console.log(`⏳ [DEBUG] Compare button DISABLED - ${totalFields - validFields} fields remaining`);
+            console.log(`⏳ [DEBUG] Missing fields: ${invalidFields.join(', ')}`);
           }
         }
       }
@@ -2041,22 +2215,32 @@
     }
 
     function showNotification(message, type = 'info') {
+      console.log(`📢 [DEBUG] Showing notification: ${type} - ${message}`);
+      
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
-      notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 500px;
+      `;
       notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
         ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       `;
 
+      // Add to body
       document.body.appendChild(notification);
+      console.log('✅ [DEBUG] Notification added to DOM');
 
-      // Auto-remove after 5 seconds
+      // Auto remove after 5 seconds
       setTimeout(() => {
         if (notification.parentNode) {
           notification.remove();
+          console.log('🗑️ [DEBUG] Notification auto-removed');
         }
       }, 5000);
     }
@@ -2064,3 +2248,4 @@
 
   // Use Javascript to make this document body's color #212529
   document.body.style.backgroundColor = "#212529";
+</script>

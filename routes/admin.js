@@ -89,6 +89,40 @@ router.delete(
   adminController.deleteNewsletterSubscriber
 );
 
+// User management routes
+router.get(
+  "/users",
+  isAuthenticated,
+  isAdmin,
+  adminController.getUsers
+);
+router.get(
+  "/users/:id",
+  isAuthenticated,
+  isAdmin,
+  adminController.getUser
+);
+router.post(
+  "/users/:id",
+  isAuthenticated,
+  isAdmin,
+  adminController.postUser
+);
+router.delete(
+  "/users/:id",
+  isAuthenticated,
+  isAdmin,
+  adminController.deleteUser
+);
+
+// Notifications management
+router.get(
+  "/notifications",
+  isAuthenticated,
+  isAdmin,
+  adminController.getNotifications
+);
+
 // Setup route (for initial admin creation) - should be removed or secured in production
 if (process.env.NODE_ENV !== "production") {
   router.post("/setup", authController.createAdminUser);

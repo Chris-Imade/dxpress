@@ -1,0 +1,481 @@
+<!-- Notification Management Page -->
+<div class="page-header" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb;">
+    <h1 style="font-size: 2rem; color: #1f2937; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fas fa-bell" style="color: #6366f1;"></i>
+        Notification Management
+    </h1>
+    <p style="color: #6b7280; font-size: 1.1rem;">Send notifications to users and manage notification settings</p>
+</div>
+<!-- Statistics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <i class="fas fa-paper-plane" style="font-size: 2rem; opacity: 0.8;"></i>
+        </div>
+        <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;"><%= notificationStats.totalSent || 0 %></div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Total Notifications Sent</div>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <i class="fas fa-calendar-month" style="font-size: 2rem; opacity: 0.8;"></i>
+        </div>
+        <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;"><%= notificationStats.thisMonth || 0 %></div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">This Month</div>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <i class="fas fa-users" style="font-size: 2rem; opacity: 0.8;"></i>
+        </div>
+        <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;"><%= notificationStats.activeUsers || 0 %></div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Active Users</div>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <i class="fas fa-check-circle" style="font-size: 2rem; opacity: 0.8;"></i>
+        </div>
+        <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem;"><%= notificationStats.deliveryRate || 0 %>%</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Delivery Rate</div>
+    </div>
+</div>
+
+<!-- Notification Form -->
+<div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.3rem; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus-circle"></i>
+            Create New Notification
+        </h2>
+        
+        <!-- Alert Messages -->
+        <div id="successMessage" style="padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;"></div>
+        <div id="errorMessage" style="padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;"></div>
+        
+        <form id="notificationForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Title *</label>
+                    <input type="text" id="notificationTitle" required style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Type</label>
+                    <select id="notificationType" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                        <option value="info">Info</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Message *</label>
+                <textarea id="notificationMessage" required style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; min-height: 120px; resize: vertical;"></textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Priority</label>
+                    <select id="notificationPriority" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Expires At</label>
+                    <input type="datetime-local" id="expiresAt" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Action URL (Optional)</label>
+                    <input type="url" id="actionUrl" placeholder="https://example.com/action" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Action Text</label>
+                    <input type="text" id="actionText" placeholder="View Details" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-paper-plane"></i>
+                    Send to All Users
+                </button>
+                <button type="button" onclick="document.getElementById('notificationForm').reset()" style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; background: #6b7280; color: white;">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Recent Notifications -->
+<div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+    <h2 style="font-size: 1.3rem; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-history"></i>
+        Recent Notifications
+    </h2>
+    
+    <% if (recentNotifications && recentNotifications.length > 0) { %>
+        <% recentNotifications.forEach(notification => { %>
+            <div style="display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white; font-size: 1.2rem; background: <%= notification.type === 'info' ? '#3b82f6' : notification.type === 'success' ? '#10b981' : notification.type === 'warning' ? '#f59e0b' : '#ef4444' %>;">
+                    <i class="fas fa-<%= notification.type === 'info' ? 'info-circle' : notification.type === 'success' ? 'check-circle' : notification.type === 'warning' ? 'exclamation-triangle' : 'times-circle' %>"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;"><%= notification.title %></div>
+                    <div style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.25rem;"><%= notification.message %></div>
+                    <div style="font-size: 0.8rem; color: #9ca3af;">
+                        Sent <%= new Date(notification.sentAt).toLocaleDateString() %> • <%= notification.recipients %> recipients
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <p>No notifications sent yet</p>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    // Handle form submission
+    document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            title: document.getElementById('notificationTitle').value,
+            message: document.getElementById('notificationMessage').value,
+            type: document.getElementById('notificationType').value,
+            priority: document.getElementById('notificationPriority').value,
+            actionUrl: document.getElementById('actionUrl').value,
+            actionText: document.getElementById('actionText').value,
+            expiresAt: document.getElementById('expiresAt').value
+        };
+        
+        if (!formData.title || !formData.message) {
+            showError('Please fill in both title and message');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('#notificationForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/admin/notifications/broadcast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSuccess(`Notification sent successfully to ${result.count} users!`);
+                document.getElementById('notificationForm').reset();
+            } else {
+                showError(result.message || 'Failed to send notification');
+            }
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            showError('Failed to send notification');
+        } finally {
+            // Reset button state
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Show success/error messages
+    function showSuccess(message) {
+        const successEl = document.getElementById('successMessage');
+        const errorEl = document.getElementById('errorMessage');
+        
+        errorEl.style.display = 'none';
+        successEl.textContent = message;
+        successEl.style.display = 'block';
+        
+        setTimeout(() => {
+            successEl.style.display = 'none';
+        }, 5000);
+    }
+
+    function showError(message) {
+        const successEl = document.getElementById('successMessage');
+        const errorEl = document.getElementById('errorMessage');
+        
+        successEl.style.display = 'none';
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        
+        setTimeout(() => {
+            errorEl.style.display = 'none';
+        }, 5000);
+    }
+</script>
+                </h1>
+                <p style="color: #6b7280; font-size: 1.1rem;">Send notifications to users and manage notification settings</p>
+                <p class="page-subtitle">Send notifications to users and manage notification settings</p>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalNotifications">-</div>
+                    <div class="stat-label">Total Notifications</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="unreadNotifications">-</div>
+                    <div class="stat-label">Unread Notifications</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="activeUsers">-</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card error">
+                    <div class="stat-value" id="systemAlerts">-</div>
+                    <div class="stat-label">System Alerts</div>
+                </div>
+            </div>
+
+            <!-- Broadcast Notification -->
+            <div class="action-section">
+                <h2 class="section-title">
+                    <i class="fas fa-broadcast-tower"></i>
+                    Broadcast Notification
+                </h2>
+
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+
+                <form id="broadcastForm">
+                    <div class="form-group">
+                        <label class="form-label" for="notificationTitle">Title *</label>
+                        <input type="text" id="notificationTitle" class="form-input" placeholder="Enter notification title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="notificationMessage">Message *</label>
+                        <textarea id="notificationMessage" class="form-textarea" placeholder="Enter notification message" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="notificationType">Type</label>
+                            <select id="notificationType" class="form-select">
+                                <option value="info">Info</option>
+                                <option value="success">Success</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                                <option value="system">System</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="notificationPriority">Priority</label>
+                            <select id="notificationPriority" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="actionUrl">Action URL (Optional)</label>
+                            <input type="url" id="actionUrl" class="form-input" placeholder="https://example.com/action">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="actionText">Action Text (Optional)</label>
+                            <input type="text" id="actionText" class="form-input" placeholder="View Details">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="expiresAt">Expires At (Optional)</label>
+                        <input type="datetime-local" id="expiresAt" class="form-input">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Notification to All Users
+                    </button>
+                </form>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="recent-notifications">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    Recent Notifications
+                </h2>
+
+                <div id="recentNotificationsList" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading recent notifications...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load notification statistics
+        async function loadNotificationStats() {
+            try {
+                const response = await fetch('/api/admin/notifications/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('totalNotifications').textContent = stats.totalNotifications.toLocaleString();
+                    document.getElementById('unreadNotifications').textContent = stats.unreadNotifications.toLocaleString();
+                    document.getElementById('activeUsers').textContent = '0'; // Placeholder
+                    document.getElementById('systemAlerts').textContent = '0'; // Placeholder
+
+                    // Load recent notifications
+                    loadRecentNotifications(stats.recentNotifications);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load recent notifications
+        function loadRecentNotifications(notifications) {
+            const container = document.getElementById('recentNotificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 2rem;">No recent notifications found.</p>';
+                return;
+            }
+
+            container.innerHTML = notifications.map(notification => `
+                <div class="notification-item">
+                    <div class="notification-icon ${notification.type}">
+                        <i class="fas fa-${getNotificationIcon(notification.type)}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-meta">
+                            ${notification.userId?.name || 'System'} • ${new Date(notification.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get icon for notification type
+        function getNotificationIcon(type) {
+            const icons = {
+                info: 'info-circle',
+                success: 'check-circle',
+                warning: 'exclamation-triangle',
+                error: 'times-circle',
+                system: 'cog',
+                shipment: 'box',
+                payment: 'credit-card'
+            };
+            return icons[type] || 'bell';
+        }
+
+        // Handle form submission
+        document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('notificationTitle').value,
+                message: document.getElementById('notificationMessage').value,
+                type: document.getElementById('notificationType').value,
+                priority: document.getElementById('notificationPriority').value,
+                actionUrl: document.getElementById('actionUrl').value,
+                actionText: document.getElementById('actionText').value,
+                expiresAt: document.getElementById('expiresAt').value
+            };
+            
+            if (!formData.title || !formData.message) {
+                showError('Please fill in both title and message');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.querySelector('#notificationForm button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/admin/notifications/broadcast', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(`Notification sent successfully to ${result.count} users!`);
+                    document.getElementById('notificationForm').reset();
+                    loadNotificationStats();
+                } else {
+                    showError(result.message || 'Failed to send notification');
+                }
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                showError('Failed to send notification');
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Show success/error messages
+        function showMessage(type, message) {
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+
+            // Hide both messages first
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            if (type === 'success') {
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+            } else {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successEl.style.display = 'none';
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotificationStats();
+        });
+    </script>
+</body>
+</html>

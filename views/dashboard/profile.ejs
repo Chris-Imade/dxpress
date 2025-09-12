@@ -72,6 +72,41 @@
             </div>
         </div>
 
+        <!-- Notification Settings -->
+        <div class="dashboard-card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-icon" style="width: 32px; height: 32px; font-size: 14px;">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div>
+                    <div class="card-title" style="font-size: 16px;">Notifications</div>
+                    <div class="card-subtitle">Manage notification preferences</div>
+                </div>
+            </div>
+            <div style="margin-top: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <div>
+                        <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">Notification Sounds</div>
+                        <div style="font-size: 12px; color: #6b7280;">Play sound when new notifications arrive</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" onchange="toggleNotificationSound()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                    <div>
+                        <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">Test Sound</div>
+                        <div style="font-size: 12px; color: #6b7280;">Preview notification sound</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="testNotificationSound()" style="padding: 8px 16px; font-size: 12px;">
+                        <i class="fas fa-volume-up"></i>
+                        Test
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Security Settings -->
         <div class="dashboard-card">
             <div class="card-header">
@@ -184,15 +219,163 @@ input:checked + .slider:before {
 }
 </style>
 
+<!-- Notification Sound Script -->
+<script src="/assets/sounds/notification.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     loadProfileStats();
+    initializeNotificationSettings();
     
     document.getElementById('profileForm').addEventListener('submit', function(e) {
         e.preventDefault();
         updateProfile();
     });
 });
+
+// Safe localStorage wrapper
+function getStorageItem(key, defaultValue = 'true') {
+    try {
+        if (typeof Storage !== 'undefined' && localStorage) {
+            const value = localStorage.getItem(key);
+            return value !== null ? value : defaultValue;
+        }
+    } catch (error) {
+        console.warn('localStorage not available:', error);
+    }
+    return defaultValue;
+}
+
+function setStorageItem(key, value) {
+    try {
+        if (typeof Storage !== 'undefined' && localStorage) {
+            localStorage.setItem(key, value);
+            return true;
+        }
+    } catch (error) {
+        console.warn('Failed to save to localStorage:', error);
+    }
+    return false;
+}
+
+// Initialize notification settings
+function initializeNotificationSettings() {
+    const soundEnabled = getStorageItem('notificationSoundEnabled', 'true') !== 'false';
+    const toggle = document.getElementById('soundToggle');
+    if (toggle) {
+        toggle.checked = soundEnabled;
+    }
+}
+
+// Save notification settings
+async function saveNotificationSettings() {
+    try {
+        const soundEnabled = document.getElementById('notificationSound').checked;
+        
+        console.log('💾 Saving notification sound setting:', soundEnabled);
+        
+        // Save to localStorage with safe wrapper
+        setStorageItem('notificationSound', soundEnabled.toString());
+        
+        // Also save to database via API
+        const preferences = {
+            notifications: {
+                sound: soundEnabled,
+                email: true, // Keep existing defaults
+                push: true
+            }
+        };
+        
+        console.log('📡 Sending preferences to server:', preferences);
+        
+        const response = await fetch('/dashboard/api/preferences', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ preferences })
+        });
+        
+        const result = await response.json();
+        console.log('📨 Server response:', result);
+        
+        if (result.success) {
+            showToast('Notification settings saved successfully!', 'success');
+        } else {
+            throw new Error(result.message || 'Failed to save to database');
+        }
+        
+    } catch (error) {
+        console.error('Failed to save notification settings:', error);
+        showToast('Failed to save settings. Please try again.', 'error');
+    }
+}
+
+// Test notification sound
+async function testNotificationSound() {
+    console.log('Testing notification sound...');
+    
+    try {
+        // Play MP3 notification sound
+        const audio = new Audio('/assets/sounds/chime.mp3');
+        audio.volume = 0.7;
+        
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            await playPromise;
+            showNotification('Notification sound test completed!', 'success');
+        }
+    } catch (error) {
+        console.error('Test notification sound error:', error);
+        if (error.name === 'NotAllowedError') {
+            showNotification('Please interact with the page first, then try again', 'warning');
+        } else {
+            showNotification('Failed to play notification sound', 'error');
+        }
+    }
+}
+
+// Show notification feedback
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 16px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 
 function loadProfileStats() {
     // Load user shipments and invoices for stats
@@ -330,14 +513,4 @@ function showNotification(message, type) {
         notification.remove();
     }, 3000);
 }
-
-// Add CSS for animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-`;
-document.head.appendChild(style);
 </script>

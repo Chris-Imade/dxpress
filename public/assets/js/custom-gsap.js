@@ -150,67 +150,95 @@ var offcanvasBarIcon = document.querySelector('.offcanvas-bar-icon');
 var closeBtn = document.querySelector('.offcanvas-sidebar__close');
 var sideOverlay = document.querySelector('.side-overlay');
 
-stl.to('.side-overlay', {
-  duration: .3, 
-  visibility: 'visible',
-  opacity: 1
-});
+// Check if elements exist before adding event listeners
+if (!offcanvasBarIcon) {
+  console.warn('[GSAP] offcanvas-bar-icon element not found on this page');
+}
 
-stl.to('.offcanvas-sidebar', {
-  x: 0,
-  duration: .3, 
-  delay: .2
-});
+// Only animate elements that exist on the page
+if (document.querySelector('.side-overlay')) {
+  stl.to('.side-overlay', {
+    duration: .3, 
+    visibility: 'visible',
+    opacity: 1
+  });
+}
 
-stl.from('.animate-item', {
-  x: 80,
-  opacity: 0,
-  stagger: .12,
-  duration: .3,
-}); 
+if (document.querySelector('.offcanvas-sidebar')) {
+  stl.to('.offcanvas-sidebar', {
+    x: 0,
+    duration: .3, 
+    delay: .2
+  });
+}
 
-stl.from('.offcanvas-sidebar__close', {
-  scale: .4,
-  opacity: 0,
-  duration: 0.4,
-  delay: 0.1,
-});
+if (document.querySelector('.animate-item')) {
+  stl.from('.animate-item', {
+    x: 80,
+    opacity: 0,
+    stagger: .12,
+    duration: .3,
+  });
+}
+
+if (document.querySelector('.offcanvas-sidebar__close')) {
+  stl.from('.offcanvas-sidebar__close', {
+    scale: .4,
+    opacity: 0,
+    duration: 0.4,
+    delay: 0.1,
+  });
+}
 
 mmm.add("(min-width: 992px)", () => {
-  offcanvasBarIcon.addEventListener('click', function () {
-    document.body.style.overflow = 'hidden';
-    document.body.style.paddingInlineEnd = '18px';
-  });
+  if (offcanvasBarIcon) {
+    offcanvasBarIcon.addEventListener('click', function () {
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingInlineEnd = '18px';
+    });
+  }
 });
 
 // Mobile device scroll hide
 mmm.add("(max-width: 991px)", () => {
+  if (offcanvasBarIcon) {
+    offcanvasBarIcon.addEventListener('click', function () {
+      document.body.style.overflow = 'hidden';
+    });
+  }
+  
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function () {
+      document.body.style.overflow = '';
+      document.body.style.paddingInlineEnd = '';
+    });
+  }
+  
+  if (sideOverlay) {
+    sideOverlay.addEventListener('click', function () {
+      document.body.style.overflow = '';
+      document.body.style.paddingInlineEnd = '';
+    });
+  }
+});
+
+if (offcanvasBarIcon) {
   offcanvasBarIcon.addEventListener('click', function () {
-    document.body.style.overflow = 'hidden';
+    stl.play();
   });
-  
+}
+
+if (closeBtn) {
   closeBtn.addEventListener('click', function () {
-    document.body.style.overflow = '';
-    document.body.style.paddingInlineEnd = '';
+    stl.reverse();
   });
-  
+}
+
+if (sideOverlay) {
   sideOverlay.addEventListener('click', function () {
-    document.body.style.overflow = '';
-    document.body.style.paddingInlineEnd = '';
+    stl.reverse();
   });
-});
-
-offcanvasBarIcon.addEventListener('click', function () {
-  stl.play();
-});
-
-closeBtn.addEventListener('click', function () {
-  stl.reverse();
-});
-
-sideOverlay.addEventListener('click', function () {
-  stl.reverse();
-});
+}
 // **************************** offcanvas sidebar js End ****************************
 
 // =================================== Custom Split text Js Start =====================================

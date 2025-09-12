@@ -165,7 +165,9 @@
               class="form-control"
               id="email"
               name="email"
-              required
+              value="admin@dxpress.uk"
+              readonly
+              style="background-color: #f8f9fa; cursor: not-allowed;"
             />
           </div>
 
@@ -193,14 +195,13 @@
     </div>
 
     <script>
-      // Simple validation
+      // Simple validation - only check password since email is pre-filled
       document
         .querySelector(".login-form")
         .addEventListener("submit", function (e) {
-          const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
 
-          if (!email || !password) {
+          if (!password) {
             e.preventDefault();
             let errorDiv = document.querySelector(".alert-danger");
             if (!errorDiv) {
@@ -209,7 +210,7 @@
               const form = document.querySelector(".login-form");
               form.parentNode.insertBefore(errorDiv, form);
             }
-            errorDiv.textContent = "Please fill in all fields.";
+            errorDiv.textContent = "Please enter your password.";
           }
         });
     </script>

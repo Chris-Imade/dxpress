@@ -1,24 +1,79 @@
-const NotificationService = require('../services/notificationService');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 
-// Get user notifications
+// Get user notifications page
+exports.getUserNotificationsPage = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    const unreadCount = await Notification.countDocuments({ 
+      userId, 
+      isRead: false, 
+      isArchived: false 
+    });
+
+    res.render("dashboard/notifications", {
+      title: "Notifications",
+      layout: "layouts/dashboard",
+      user: req.user,
+      path: "/dashboard/notifications",
+      notifications,
+      unreadCount
+    });
+  } catch (error) {
+    console.error('Get notifications page error:', error);
+    res.status(500).render('dashboard/notifications', {
+      title: "Notifications",
+      layout: "layouts/dashboard",
+      user: req.user,
+      path: "/dashboard/notifications",
+      notifications: [],
+      unreadCount: 0,
+      error: 'Failed to load notifications'
+    });
+  }
+};
+
+// Get user notifications API
 exports.getUserNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { page, limit, category, type, isRead, priority } = req.query;
+    const { page = 1, limit = 20, category, type, isRead, archived } = req.query;
 
-    const result = await NotificationService.getUserNotifications(userId, {
-      page: parseInt(page) || 1,
-      limit: parseInt(limit) || 20,
-      category,
-      type,
-      isRead: isRead === 'true' ? true : isRead === 'false' ? false : undefined,
-      priority
-    });
+    const filter = { userId };
+    
+    // Handle archived filter
+    if (archived === 'true') {
+      filter.isArchived = true;
+    } else {
+      filter.isArchived = false;
+    }
+    
+    if (category) filter.category = category;
+    if (type) filter.type = type;
+    if (isRead !== undefined) filter.isRead = isRead === 'true';
+
+    const notifications = await Notification.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await Notification.countDocuments(filter);
 
     res.json({
       success: true,
-      ...result
+      notifications,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error('Get notifications error:', error);
@@ -42,7 +97,15 @@ exports.markNotificationsAsRead = async (req, res) => {
       });
     }
 
-    const result = await NotificationService.markAsRead(userId, notificationIds);
+    const result = await Notification.updateMany(
+      { 
+        userId: userId, 
+        _id: { $in: notificationIds } 
+      },
+      { 
+        isRead: true 
+      }
+    );
 
     res.json({
       success: true,
@@ -71,7 +134,15 @@ exports.archiveNotifications = async (req, res) => {
       });
     }
 
-    const result = await NotificationService.archiveNotifications(userId, notificationIds);
+    const result = await Notification.updateMany(
+      { 
+        userId: userId, 
+        _id: { $in: notificationIds } 
+      },
+      { 
+        isArchived: true 
+      }
+    );
 
     res.json({
       success: true,

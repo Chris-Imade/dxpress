@@ -128,8 +128,15 @@ const login = async (req, res) => {
       lastName: user.lastName
     };
 
-    // Update last login
+    // Update last login - handle missing required fields
     user.lastLogin = new Date();
+    
+    // Ensure required fields are present for validation
+    if (!user.name && user.email) {
+      // Extract name from email for admin users
+      user.name = user.email.split('@')[0] || 'Admin';
+    }
+    
     await user.save();
 
     // Return appropriate response

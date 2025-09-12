@@ -6,6 +6,12 @@
     <title><%= title %> - DXpress Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Payment configuration
+        window.stripePublishableKey = '<%= process.env.STRIPE_PUBLIC_KEY || "pk_test_your_stripe_key" %>';
+        window.paypalButtonId = '<%= process.env.PAYPAL_HOSTED_BUTTON_ID || "your_paypal_button_id" %>';
+    </script>
     <style>
         * {
             margin: 0;
@@ -549,7 +555,7 @@
                     </div>
                     <div class="user-details">
                         <h4><%= user && user.name ? user.name : 'User' %></h4>
-                        <p><%= user && user.email ? user.email : 'user@example.com' %></p>
+                        <p><%= user && user.email ? (user.email.length > 15 ? user.email.substring(0, 5) + '...@' + user.email.split('@')[1] : user.email) : 'user@example.com' %></p>
                     </div>
                 </div>
             </div>
@@ -584,6 +590,55 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/js/notifications-client.js"></script>
+    <script>
+        // Pre-activate audio context on page load for notifications
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create and prepare audio element for notifications
+            const preloadAudio = () => {
+                try {
+                    const audio = new Audio('/assets/sounds/chime.mp3');
+                    audio.volume = 0;
+                    audio.muted = true;
+                    
+                    // Try to preload and prime the audio
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.muted = false;
+                            audio.volume = 0.7;
+                            console.log('🎵 Audio preloaded and ready');
+                            
+                            // Store preloaded audio globally
+                            window.preloadedNotificationAudio = audio;
+                        }).catch(() => {
+                            // Silent fail - will use regular audio creation
+                        });
+                    }
+                } catch (error) {
+                    // Silent fail - will use regular audio creation
+                }
+            };
+
+            // Preload audio immediately
+            preloadAudio();
+
+            // Also preload on first user interaction
+            const activateAudio = () => {
+                preloadAudio();
+                if (window.notificationManager && !window.notificationManager.audioContextActivated) {
+                    window.notificationManager.audioContextActivated = true;
+                }
+            };
+
+            ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(event => {
+                document.addEventListener(event, activateAudio, { once: true });
+            });
+        });
+    </script>
     <script>
         // Sidebar Toggle Functionality
         const sidebar = document.getElementById('sidebar');

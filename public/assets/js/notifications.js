@@ -490,7 +490,6 @@ class NotificationManager {
 
                     .toast-close:hover {
                         background: #f3f4f6;
-                        color: #64748b;
                     }
 
                     @keyframes slideInRight {

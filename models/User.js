@@ -60,6 +60,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  // User preferences and settings
+  preferences: {
+    notifications: {
+      sound: { type: Boolean, default: true },
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+    },
+    theme: { type: String, default: 'light' },
+    language: { type: String, default: 'en' },
+  },
 });
 
 // Hash password before saving

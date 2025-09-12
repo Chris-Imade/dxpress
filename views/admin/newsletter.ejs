@@ -5,14 +5,110 @@
             <i class="fas fa-envelope"></i>
         </div>
         <div>
-            <div class="card-title">Newsletter Management</div>
-            <div class="card-subtitle">Manage newsletter subscribers</div>
+            <div class="card-title">Newsletter Campaign Manager</div>
+            <div class="card-subtitle">Create rich newsletters and manage subscribers</div>
         </div>
-        <div style="margin-left: auto;">
+        <div style="margin-left: auto; display: flex; gap: 12px;">
+            <button onclick="showCreateNewsletter()" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Create Newsletter
+            </button>
             <a href="/admin/newsletter/export-csv" class="btn btn-secondary">
                 <i class="fas fa-download"></i>
                 Export CSV
             </a>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter Creation Modal -->
+<div id="newsletterModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px; overflow-y: auto;">
+    <div style="background: white; max-width: 900px; margin: 0 auto; border-radius: 12px; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="font-size: 24px; font-weight: 700; color: #032330; margin: 0;">Create Newsletter Campaign</h2>
+            <button onclick="hideCreateNewsletter()" style="background: none; border: none; font-size: 24px; color: #6b7280; cursor: pointer;">&times;</button>
+        </div>
+        
+        <form id="newsletterForm">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Subject Line *</label>
+                <input type="text" id="newsletterSubject" required style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Enter newsletter subject...">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Newsletter Content *</label>
+                <div id="editor" style="border: 2px solid #e5e7eb; border-radius: 8px; min-height: 300px;"></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Campaign Name</label>
+                    <input type="text" id="campaignName" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" placeholder="Internal campaign name...">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Send Date</label>
+                    <input type="datetime-local" id="sendDate" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="hideCreateNewsletter()" class="btn btn-secondary">Cancel</button>
+                <button type="button" onclick="previewNewsletter()" class="btn btn-secondary">
+                    <i class="fas fa-eye"></i>
+                    Preview
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send to All Subscribers
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Newsletter Analytics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= totalSubscribers || 0 %></div>
+            <div class="stat-label">Total Subscribers</div>
+            <div class="stat-change neutral">Active subscribers</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fas fa-paper-plane"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= campaignsSent || 0 %></div>
+            <div class="stat-label">Campaigns Sent</div>
+            <div class="stat-change positive">This month</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-envelope-open"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= openRate || '0' %>%</div>
+            <div class="stat-label">Open Rate</div>
+            <div class="stat-change neutral">Average</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+            <i class="fas fa-mouse-pointer"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number"><%= clickRate || '0' %>%</div>
+            <div class="stat-label">Click Rate</div>
+            <div class="stat-change neutral">Average</div>
         </div>
     </div>
 </div>
@@ -137,4 +233,132 @@ function confirmDeleteSubscriber(subscriberId) {
         });
     }
 }
+
+// Rich text editor and newsletter functionality
+let quill;
+
+function showCreateNewsletter() {
+    document.getElementById('newsletterModal').style.display = 'block';
+    
+    // Initialize Quill editor if not already done
+    if (!quill) {
+        // Load Quill CSS and JS
+        const quillCSS = document.createElement('link');
+        quillCSS.href = 'https://cdn.quilljs.com/1.3.6/quill.snow.css';
+        quillCSS.rel = 'stylesheet';
+        document.head.appendChild(quillCSS);
+        
+        const quillJS = document.createElement('script');
+        quillJS.src = 'https://cdn.quilljs.com/1.3.6/quill.js';
+        quillJS.onload = function() {
+            quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Write your newsletter content here...'
+            });
+        };
+        document.head.appendChild(quillJS);
+    }
+}
+
+function hideCreateNewsletter() {
+    document.getElementById('newsletterModal').style.display = 'none';
+}
+
+function previewNewsletter() {
+    const subject = document.getElementById('newsletterSubject').value;
+    const content = quill ? quill.root.innerHTML : '';
+    
+    if (!subject || !content.trim()) {
+        alert('Please fill in both subject and content');
+        return;
+    }
+    
+    // Open preview in new window
+    const previewWindow = window.open('', '_blank', 'width=800,height=600');
+    previewWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Newsletter Preview: ${subject}</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: #032330; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; background: #f9f9f9; }
+                .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>DXpress Newsletter</h1>
+                <h2>${subject}</h2>
+            </div>
+            <div class="content">
+                ${content}
+            </div>
+            <div class="footer">
+                <p>© 2025 DXpress. All rights reserved.</p>
+                <p>You received this email because you subscribed to our newsletter.</p>
+            </div>
+        </body>
+        </html>
+    `);
+}
+
+// Handle newsletter form submission
+document.getElementById('newsletterForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        subject: document.getElementById('newsletterSubject').value,
+        content: quill ? quill.root.innerHTML : '',
+        campaignName: document.getElementById('campaignName').value,
+        sendDate: document.getElementById('sendDate').value
+    };
+    
+    if (!formData.subject || !formData.content.trim()) {
+        alert('Please fill in both subject and content');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/admin/newsletter/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`Newsletter sent successfully to ${result.count} subscribers!`);
+            hideCreateNewsletter();
+            location.reload();
+        } else {
+            alert(result.message || 'Failed to send newsletter');
+        }
+    } catch (error) {
+        console.error('Error sending newsletter:', error);
+        alert('Failed to send newsletter');
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('newsletterModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideCreateNewsletter();
+    }
+});
 </script>

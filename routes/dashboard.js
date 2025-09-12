@@ -93,14 +93,14 @@ router.get("/gps-tracking", isAuthenticated, isUser, (req, res) => {
 router.get("/api/gps-tracking", isAuthenticated, isUser, dashboardController.getGPSTracking);
 
 // Notifications page
-router.get("/notifications", isAuthenticated, isUser, (req, res) => {
-  res.render("dashboard/notifications", {
-    title: "Notifications",
-    layout: "layouts/dashboard",
-    user: req.user,
-    path: "/dashboard/notifications"
-  });
-});
+const notificationController = require("../controllers/notifications");
+router.get("/notifications", isAuthenticated, isUser, notificationController.getUserNotificationsPage);
+
+// API routes for notifications
+router.get("/api/notifications", isAuthenticated, isUser, notificationController.getUserNotifications);
+router.post("/api/notifications/mark-read", isAuthenticated, isUser, notificationController.markNotificationsAsRead);
+router.post("/api/notifications/archive", isAuthenticated, isUser, notificationController.archiveNotifications);
+router.get("/api/notifications/unread-count", isAuthenticated, isUser, notificationController.getUnreadCount);
 
 // Create Shipment
 router.get("/create-shipment", isAuthenticated, isUser, (req, res) => {
@@ -118,6 +118,9 @@ router.post("/api/select-carrier", isAuthenticated, isUser, dashboardController.
 router.post("/api/process-payment", isAuthenticated, isUser, dashboardController.processPaymentAndCreateShipment);
 router.post("/api/payment-callback", dashboardController.handlePaymentCallback);
 
+// API: Test DHL integration
+router.get("/api/test-dhl", isAuthenticated, dashboardController.testDHLIntegration);
+
 // API: Legacy create shipment (backward compatibility)
 router.post("/api/create-shipment", isAuthenticated, isUser, dashboardController.createShipment);
 
@@ -130,5 +133,13 @@ router.get("/profile", isAuthenticated, isUser, (req, res) => {
     path: "/dashboard/profile"
   });
 });
+
+// API: Update user preferences
+router.post("/api/preferences", isAuthenticated, isUser, dashboardController.updatePreferences);
+
+// PayPal payment success handler
+router.get("/payment-success", isAuthenticated, isUser, dashboardController.handlePayPalSuccess);
+
+// PayPal payment cancel handler (already handled by create-shipment page with cancelled param)
 
 module.exports = router;

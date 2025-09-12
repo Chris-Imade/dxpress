@@ -238,7 +238,7 @@ function calculateRates() {
     fetch(`/dashboard/api/rates?${params}`)
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.success && data.rates) {
                 displayRatesFromAPI(data.rates);
             } else {
                 container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444;">Failed to calculate rates. Please try again.</div>';
@@ -259,44 +259,94 @@ function displayRatesFromAPI(rates) {
     }
     
     container.innerHTML = rates.map(rate => {
-        const isAvailable = rate.available !== false;
-        const comingSoon = rate.comingSoon === true;
+        const isAvailable = rate.available === true;
+        const isMaintenanceMode = rate.maintenanceMode === true;
+        const isDHL = rate.carrier === 'DHL';
+        
+        // Determine card styling based on carrier status
+        let cardClass = 'rate-card';
+        let borderColor = '#e5e7eb';
+        let backgroundColor = 'white';
+        
+        if (isDHL && isAvailable) {
+            cardClass += ' dhl-enabled';
+            borderColor = '#10b981';
+            backgroundColor = '#ecfdf5';
+        } else if (isMaintenanceMode) {
+            cardClass += ' maintenance-mode';
+            borderColor = '#f59e0b';
+            backgroundColor = '#fef3c7';
+        } else if (!isAvailable) {
+            cardClass += ' disabled';
+            backgroundColor = '#f9fafb';
+        }
         
         return `
-            <div class="rate-card ${!isAvailable ? 'disabled' : ''}" ${isAvailable ? `onclick="selectRate('${rate.service}', '${rate.baseRate}')"` : ''}>
-                <div class="rate-header">
-                    <div class="carrier-info">
-                        <div class="carrier-logo">${rate.carrier}</div>
-                        <div class="service-name">${rate.service}</div>
+            <div class="${cardClass}" style="border-color: ${borderColor}; background: ${backgroundColor};" ${isAvailable ? `onclick="selectRate('${rate.service}', '${rate.baseRate}')"` : ''}>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="carrier-logo" style="background: ${isDHL ? '#dc2626' : isMaintenanceMode ? '#f59e0b' : '#6b7280'}; color: white;">
+                            ${rate.carrier}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #1a1f36; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                ${rate.service}
+                                ${isDHL && isAvailable ? 
+                                    `<span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;">
+                                        <i class="fas fa-wifi"></i> LIVE API
+                                    </span>` : ''
+                                }
+                                ${isMaintenanceMode ? 
+                                    `<span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;">
+                                        <i class="fas fa-tools"></i> MAINTENANCE
+                                    </span>` : ''
+                                }
+                            </div>
+                            <div class="rate-delivery" style="color: ${isMaintenanceMode ? '#92400e' : '#6b7280'};">
+                                ${rate.deliveryTime}
+                            </div>
+                        </div>
                     </div>
-                    <div class="rate-price">
-                        <span class="currency">£</span>
-                        <span class="amount">${rate.baseRate.toFixed(2)}</span>
-                        ${comingSoon ? '<span class="coming-soon-badge">Coming Soon</span>' : ''}
-                    </div>
-                </div>
-                <div class="rate-details">
-                    <div class="delivery-time">
-                        <i class="fas fa-clock"></i>
-                        <span>${rate.deliveryTime}</span>
-                    </div>
-                    <div class="rate-features">
+                    <div style="text-align: right;">
                         ${isAvailable ? 
-                            '<span class="feature">✓ Live Tracking</span><span class="feature">✓ Insurance Available</span>' :
-                            '<span class="feature disabled">⏳ Integration Pending</span>'
+                            `<div class="rate-price" style="color: #10b981;">£${rate.baseRate.toFixed(2)}</div>` :
+                            `<div style="color: #6b7280; font-weight: 600;">Unavailable</div>`
                         }
                     </div>
                 </div>
-                ${isAvailable ? 
-                    `<button class="select-rate-btn" onclick="createShipmentWithRate('${rate.service}', '${rate.baseRate}')">
-                        <i class="fas fa-shipping-fast"></i>
-                        Select & Ship
-                    </button>` :
-                    `<button class="select-rate-btn disabled" disabled>
-                        <i class="fas fa-clock"></i>
-                        ${comingSoon ? 'Coming Soon' : 'Unavailable'}
-                    </button>`
+                
+                ${isMaintenanceMode ? 
+                    `<div style="padding: 12px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 12px;">
+                        <div style="font-size: 12px; color: #92400e; font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle"></i> ${rate.message || 'Service under maintenance'}
+                        </div>
+                    </div>` : ''
                 }
+                
+                <div class="rate-features">
+                    ${isAvailable && isDHL ? 
+                        `<span class="rate-feature" style="background: #dcfce7; color: #166534;">✓ Real-time Tracking</span>
+                         <span class="rate-feature" style="background: #dcfce7; color: #166534;">✓ Live GPS</span>
+                         <span class="rate-feature" style="background: #dcfce7; color: #166534;">✓ Insurance</span>` :
+                        isMaintenanceMode ?
+                        `<span class="rate-feature" style="background: #fef3c7; color: #92400e;">⏳ Coming Soon</span>
+                         <span class="rate-feature" style="background: #fef3c7; color: #92400e;">🔧 In Development</span>` :
+                        `<span class="rate-feature" style="background: #f3f4f6; color: #6b7280;">❌ Unavailable</span>`
+                    }
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    ${isAvailable ? 
+                        `<button class="btn btn-primary" style="width: 100%; padding: 12px; background: #10b981; border: none; border-radius: 8px; color: white; font-weight: 600;" onclick="event.stopPropagation(); createShipmentWithRate('${rate.service}', '${rate.baseRate}')">
+                            <i class="fas fa-shipping-fast"></i>
+                            Create Shipment - £${rate.baseRate.toFixed(2)}
+                        </button>` :
+                        `<button class="btn" style="width: 100%; padding: 12px; background: #6b7280; border: none; border-radius: 8px; color: white; font-weight: 600;" disabled>
+                            <i class="fas fa-clock"></i>
+                            ${isMaintenanceMode ? 'Under Development' : 'Service Unavailable'}
+                        </button>`
+                    }
+                </div>
             </div>
         `;
     }).join('');
