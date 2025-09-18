@@ -501,6 +501,7 @@ exports.getSettings = async (req, res) => {
     // Prepare carrier settings for the view - no dummy API calls
     const shippingRates = {
       dhl: {
+        baseRate: carrierSettings.dhl?.baseRate || 45.99,
         additionalFees: carrierSettings.dhl?.additionalFees || 5.0,
         enabled: carrierSettings.dhl?.enabled !== false,
         apiIntegrated: true,

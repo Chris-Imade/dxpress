@@ -225,14 +225,6 @@ router.get("/shipment-calculator", (req, res) => {
   });
 });
 
-// Create Shipment route
-router.get("/create-shipment", (req, res) => {
-  res.render("shipment/create-shipment", {
-    page: "create-shipment",
-    title: "Create Shipment",
-    layout: "layouts/main",
-  });
-});
 
 // Add a redirect for the old track-shipment URL
 router.get("/track-shipment", (req, res) => {

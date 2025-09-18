@@ -5,7 +5,7 @@ class DHLService {
     this.apiKey = apiKey;
     this.apiSecret = apiSecret;
     this.baseUrl =
-      process.env.DHL_API_URL || "https://express.api.dhl.com/mydhlapi/test";
+      process.env.DHL_API_SANDBOX_BASE_URL;
   }
 
   async calculateRates(origin, destination, weight, dimensions) {

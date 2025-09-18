@@ -10,7 +10,7 @@ class DHLService {
     
     // DHL Express MyDHL API uses the same base URL for sandbox and production
     // Environment is controlled by the API credentials provided
-    this.baseURL = 'https://express.api.dhl.com';
+    this.baseURL = process.env.DHL_API_SANDBOX_BASE_URL;
     
     // Create Basic Auth header for DHL Express MyDHL API
     this.authHeader = this.apiKey && this.apiSecret 
