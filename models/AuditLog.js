@@ -25,6 +25,7 @@ const auditLogSchema = new mongoose.Schema(
         "REFUND_ISSUED",
         "SETTINGS_CHANGED",
         "API_CALL",
+        "UPDATE_SHIPPING_SETTINGS",
         "OTHER",
       ],
     },

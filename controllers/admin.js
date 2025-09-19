@@ -424,108 +424,157 @@ exports.getDashboard = async (req, res) => {
       title: "Admin Dashboard",
       layout: "layouts/admin-dashboard",
       path: "/admin/",
-      errorMessage: "Failed to load dashboard data",
       analytics: {
         totalUsers: 0,
         totalShipments: 0,
         totalRevenue: 0,
         totalSubscribers: 0,
+        newUsersToday: 0,
+        newUsersThisWeek: 0,
+        newUsersThisMonth: 0,
+        activeUsers: 0,
         userTrends: [],
+        pendingShipments: 0,
+        inTransitShipments: 0,
+        deliveredShipments: 0,
+        cancelledShipments: 0,
+        shipmentsThisMonth: 0,
+        monthlyRevenue: 0,
+        deliveryRate: 0,
+        onTimeDeliveries: 0,
+        uptimeHours: 0,
+        uptimePercent: 0,
+        memoryUsedMB: 0,
+        memoryTotalMB: 0,
         recentShipments: [],
         recentUsers: [],
         topRoutes: [],
         geographicData: [],
       },
-      counts: {},
-      recentShipments: [],
+      // Legacy support
+      counts: {
+        shipments: 0,
+        pendingShipments: 0,
+        deliveredShipments: 0,
+        newsletters: 0,
+      },
+      recentShipments,
       stylesheets: "",
       scripts: "",
     });
   }
 };
 
-// Settings
+
 exports.getSettings = async (req, res) => {
   try {
-    // Validate user exists (for access control / context)
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).render("admin/404", {
-        title: "User Not Found",
-        path: "/admin/error",
-        layout: "layouts/admin-dashboard",
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).render('error', {
+        message: 'Access Denied',
+        error: { status: 403 },
+        user: req.user,
+        layout: 'layouts/admin-dashboard',
         stylesheets: "",
         scripts: "",
       });
     }
 
-    // Load carrier settings from GlobalSettings
-    const defaultCarrierSettings = {
-      dhl: { 
-        additionalFees: 5.0, 
-        enabled: true, 
-        apiIntegrated: true 
+    // Default settings
+    const defaultSettings = {
+      local: {
+        baseRate: 3.99,
+        weightRate: 1.25,
+        sizeRate: 25.00,
+        additionalFees: 2.99,
+        minimumCharge: 5.99,
+        standardDeliveryDays: '2-3',
+        expressDeliveryDays: '1-2',
+        expressMultiplier: '1.8',
+        sameDayDelivery: false,
+        sameDayCutoff: '14:00',
+        sameDayAdditionalFee: 9.99,
+        enabled: true,
+        service: "Local Delivery"
       },
-      fedex: { 
-        baseRate: 35.5, 
-        additionalFees: 3.5, 
-        enabled: false, 
-        apiIntegrated: false,
-        maintenanceMode: true 
-      },
-      ups: { 
-        baseRate: 40.75, 
-        additionalFees: 4.25, 
-        enabled: false, 
-        apiIntegrated: false,
-        maintenanceMode: true 
-      },
-    };
-    
-    console.log('🔧 [DEBUG] Loading carrier settings from GlobalSettings...');
-    let carrierSettings;
-    try {
-      carrierSettings = await GlobalSettings.getSetting("carrier_settings", defaultCarrierSettings);
-      console.log('📦 [DEBUG] Loaded carrier settings:', carrierSettings);
-      
-      if (!carrierSettings || typeof carrierSettings !== 'object') {
-        console.warn('⚠️ [DEBUG] Invalid carrier settings, using defaults');
-        carrierSettings = defaultCarrierSettings;
-      }
-    } catch (settingsError) {
-      console.error('❌ [DEBUG] Error loading carrier settings:', settingsError);
-      carrierSettings = defaultCarrierSettings;
-    }
-
-    // Prepare carrier settings for the view - no dummy API calls
-    const shippingRates = {
       dhl: {
-        baseRate: carrierSettings.dhl?.baseRate || 45.99,
-        additionalFees: carrierSettings.dhl?.additionalFees || 5.0,
-        enabled: carrierSettings.dhl?.enabled !== false,
-        apiIntegrated: true,
-        service: "DHL Express"
+        baseRate: 35.5,
+        additionalFees: 5.0,
+        enabled: true,
+        apiIntegrated: false,
+        service: "DHL Express",
+        maintenanceMode: false
       },
       fedex: {
-        baseRate: carrierSettings.fedex?.baseRate || 35.5,
-        additionalFees: carrierSettings.fedex?.additionalFees || 3.5,
-        enabled: carrierSettings.fedex?.enabled === true,
-        maintenanceMode: carrierSettings.fedex?.maintenanceMode === true
+        baseRate: 35.5,
+        additionalFees: 3.5,
+        enabled: false,
+        service: "FedEx"
       },
       ups: {
-        baseRate: carrierSettings.ups?.baseRate || 40.75,
-        additionalFees: carrierSettings.ups?.additionalFees || 4.25,
-        enabled: carrierSettings.ups?.enabled === true,
-        maintenanceMode: carrierSettings.ups?.maintenanceMode === true
+        baseRate: 32.0,
+        additionalFees: 4.0,
+        enabled: false,
+        service: "UPS",
+        maintenanceMode: false,
+        apiIntegrated: false
       }
     };
+
+    // Try to load settings from database
+    let settings = {};
+    try {
+      // Load each setting individually with defaults
+      settings.local = {
+        baseRate: await GlobalSettings.getSetting('baseRate', defaultSettings.local.baseRate),
+        weightRate: await GlobalSettings.getSetting('weightRate', defaultSettings.local.weightRate),
+        sizeRate: await GlobalSettings.getSetting('sizeRate', defaultSettings.local.sizeRate),
+        additionalFees: await GlobalSettings.getSetting('additionalFees', defaultSettings.local.additionalFees),
+        minimumCharge: await GlobalSettings.getSetting('minimumCharge', defaultSettings.local.minimumCharge),
+        standardDeliveryDays: await GlobalSettings.getSetting('standardDeliveryDays', defaultSettings.local.standardDeliveryDays),
+        expressDeliveryDays: await GlobalSettings.getSetting('expressDeliveryDays', defaultSettings.local.expressDeliveryDays),
+        expressMultiplier: await GlobalSettings.getSetting('expressMultiplier', defaultSettings.local.expressMultiplier),
+        sameDayDelivery: await GlobalSettings.getSetting('sameDayDelivery', defaultSettings.local.sameDayDelivery),
+        sameDayCutoff: await GlobalSettings.getSetting('sameDayCutoff', defaultSettings.local.sameDayCutoff),
+        sameDayAdditionalFee: await GlobalSettings.getSetting('sameDayAdditionalFee', defaultSettings.local.sameDayAdditionalFee),
+        enabled: true,
+        service: "Local Delivery"
+      };
+
+      // Load carrier settings
+      settings.dhl = {
+        ...defaultSettings.dhl,
+        additionalFees: await GlobalSettings.getSetting('dhlAdditionalFees', defaultSettings.dhl.additionalFees),
+        enabled: await GlobalSettings.getSetting('dhlEnabled', defaultSettings.dhl.enabled),
+        apiIntegrated: await GlobalSettings.getSetting('dhlApiIntegrated', defaultSettings.dhl.apiIntegrated),
+        maintenanceMode: await GlobalSettings.getSetting('dhlMaintenanceMode', defaultSettings.dhl.maintenanceMode)
+      };
+
+      settings.fedex = {
+        ...defaultSettings.fedex,
+        baseRate: await GlobalSettings.getSetting('fedexBaseRate', defaultSettings.fedex.baseRate),
+        additionalFees: await GlobalSettings.getSetting('fedexAdditionalFees', defaultSettings.fedex.additionalFees),
+        enabled: await GlobalSettings.getSetting('fedexEnabled', defaultSettings.fedex.enabled)
+      };
+
+      settings.ups = {
+        ...defaultSettings.ups,
+        baseRate: await GlobalSettings.getSetting('upsBaseRate', defaultSettings.ups.baseRate),
+        additionalFees: await GlobalSettings.getSetting('upsAdditionalFees', defaultSettings.ups.additionalFees),
+        enabled: await GlobalSettings.getSetting('upsEnabled', defaultSettings.ups.enabled),
+        maintenanceMode: await GlobalSettings.getSetting('upsMaintenanceMode', defaultSettings.ups.maintenanceMode)
+      };
+
+    } catch (error) {
+      console.error('Error loading settings from database, using defaults:', error);
+      settings = defaultSettings;
+    }
 
     res.render("admin/settings", {
       title: "Settings",
       layout: "layouts/admin-dashboard",
-      user,
-      shippingRates,
+      user: req.user,
+      shippingRates: settings,
       path: "/admin/settings",
       stylesheets: "",
       scripts: "",
@@ -550,47 +599,92 @@ exports.postSettings = async (req, res) => {
     console.log('📋 [DEBUG] Request body:', req.body);
     console.log('👤 [DEBUG] User ID:', req.user._id);
 
-    const { dhl, fedex, ups } = req.body;
+    // Extract and validate local shipping rate settings
+    const {
+      baseRate,
+      weightRate,
+      sizeRate,
+      additionalFees,
+      minimumCharge,
+      standardDeliveryDays,
+      expressDeliveryDays,
+      expressMultiplier,
+      sameDayDelivery,
+      sameDayCutoff,
+      sameDaySurcharge
+    } = req.body;
 
-    // Validate input data - DHL only needs additionalFees since baseRate comes from API
-    if (!dhl || !dhl.additionalFees) {
-      console.error('❌ [DEBUG] Missing DHL additional fees in request body');
-      return res.redirect("/admin/settings?error=1");
+    // Validate required fields
+    const requiredFields = [
+      'baseRate', 'weightRate', 'sizeRate', 'additionalFees', 
+      'minimumCharge', 'standardDeliveryDays', 'expressDeliveryDays', 'expressMultiplier'
+    ];
+    
+    for (const field of requiredFields) {
+      if (req.body[field] === undefined || req.body[field] === '') {
+        console.error(`❌ [DEBUG] Missing required field: ${field}`);
+        return res.redirect("/admin/settings?error=missing_fields");
+      }
     }
+
+    // Parse numeric values
+    const shippingSettings = {
+      baseRate: parseFloat(baseRate),
+      weightRate: parseFloat(weightRate),
+      sizeRate: parseFloat(sizeRate),
+      additionalFees: parseFloat(additionalFees),
+      minimumCharge: parseFloat(minimumCharge),
+      standardDeliveryDays: standardDeliveryDays,
+      expressDeliveryDays: expressDeliveryDays,
+      expressMultiplier: parseFloat(expressMultiplier),
+      sameDayDelivery: sameDayDelivery === 'on',
+      sameDayCutoff: sameDayCutoff || '14:00',
+      sameDaySurcharge: sameDaySurcharge ? parseFloat(sameDaySurcharge) : 0,
+      lastUpdated: new Date(),
+      updatedBy: req.user._id
+    };
 
     // Validate numeric values
-    const dhlAdditionalFees = parseFloat(dhl.additionalFees);
+    const numericFields = [
+      'baseRate', 'weightRate', 'sizeRate', 'additionalFees', 
+      'minimumCharge', 'expressMultiplier', 'sameDaySurcharge'
+    ];
     
-    if (isNaN(dhlAdditionalFees)) {
-      console.error('❌ [DEBUG] Invalid DHL additional fees value');
-      return res.redirect("/admin/settings?error=1");
+    for (const field of numericFields) {
+      if (isNaN(shippingSettings[field]) || shippingSettings[field] < 0) {
+        console.error(`❌ [DEBUG] Invalid value for ${field}:`, req.body[field]);
+        return res.redirect("/admin/settings?error=invalid_values");
+      }
     }
 
-    // Load current carrier settings
-    const currentSettings = await GlobalSettings.getSetting("carrier_settings", {});
+    // Validate express multiplier is >= 1
+    if (shippingSettings.expressMultiplier < 1) {
+      console.error('❌ [DEBUG] Express multiplier must be 1 or greater');
+      return res.redirect("/admin/settings?error=invalid_multiplier");
+    }
+
+    // Load current settings
+    const currentSettings = await GlobalSettings.getSettings();
     
-    // Update carrier settings - only DHL additional fees for now
-    const updatedCarrierSettings = {
+    // Update shipping settings
+    const updatedSettings = {
       ...currentSettings,
-      dhl: {
-        ...currentSettings.dhl,
-        additionalFees: dhlAdditionalFees,
-        enabled: true,
-        apiIntegrated: true
+      shippingRates: {
+        ...currentSettings.shippingRates,
+        local: shippingSettings
       },
-      fedex: {
-        ...currentSettings.fedex,
-        enabled: false,
-        maintenanceMode: true
-      },
-      ups: {
-        ...currentSettings.ups,
-        enabled: false,
-        maintenanceMode: true
+      // Keep carrier settings but mark DHL as disabled
+      carrier_settings: {
+        ...(currentSettings.carrier_settings || {}),
+        dhl: {
+          ...(currentSettings.carrier_settings?.dhl || {}),
+          enabled: false,
+          apiIntegrated: false
+        }
       }
     };
 
-    console.log('💰 [DEBUG] Updated carrier settings:', updatedCarrierSettings);
+    console.log('💰 [DEBUG] Updated shipping settings:', updatedSettings);
 
     // Log the settings update
     console.log('📝 [DEBUG] Creating audit log...');
@@ -598,9 +692,12 @@ exports.postSettings = async (req, res) => {
     try {
       await AuditLog.create({
         userId: req.user._id,
-        action: "UPDATE_CARRIER_SETTINGS",
+        action: "UPDATE_SHIPPING_SETTINGS",
         resource: "global_settings",
-        details: { carrier_settings: updatedCarrierSettings },
+        details: { 
+          shippingRates: updatedSettings.shippingRates,
+          updatedBy: req.user._id
+        },
         ipAddress: req.ip,
         userAgent: req.get("User-Agent"),
       });
@@ -610,11 +707,11 @@ exports.postSettings = async (req, res) => {
       // Continue with settings update even if audit log fails
     }
 
-    // Update GlobalSettings carrier settings
+    // Update GlobalSettings
     console.log('🔧 [DEBUG] Updating GlobalSettings...');
     try {
-      const result = await GlobalSettings.setSetting("carrier_settings", updatedCarrierSettings, req.user._id, "Admin updated carrier settings");
-      console.log('✅ [DEBUG] GlobalSettings updated successfully:', result);
+      const result = await GlobalSettings.setSettings(updatedSettings, req.user._id);
+      console.log('✅ [DEBUG] GlobalSettings updated successfully');
     } catch (settingsError) {
       console.error('❌ [DEBUG] GlobalSettings update failed:', settingsError);
       throw settingsError;

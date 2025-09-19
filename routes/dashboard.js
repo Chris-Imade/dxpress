@@ -108,7 +108,8 @@ router.get("/create-shipment", isAuthenticated, isUser, (req, res) => {
     title: "Create Shipment",
     layout: "layouts/dashboard",
     user: req.user,
-    path: "/dashboard/create-shipment"
+    path: "/dashboard/create-shipment",
+    stripePublishableKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_your_stripe_key'
   });
 });
 

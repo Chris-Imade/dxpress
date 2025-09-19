@@ -275,11 +275,11 @@ function trackPackage(trackingNumber) {
     document.getElementById('trackingTimeline').innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Fetching tracking information...</p></div>';
     
     // Call API for real tracking data
-    fetch(`/dashboard/api/shipments?trackingId=${encodeURIComponent(trackingNumber)}`)
+    fetch(`/dashboard/api/track/${encodeURIComponent(trackingNumber)}`)
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.shipments && data.shipments.length > 0) {
-                displayTrackingResults(data.shipments[0]);
+            if (data.success && data.data) {
+                displayTrackingResults(data.data);
             } else {
                 showTrackingNotFound(trackingNumber);
             }

@@ -3,6 +3,7 @@
  * Handles payment processing for shipments with integrated notifications
  */
 
+const mongoose = require('mongoose');
 const Payment = require('../models/Payment');
 const Shipment = require('../models/Shipment');
 const Notification = require('../models/Notification');
@@ -44,16 +45,20 @@ const paymentProviders = {
           throw new Error("Stripe is not properly configured");
         }
 
+        // Ensure amount is a number and round to nearest integer (cents)
+        const amountInCents = Math.round(parseFloat(amount) * 100);
+        
         console.log("[Stripe Debug] Payment intent details:", {
-          amount,
+          amount: amountInCents,
           currency,
           metadata,
         });
 
         const paymentIntent = await stripeClient.paymentIntents.create({
-          amount: Math.round(amount * 100), // Convert to cents
+          amount: amountInCents,
           currency: currency.toLowerCase(),
           metadata,
+          payment_method_types: ['card'],
           automatic_payment_methods: {
             enabled: true,
           },
@@ -95,10 +100,13 @@ const paymentProviders = {
   paypal: {
     createOrder: async (amount, currency, description) => {
       try {
-        // For PayPal hosted buttons, we don't need to create an order
-        // The hosted button will handle the order creation
+        // For PayPal, we'll return the amount and currency for client-side processing
         return {
-          id: process.env.PAYPAL_HOSTED_BUTTON_ID,
+          success: true,
+          amount: parseFloat(amount).toFixed(2),
+          currency: currency.toLowerCase(),
+          description: description || 'Shipment Payment',
+          id: process.env.PAYPAL_HOSTED_BUTTON_ID || `PAYPAL_${Date.now()}`,
           status: "CREATED",
           links: [
             {
@@ -219,11 +227,12 @@ exports.completePayment = async (provider, completionDetails) => {
  * Create payment record and process payment
  * @param {Object} shipmentData - Shipment information
  * @param {Object} paymentData - Payment details
+ * @param {Object} options - Additional options (e.g., session for transactions)
  * @returns {Promise<Object>} Payment processing result
  */
-exports.processShipmentPayment = async (shipmentData, paymentData) => {
+exports.processShipmentPayment = async (shipmentData, paymentData, options = {}) => {
   try {
-    const { userId, shipmentId, amount, currency, paymentMethod } = paymentData;
+    const { userId, shipmentId, amount, currency = 'GBP', paymentMethod = 'stripe' } = paymentData;
     
     // Create payment record
     const payment = new Payment({
@@ -232,23 +241,32 @@ exports.processShipmentPayment = async (shipmentData, paymentData) => {
       amount,
       currency,
       status: 'pending',
-      paymentMethod
+      paymentMethod,
+      metadata: {
+        shipmentId: shipmentData._id?.toString(),
+        trackingId: shipmentData.trackingId,
+        customerEmail: shipmentData.customerEmail
+      }
     });
     
     await payment.save();
     
     // Create notification for payment initiated
-    await Notification.createNotification({
+    const notification = new Notification({
       userId,
+      type: 'payment',
       title: 'Payment Processing',
       message: `Payment of ${currency} ${amount.toFixed(2)} is being processed for your shipment.`,
-      type: 'payment',
-      category: 'payment_status',
-      relatedId: payment._id,
-      relatedModel: 'Payment',
-      actionUrl: `/dashboard/orders`,
-      actionText: 'View Order'
+      isRead: false,
+      metadata: {
+        paymentId: payment._id,
+        amount,
+        currency,
+        status: 'pending'
+      }
     });
+    
+    await notification.save();
     
     // Process payment based on method
     let paymentResult;

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const Shipment = require("../models/Shipment");
 const Notification = require("../models/Notification");
@@ -85,6 +86,27 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
+// Calculate local shipping rates based on weight and dimensions
+function calculateLocalRates(weight, dimensions, settings) {
+  const { baseRate, weightRate, sizeRate, additionalFees = 0 } = settings;
+  
+  // Calculate weight-based cost (GBP per kg)
+  const weightCost = weight * (weightRate || 2.5);
+  
+  // Calculate size-based cost (GBP per cubic meter)
+  const volume = (dimensions.length * dimensions.width * dimensions.height) / 1000000; // Convert cm³ to m³
+  const sizeCost = volume * (sizeRate || 50);
+  
+  // Calculate total base rate
+  let total = baseRate + weightCost + sizeCost + additionalFees;
+  
+  // Ensure minimum charge
+  total = Math.max(total, settings.minimumCharge || 5.99);
+  
+  // Round to 2 decimal places
+  return parseFloat(total.toFixed(2));
+}
+
 // Get shipping rates
 exports.getRates = async (req, res) => {
   try {
@@ -103,20 +125,28 @@ exports.getRates = async (req, res) => {
       });
     }
 
-    // Load carrier settings to get additional fees
-    const defaultCarrierSettings = {
-      dhl: { additionalFees: 5.0, enabled: true, apiIntegrated: true },
-      fedex: { baseRate: 35.5, additionalFees: 3.5, enabled: false, maintenanceMode: true },
-      ups: { baseRate: 40.75, additionalFees: 4.25, enabled: false, maintenanceMode: true }
+    // Load shipping settings
+    const defaultSettings = {
+      baseRate: 3.99,
+      weightRate: 1.25, // GBP per kg
+      sizeRate: 25,     // GBP per m³
+      additionalFees: 2.99,
+      minimumCharge: 5.99,
+      expressMultiplier: 1.8,
+      standardDeliveryDays: '2-3',
+      expressDeliveryDays: '1-2',
+      sameDayDelivery: false,
+      sameDayCutoff: '14:00',
+      sameDaySurcharge: 9.99
     };
     
-    const carrierSettings = await GlobalSettings.getSetting("carrier_settings", defaultCarrierSettings);
+    const settings = await GlobalSettings.getSetting("shipping_settings", defaultSettings);
     
     const shipmentData = {
-      userId: req.user._id,
-      customerName: req.user.name,
-      customerEmail: req.user.email,
-      customerPhone: req.user.phone,
+      userId: req.user?._id || 'guest',
+      customerName: req.user?.name || 'Guest',
+      customerEmail: req.user?.email || 'guest@example.com',
+      customerPhone: req.user?.phone || '',
       origin: {
         address: originAddress,
         city: originCity,
@@ -139,88 +169,81 @@ exports.getRates = async (req, res) => {
       declaredValue: parseFloat(declaredValue) || 100
     };
 
-    const rates = [];
+    // Calculate base rate
+    const standardRate = calculateLocalRates(
+      shipmentData.weight, 
+      shipmentData.dimensions,
+      settings
+    );
     
-    // DHL - calculate real rates with user data and additional fees
-    if (carrierSettings.dhl?.enabled) {
-      try {
-        const dhlRates = await dhlService.calculateRatesWithFees(
-          shipmentData, 
-          carrierSettings.dhl.additionalFees || 5.0
-        );
-        
-        const formattedRates = dhlRates.map(rate => ({
-          service: rate.service,
-          serviceCode: rate.serviceCode,
-          baseRate: rate.totalRate, // This includes API rate + additional fees
-          originalBaseRate: rate.originalBaseRate,
-          additionalFees: rate.additionalFees,
-          currency: rate.currency || "GBP",
-          deliveryTime: rate.deliveryTime || "1-2 business days",
-          available: true,
-          carrier: "DHL",
-          isLive: !rate.isApiFallback
-        }));
-        
-        rates.push(...formattedRates);
-      } catch (error) {
-        console.error("DHL API error:", error);
-        rates.push({
-          service: "DHL Express (Unavailable)",
-          baseRate: 0,
-          currency: "GBP",
-          deliveryTime: "Service temporarily unavailable",
-          available: false,
-          carrier: "DHL",
-          error: "Service temporarily unavailable"
-        });
-      }
-    }
-    
-    // Add other carriers as "Under Maintenance"
-    const maintenanceCarriers = [
-      { 
-        name: "FedEx", 
-        service: "FedEx Priority", 
-        deliveryTime: "2-3 business days",
-        message: "API integration in development"
+    // Define service levels
+    const services = [
+      {
+        name: "Standard Delivery",
+        code: "standard",
+        description: "Regular shipping with tracking",
+        deliveryTime: `${settings.standardDeliveryDays || '2-3'} business days`,
+        multiplier: 1.0
       },
-      { 
-        name: "UPS", 
-        service: "UPS Ground", 
-        deliveryTime: "3-5 business days",
-        message: "API integration in development"
-      },
-      { 
-        name: "USPS", 
-        service: "USPS Priority", 
-        deliveryTime: "2-3 business days",
-        message: "API integration in development"
+      {
+        name: "Express Delivery",
+        code: "express",
+        description: "Faster shipping with priority handling",
+        deliveryTime: `${settings.expressDeliveryDays || '1-2'} business days`,
+        multiplier: settings.expressMultiplier || 1.8
       }
     ];
     
-    maintenanceCarriers.forEach(carrier => {
-      rates.push({
-        service: carrier.service,
-        baseRate: 0,
-        currency: "GBP",
-        deliveryTime: carrier.deliveryTime,
-        available: false,
-        carrier: carrier.name,
-        maintenanceMode: true,
-        message: carrier.message
+    // Add same-day delivery if enabled
+    if (settings.sameDayDelivery) {
+      services.push({
+        name: "Same Day Delivery",
+        code: "same_day",
+        description: "Delivery on the same day if ordered before " + (settings.sameDayCutoff || '14:00'),
+        deliveryTime: "Same day",
+        multiplier: 3.5,
+        surcharge: settings.sameDaySurcharge || 9.99
       });
+    }
+    
+    // Generate rates for each service
+    const rates = services.map(service => {
+      let rate = standardRate * service.multiplier;
+      
+      // Add surcharge if applicable (e.g., for same-day delivery)
+      if (service.surcharge) {
+        rate += service.surcharge;
+      }
+      
+      return {
+        service: service.name,
+        serviceCode: service.code,
+        baseRate: parseFloat(rate.toFixed(2)),
+        originalBaseRate: parseFloat(standardRate.toFixed(2)),
+        additionalFees: service.surcharge || 0,
+        currency: "GBP",
+        deliveryTime: service.deliveryTime,
+        available: true,
+        carrier: "Local Delivery",
+        description: service.description
+      };
     });
 
     res.json({
       success: true,
-      rates: rates
+      rates: rates,
+      settings: {
+        currency: "GBP",
+        weightUnit: "kg",
+        dimensionUnit: "cm"
+      }
     });
   } catch (error) {
     console.error("Rate calculation error:", error);
-    res.json({
+    res.status(500).json({
       success: false,
-      message: "Failed to calculate shipping rates"
+      message: "Failed to calculate shipping rates",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
@@ -283,15 +306,15 @@ exports.saveShipmentData = async (req, res) => {
       customerPhone: senderPhone,
       origin: {
         address: senderAddress,
-        city: originParts[originParts.length - 2]?.trim() || "London",
-        postalCode: "SW1A 1AA",
-        country: "United Kingdom"
+        city: senderCity,
+        postalCode: senderPostalCode,
+        country: senderCountry
       },
       destination: {
         address: recipientAddress,
-        city: destParts[destParts.length - 2]?.trim() || "New York",
-        postalCode: "10001",
-        country: "United States"
+        city: recipientCity,
+        postalCode: recipientPostalCode,
+        country: recipientCountry
       },
       packageType: mapPackageType(packageType),
       weight: parseFloat(packageWeight),
@@ -317,7 +340,7 @@ exports.saveShipmentData = async (req, res) => {
       paymentStatus: "unpaid",
       'origin.address': origin.address,
       'destination.address': destination.address,
-      customerEmail: customerEmail,
+      customerEmail: senderEmail,
       weight: parseFloat(packageWeight),
       createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) } // Within last 10 minutes
     }).sort({ createdAt: -1 });
@@ -384,153 +407,229 @@ exports.selectCarrierAndProceedToPayment = async (req, res) => {
 
   } catch (error) {
     console.error("Carrier selection error:", error);
-    res.json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to select carrier"
+      message: error.message || 'Error selecting carrier'
     });
   }
 };
 
 // Step 3: Process payment and finalize shipment
 exports.processPaymentAndCreateShipment = async (req, res) => {
+  let shipment;
+  
   try {
-    const { shipmentId, paymentMethod, amount } = req.body;
-
-    const shipment = await Shipment.findById(shipmentId);
-    if (!shipment) {
-      return res.json({
+    const { shipmentId, paymentMethod = 'stripe', amount } = req.body;
+    
+    // Validate required fields
+    if (!shipmentId || !amount) {
+      return res.status(400).json({
         success: false,
-        message: "Shipment not found"
+        message: 'Missing required fields: shipmentId and amount are required'
+      });
+    }
+    
+    console.log('Processing payment for shipment:', { shipmentId, paymentMethod, amount });
+
+    // Find and lock the shipment for update
+    shipment = await Shipment.findById(shipmentId);
+    if (!shipment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shipment not found'
       });
     }
 
-    // Validate amount matches shipment price
+    // Check if shipment is already paid
+    if (shipment.paymentStatus === 'paid') {
+      return res.json({
+        success: true,
+        message: 'Payment already processed for this shipment',
+        shipmentId: shipment._id,
+        trackingNumber: shipment.trackingId
+      });
+    }
+
+    // Validate payment amount with tolerance for floating point precision
+    const expectedAmount = parseFloat(shipment.price);
     const paymentAmount = parseFloat(amount);
+    const amountDifference = Math.abs(paymentAmount - expectedAmount);
+    const maxAllowedDifference = Math.max(0.10, expectedAmount * 0.01); // 1% or £0.10, whichever is larger
+
     console.log('Payment validation:', {
-      frontendAmount: paymentAmount,
-      shipmentPrice: shipment.price,
-      difference: Math.abs(paymentAmount - shipment.price),
+      expectedAmount,
+      paymentAmount,
+      difference: amountDifference,
+      maxAllowedDifference,
       shipmentCarrier: shipment.carrier,
       shipmentService: shipment.service
     });
     
-    if (Math.abs(paymentAmount - shipment.price) > 0.01) {
-      return res.json({
+    if (isNaN(paymentAmount) || amountDifference > maxAllowedDifference) {
+      return res.status(400).json({
         success: false,
-        message: `Payment amount mismatch: Expected £${shipment.price}, received £${paymentAmount}`
+        message: `Payment amount validation failed. Expected: £${expectedAmount.toFixed(2)}, Received: £${paymentAmount.toFixed(2)}`,
+        expectedAmount: expectedAmount,
+        receivedAmount: paymentAmount,
+        difference: amountDifference.toFixed(2)
       });
     }
 
     // Process payment
-    const paymentResult = await paymentService.processShipmentPayment(shipment, {
-      userId: req.user._id,
-      shipmentId: shipment._id,
+    const paymentResult = await paymentService.processShipmentPayment(
+      shipment,
+      {
+        userId: req.user._id,
+        shipmentId: shipment._id,
+        amount: paymentAmount,
+        currency: 'GBP',
+        paymentMethod: paymentMethod || 'stripe'
+      }
+    );
+
+    if (!paymentResult || !paymentResult.success) {
+      throw new Error(paymentResult?.message || 'Payment processing failed');
+    }
+
+    // Update shipment status
+    shipment.status = 'processing';
+    shipment.paymentStatus = 'paid';
+    shipment.paymentMethod = paymentMethod;
+    shipment.paidAt = new Date();
+    shipment.paymentDetails = {
       amount: paymentAmount,
       currency: 'GBP',
-      paymentMethod: paymentMethod || 'stripe'
-    });
+      paymentMethod,
+      transactionId: paymentResult.transactionId || `PAY_${Date.now()}`,
+      status: 'completed'
+    };
 
-    if (paymentResult.success) {
-      // Update shipment status - both Stripe and PayPal are processed immediately in our system
-      shipment.status = "processing";
-      shipment.paymentStatus = "paid";
-      shipment.paymentMethod = paymentMethod;
+    // Save the updated shipment
+    await shipment.save();
       
-      // Try to create with DHL API if it's a DHL shipment
-      if (shipment.carrier === "DHL Express" || shipment.carrier === "dhl") {
-        try {
-          const dhlResponse = await dhlService.createShipment(shipment);
-          
-          if (dhlResponse && dhlResponse.trackingNumber) {
-            shipment.trackingId = dhlResponse.trackingNumber;
-            shipment.dhlShipmentId = dhlResponse.dhlShipmentId;
-            shipment.labelUrl = dhlResponse.labelUrl;
-          }
-          
-          shipment.trackingHistory.push({
-            status: "processing",
-            location: shipment.origin.city,
-            description: "Shipment created and processing with DHL",
-            timestamp: new Date()
-          });
-        } catch (error) {
-          console.error("DHL shipment creation error:", error);
-          // Continue with local shipment creation
-          shipment.trackingHistory.push({
-            status: "processing", 
-            location: shipment.origin.city,
-            description: "Shipment created and processing",
-            timestamp: new Date()
-          });
+    // If it's a DHL shipment, create the shipment with DHL API
+    const carrier = shipment.carrier?.toLowerCase();
+    if (carrier === 'dhl' || carrier === 'dhl express') {
+      try {
+        const dhlResponse = await dhlService.createShipment(shipment);
+        
+        if (dhlResponse && dhlResponse.trackingNumber) {
+          shipment.trackingId = dhlResponse.trackingNumber;
+          shipment.dhlShipmentId = dhlResponse.dhlShipmentId;
+          shipment.labelUrl = dhlResponse.labelUrl;
         }
-      } else {
+        
         shipment.trackingHistory.push({
           status: "processing",
-          location: shipment.origin.city, 
-          description: "Shipment created and processing",
+          location: shipment.origin.city,
+          description: "Shipment created and processing with DHL",
           timestamp: new Date()
         });
+      } catch (error) {
+        // If we get here, payment was successful but there was an issue with DHL
+        // We'll still mark the shipment as paid but log the error
+        console.error('Error creating DHL shipment:', error);
+        
+        // Update shipment with error information
+        shipment.status = 'processing';
+        shipment.notes = 'Payment processed but there was an issue creating the DHL shipment. Please contact support.';
+        await shipment.save();
+        
+        // Create a notification for the admin
+        await Notification.create({
+          userId: req.user._id,
+          type: 'error',
+          title: 'Shipment Creation Error',
+          message: `Payment processed but failed to create DHL shipment for ${shipment.trackingId}`,
+          isAdmin: true,
+          metadata: {
+            shipmentId: shipment._id,
+            trackingId: shipment.trackingId,
+            error: error.message
+          }
+        });
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Payment processed successfully, but there was an issue creating the DHL shipment. Our team has been notified and will contact you shortly.',
+          trackingNumber: shipment.trackingId,
+          shipmentId: shipment._id,
+          paymentStatus: 'paid',
+          requiresSupport: true
+        });
       }
-
-      // Create success notification
-      await NotificationService.createShipmentNotification(
-        req.user._id, 
-        shipment, 
-        'created'
-      );
-
-      await shipment.save();
-
-      res.json({
-        success: true,
-        message: `Payment successful via ${paymentMethod}! Shipment created.`,
-        trackingNumber: shipment.trackingId,
-        shipmentId: shipment._id,
-        paymentId: paymentResult.payment._id
-      });
     } else {
-      res.json({
-        success: false,
-        message: paymentResult.message || "Payment processing failed"
+      shipment.trackingHistory.push({
+        status: "processing",
+        location: shipment.origin.city, 
+        description: "Shipment created and processing",
+        timestamp: new Date()
       });
     }
 
+    // Create success notification
+    await NotificationService.createShipmentNotification(
+      req.user._id, 
+      shipment, 
+      'created'
+    );
+
+    await shipment.save();
+
+    return res.json({
+      success: true,
+      message: `Payment successful via ${paymentMethod}! Shipment created.`,
+      trackingNumber: shipment.trackingId,
+      shipmentId: shipment._id,
+      paymentId: paymentResult.payment._id
+    });
   } catch (error) {
-    console.error("Payment processing error:", error);
-    res.json({
-      success: false,
-      message: "Failed to process payment"
+    console.error('Error processing payment:', {
+      error: error.message,
+      stack: error.stack,
+      shipmentId: shipment?._id,
+      userId: req.user?._id
     });
-  }
-};
-
-// Handle payment webhook/callback
-exports.handlePaymentCallback = async (req, res) => {
-  try {
-    const { paymentId, status, transactionId, paymentDetails } = req.body;
-
-    const result = await paymentService.updatePaymentStatus(paymentId, status, {
-      transactionId,
-      paymentDetails
-    });
-
-    if (result.success) {
-      res.json({
-        success: true,
-        message: "Payment status updated successfully"
-      });
-    } else {
-      res.json({
-        success: false,
-        message: "Failed to update payment status"
-      });
+    
+    // Create error notification
+    if (shipment) {
+      await Notification.create({
+        userId: req.user?._id,
+        type: 'error',
+        title: 'Payment Processing Error',
+        message: `Failed to process payment for shipment ${shipment.trackingId || shipmentId}`,
+        isAdmin: true,
+        metadata: {
+          error: error.message,
+          shipmentId: shipment._id,
+          trackingId: shipment.trackingId,
+          paymentMethod: paymentMethod || 'unknown',
+          amount: amount || 0
+        }
+      }).catch(console.error);
     }
-
-  } catch (error) {
-    console.error("Payment callback error:", error);
-    res.status(500).json({
+    
+    // Handle payment callback processing failure
+    if (shipment) {
+      shipment.trackingHistory.push({
+        status: "error",
+        location: shipment.origin.city, 
+        description: "Payment processing failed",
+        timestamp: new Date(),
+        message: error.message || "Payment processing failed"
+      });
+      
+      try {
+        await shipment.save();
+      } catch (saveError) {
+        console.error('Error saving shipment with error status:', saveError);
+      }
+    }
+    
+    return res.status(500).json({
       success: false,
-      message: "Payment callback processing failed"
+      message: error.message || 'Failed to process payment',
+      requiresSupport: true
     });
   }
 };
@@ -819,6 +918,67 @@ exports.handlePayPalSuccess = async (req, res) => {
   } catch (error) {
     console.error('PayPal success handler error:', error);
     res.redirect('/dashboard/create-shipment?error=payment_processing_failed');
+  }
+};
+
+// Handle payment callback from payment providers
+exports.handlePaymentCallback = async (req, res) => {
+  try {
+    const { paymentId, token, PayerID, status } = req.query || req.body;
+    
+    if (!paymentId && !token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required payment parameters'
+      });
+    }
+
+    // Handle different payment providers
+    if (paymentId && PayerID) {
+      // Handle PayPal callback
+      const result = await paymentService.executePayPalPayment(paymentId, PayerID);
+      
+      if (result.success) {
+        // Update the shipment status to 'paid' or 'processing'
+        await Shipment.findByIdAndUpdate(
+          result.shipmentId,
+          { 
+            status: 'processing',
+            paymentStatus: 'paid',
+            paymentMethod: 'paypal',
+            paymentId: paymentId
+          },
+          { new: true }
+        );
+        
+        return res.redirect(`/dashboard/shipments?payment=success`);
+      }
+    } else if (token) {
+      // Handle Stripe callback
+      const result = await paymentService.verifyStripePayment(token);
+      
+      if (result.success) {
+        await Shipment.findByIdAndUpdate(
+          result.shipmentId,
+          { 
+            status: 'processing',
+            paymentStatus: 'paid',
+            paymentMethod: 'stripe',
+            paymentId: result.paymentIntentId
+          },
+          { new: true }
+        );
+        
+        return res.redirect(`/dashboard/shipments?payment=success`);
+      }
+    }
+    
+    // If we get here, payment failed
+    return res.redirect('/dashboard/shipments?payment=failed');
+    
+  } catch (error) {
+    console.error('Payment callback error:', error);
+    return res.status(500).redirect('/dashboard/shipments?payment=error');
   }
 };
 

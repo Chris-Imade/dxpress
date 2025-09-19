@@ -369,6 +369,11 @@ input:checked + .slider:before {
 </style>
 
 <script>
+    // Pass Stripe publishable key from server to client
+    window.stripePublishableKey = "<%= stripePublishableKey %>";
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     // Pre-fill from URL parameters if coming from rates page
     const urlParams = new URLSearchParams(window.location.search);
@@ -559,13 +564,21 @@ function displayRealTimeShippingOptions(rates) {
         const isMaintenanceMode = rate.maintenanceMode === true;
         const isDHL = rate.carrier === 'DHL';
         
+        // Determine icon based on service type
+        let serviceIcon = '<i class="fas fa-box"></i>'; // Default icon
+        if (rate.service.toLowerCase().includes('express')) {
+            serviceIcon = '<i class="fas fa-rocket"></i>';
+        } else if (rate.service.toLowerCase().includes('standard')) {
+            serviceIcon = '<i class="fas fa-truck"></i>';
+        }
+
         return `
             <div class="shipping-option ${!isAvailable ? 'disabled' : ''}" ${isAvailable ? `onclick="selectShippingOption(${index})"` : ''} style="${!isAvailable ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
                 <input type="radio" name="shippingOption" value="${index}" id="option${index}" ${!isAvailable ? 'disabled' : ''}>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div class="carrier-logo" style="background: ${isDHL ? '#dc2626' : isMaintenanceMode ? '#f59e0b' : '#6b7280'}; color: white;">
-                            ${rate.carrier}
+                            ${serviceIcon}
                         </div>
                         <div>
                             <div style="font-weight: 600; color: #032330; font-size: 16px; display: flex; align-items: center; gap: 8px;">
@@ -821,8 +834,8 @@ function proceedFromPreview() {
 function createShipment() {
     // Validate required fields
     const requiredFields = [
-        'senderName', 'senderPhone', 'senderEmail', 'senderAddress',
-        'recipientName', 'recipientPhone', 'recipientAddress',
+        'senderName', 'senderPhone', 'senderEmail', 'senderAddress', 'senderCity', 'senderPostalCode', 'senderCountry',
+        'recipientName', 'recipientPhone', 'recipientAddress', 'recipientCity', 'recipientPostalCode', 'recipientCountry',
         'packageType', 'packageWeight', 'packageLength', 'packageWidth', 'packageHeight', 'packageDescription'
     ];
     
@@ -1022,7 +1035,7 @@ function showPaymentModal(formData, selectedRate) {
                     transition: all 0.2s;
                     font-size: 16px;
                     font-weight: 500;
-                " onmouseover="this.style.borderColor='#0070ba'; this.style.backgroundColor='#f0f8ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white';">
+                " onmouseover="this.style.borderColor='#0070ba'; this.style.backgroundColor='#f0f8ff';" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white';" disabled>
                     <i class="fab fa-paypal" style="font-size: 24px; color: #0070ba;"></i>
                     Pay with PayPal
                 </button>
