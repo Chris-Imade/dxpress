@@ -33,23 +33,23 @@ exports.getDashboard = async (req, res) => {
     
     // Get user's shipment statistics
     const totalShipments = await Shipment.countDocuments({ 
-      customerEmail: req.user.email 
+      createdBy: req.user._id 
     });
     
     const inTransitShipments = await Shipment.countDocuments({
-      customerEmail: req.user.email,
+      createdBy: req.user._id,
       status: "in_transit"
     });
     
     const deliveredThisWeek = await Shipment.countDocuments({
-      customerEmail: req.user.email,
+      createdBy: req.user._id,
       status: "delivered",
       updatedAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     });
     
     // Get recent shipments
     const recentShipments = await Shipment.find({
-      customerEmail: req.user.email
+      createdBy: req.user._id
     })
     .sort({ createdAt: -1 })
     .limit(10)
@@ -57,7 +57,7 @@ exports.getDashboard = async (req, res) => {
     
     // Get active shipments for GPS tracking
     const activeShipments = await Shipment.find({
-      customerEmail: req.user.email,
+      createdBy: req.user._id,
       status: { $in: ["processing", "in_transit"] }
     })
     .sort({ createdAt: -1 })
@@ -143,7 +143,7 @@ exports.getRates = async (req, res) => {
     const settings = await GlobalSettings.getSetting("shipping_settings", defaultSettings);
     
     const shipmentData = {
-      userId: req.user?._id || 'guest',
+      createdBy: req.user?._id,
       customerName: req.user?.name || 'Guest',
       customerEmail: req.user?.email || 'guest@example.com',
       customerPhone: req.user?.phone || '',
@@ -349,7 +349,7 @@ exports.saveShipmentData = async (req, res) => {
 
     // Check for existing draft shipment to prevent duplicates using more unique identifiers
     const existingDraft = await Shipment.findOne({
-      userId: req.user._id,
+      createdBy: req.user._id,
       status: "draft",
       paymentStatus: "unpaid",
       'origin.address': origin.address,
@@ -733,7 +733,7 @@ exports.getShipments = async (req, res) => {
     const { status, page = 1, limit = 10 } = req.query;
     const userId = req.user.userId;
     
-    const query = { customerEmail: req.user.email };
+    const query = { createdBy: req.user._id };
     if (status) {
       query.status = status;
     }
@@ -769,7 +769,7 @@ exports.getShipments = async (req, res) => {
 exports.getGPSTracking = async (req, res) => {
   try {
     const activeShipments = await Shipment.find({
-      customerEmail: req.user.email,
+      createdBy: req.user._id,
       status: { $in: ["processing", "in_transit"] }
     }).lean();
 

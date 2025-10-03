@@ -14,6 +14,12 @@ const shipmentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true // Add index for faster queries
+    },
     customerName: {
       type: String,
       required: true,

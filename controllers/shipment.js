@@ -414,6 +414,7 @@ exports.createShipmentRequest = async (req, res) => {
 
     // Create new shipment object
     const shipment = new Shipment({
+      createdBy: req.user._id, // Associate shipment with logged-in user
       customerName,
       customerEmail,
       customerPhone,

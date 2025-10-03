@@ -1,189 +1,552 @@
-<!-- Shipments Management Page -->
-<div class="dashboard-card" style="margin-bottom: 24px;">
-    <div class="card-header">
-        <div class="card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-            <i class="fas fa-box"></i>
-        </div>
-        <div>
-            <div class="card-title">Shipments Management</div>
-            <div class="card-subtitle">View and manage all shipments</div>
-        </div>
-        <div style="margin-left: auto;">
-            <a href="/admin/shipments/create" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                New Shipment
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Search and Filter Section -->
-<div class="dashboard-card" style="margin-bottom: 24px;">
-    <div style="padding: 20px;">
-        <form method="GET" action="/admin/shipments" style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: end;">
-            <div>
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Search Shipments</label>
-                <input 
-                    type="search" 
-                    style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"
-                    placeholder="Search by tracking ID, customer name, email, phone..." 
-                    name="search" 
-                    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
-                >
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-shipping-fast"></i>
+                        Shipment Management
+                    </h1>
+                    <p class="page-subtitle">Advanced filtering and analytics for all shipments</p>
+                </div>
+                <div>
+                    <a href="/admin/shipments/create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Shipment
+                    </a>
+                    <button class="btn btn-info" onclick="showAnalytics()">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </button>
+                </div>
             </div>
-            <div>
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Filter by Status</label>
-                <select name="status" style="padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; min-width: 150px;">
-                    <option value="" <%= !statusFilter ? 'selected' : '' %>>All Statuses</option>
-                    <option value="Pending" <%= statusFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
-                    <option value="In Transit" <%= statusFilter === 'In Transit' ? 'selected' : '' %>>In Transit</option>
-                    <option value="Delivered" <%= statusFilter === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                    <option value="Delayed" <%= statusFilter === 'Delayed' ? 'selected' : '' %>>Delayed</option>
-                    <option value="Cancelled" <%= statusFilter === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary" style="height: fit-content;">
-                <i class="fas fa-search"></i>
-                Search
-            </button>
-        </form>
+        </div>
     </div>
-</div>
 
-<!-- Results Summary -->
-<div style="margin-bottom: 16px; color: #6b7280; font-weight: 500;">
-    Total: <%= pagination.totalItems %> shipments found
-</div>
-<!-- Shipments Table -->
-<div class="table-container" style="margin-bottom: 24px;">
-    <div class="table-header">
-        <h3 class="table-title">All Shipments</h3>
-    </div>
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Tracking ID</th>
-                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Customer</th>
-                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Route</th>
-                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Status</th>
-                    <th style="padding: 16px; text-align: left; font-weight: 600; color: #374151;">Created</th>
-                    <th style="padding: 16px; text-align: center; font-weight: 600; color: #374151;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (shipments && shipments.length > 0) { %>
-                    <% shipments.forEach(function(shipment) { %>
-                    <tr style="border-bottom: 1px solid #f3f4f6;">
-                        <td style="padding: 16px; font-weight: 600; color: #032330;"><%= shipment.trackingId %></td>
-                        <td style="padding: 16px;">
-                            <div style="font-weight: 600; color: #374151;"><%= shipment.customerName %></div>
-                            <div style="font-size: 12px; color: #6b7280;"><%= shipment.customerEmail %></div>
-                        </td>
-                        <td style="padding: 16px;">
-                            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
-                                <div style="display: flex; flex-direction: column; align-items: center;">
-                                    <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-bottom: 4px;"></div>
-                                    <div style="width: 2px; height: 20px; background: #e5e7eb;"></div>
-                                    <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-top: 4px;"></div>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">
-                                        <i class="fas fa-map-marker-alt" style="color: #10b981; margin-right: 4px;"></i>
-                                        <%= shipment.origin.city %>, <%= shipment.origin.country %>
-                                    </div>
-                                    <div style="font-weight: 600; color: #374151;">
-                                        <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 4px;"></i>
-                                        <%= shipment.destination.city %>, <%= shipment.destination.country %>
-                                    </div>
+    <!-- Advanced Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter"></i> Advanced Filters
+                        <button class="btn btn-sm btn-outline-secondary float-end" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="filterForm" method="GET">
+                        <div class="row">
+                            <!-- Search -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Search</label>
+                                <input type="text" class="form-control" name="search" 
+                                       value="<%= filters.search %>" 
+                                       placeholder="Tracking ID, customer name, email...">
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="">All Statuses</option>
+                                    <% filterOptions.statuses.forEach(status => { %>
+                                    <option value="<%= status %>" <%= filters.status === status ? 'selected' : '' %>>
+                                        <%= status.charAt(0).toUpperCase() + status.slice(1) %>
+                                    </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+
+                            <!-- Carrier Filter -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Carrier</label>
+                                <select class="form-select" name="carrier">
+                                    <option value="">All Carriers</option>
+                                    <% filterOptions.carriers.forEach(carrier => { %>
+                                    <option value="<%= carrier %>" <%= filters.carrier === carrier ? 'selected' : '' %>>
+                                        <%= carrier %>
+                                    </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+
+                            <!-- User Filter -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">User</label>
+                                <div class="position-relative">
+                                    <input type="text" class="form-control" id="userSearch" 
+                                           placeholder="Search by user name or email..."
+                                           value="<%= filters.userId ? 'Loading...' : '' %>">
+                                    <input type="hidden" name="userId" value="<%= filters.userId %>">
+                                    <div id="userSuggestions" class="dropdown-menu" style="width: 100%;"></div>
                                 </div>
                             </div>
-                        </td>
-                        <td style="padding: 16px; text-align: right;">
-                            <% let statusClass = 'pending'; %>
-                            <% if (shipment.status === 'Delivered') statusClass = 'delivered'; %>
-                            <% if (shipment.status === 'In Transit') statusClass = 'transit'; %>
-                            <% if (shipment.status === 'Cancelled') statusClass = 'cancelled'; %>
-                            <% if (shipment.status === 'Delayed') statusClass = 'delayed'; %>
-                            <span class="status-badge <%= statusClass %>"><%= shipment.status %></span>
-                        </td>
-                        <td style="padding: 16px; color: #6b7280;"><%= new Date(shipment.createdAt).toLocaleDateString() %></td>
-                        <td style="padding: 16px; text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="/admin/shipments/edit/<%= shipment._id %>" style="padding: 8px; background: #f3f4f6; border: none; border-radius: 6px; color: #6b7280; text-decoration: none; transition: all 0.2s ease; display: inline-block;">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button 
-                                    class="delete-shipment-btn" 
-                                    data-id="<%= shipment._id %>"
-                                    style="padding: 8px; background: #fee2e2; border: none; border-radius: 6px; color: #dc2626; cursor: pointer; transition: all 0.2s ease;"
-                                    onclick="confirmDelete('<%= shipment._id %>')"
-                                >
-                                    <i class="fas fa-trash"></i>
+
+                            <!-- Date Range -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Date From</label>
+                                <input type="date" class="form-control" name="dateFrom" value="<%= filters.dateFrom %>">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Date To</label>
+                                <input type="date" class="form-control" name="dateTo" value="<%= filters.dateTo %>">
+                            </div>
+
+                            <!-- Sort Options -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Sort By</label>
+                                <select class="form-select" name="sortBy">
+                                    <option value="createdAt" <%= filters.sortBy === 'createdAt' ? 'selected' : '' %>>Created Date</option>
+                                    <option value="updatedAt" <%= filters.sortBy === 'updatedAt' ? 'selected' : '' %>>Updated Date</option>
+                                    <option value="status" <%= filters.sortBy === 'status' ? 'selected' : '' %>>Status</option>
+                                    <option value="price" <%= filters.sortBy === 'price' ? 'selected' : '' %>>Price</option>
+                                    <option value="customerName" <%= filters.sortBy === 'customerName' ? 'selected' : '' %>>Customer Name</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Order</label>
+                                <select class="form-select" name="sortOrder">
+                                    <option value="desc" <%= filters.sortOrder === 'desc' ? 'selected' : '' %>>Descending</option>
+                                    <option value="asc" <%= filters.sortOrder === 'asc' ? 'selected' : '' %>>Ascending</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-search"></i> Apply Filters
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="exportData()">
+                                    <i class="fas fa-download"></i> Export CSV
                                 </button>
                             </div>
-                        </td>
-                    </tr>
-                    <% }); %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="6" style="padding: 40px; text-align: center; color: #6b7280;">
-                            <i class="fas fa-box" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
-                            <div>No shipments found</div>
-                        </td>
-                    </tr>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Showing <strong><%= pagination.totalItems %></strong> shipments
+                <% if (filters.search || filters.status || filters.carrier || filters.userId || filters.dateFrom || filters.dateTo) { %>
+                with applied filters
                 <% } %>
-            </tbody>
-        </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tracking ID</th>
+                                    <th>Customer</th>
+                                    <th>Created By</th>
+                                    <th>Route</th>
+                                    <th>Carrier</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (shipments && shipments.length > 0) { %>
+                                <% shipments.forEach(shipment => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= shipment.trackingId %></strong>
+                                        <% if (shipment.carrierTrackingNumber) { %>
+                                        <br><small class="text-muted">Carrier: <%= shipment.carrierTrackingNumber %></small>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong><%= shipment.customerName %></strong>
+                                            <br><small class="text-muted"><%= shipment.customerEmail %></small>
+                                            <% if (shipment.customerPhone) { %>
+                                            <br><small class="text-muted"><%= shipment.customerPhone %></small>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <% if (shipment.createdBy) { %>
+                                        <div>
+                                            <strong><%= shipment.createdBy.name %></strong>
+                                            <br><small class="text-muted"><%= shipment.createdBy.email %></small>
+                                            <span class="badge bg-<%= shipment.createdBy.role === 'admin' ? 'danger' : 'primary' %>">
+                                                <%= shipment.createdBy.role %>
+                                            </span>
+                                        </div>
+                                        <% } else { %>
+                                        <span class="text-muted">Unknown</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <strong>From:</strong> <%= shipment.origin.city %>, <%= shipment.origin.country %>
+                                            <br><strong>To:</strong> <%= shipment.destination.city %>, <%= shipment.destination.country %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong><%= shipment.carrier %></strong>
+                                            <% if (shipment.carrierService) { %>
+                                            <br><small class="text-muted"><%= shipment.carrierService %></small>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-<%= getStatusColor(shipment.status) %>">
+                                            <%= shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1) %>
+                                        </span>
+                                        <% if (shipment.paymentStatus) { %>
+                                        <br><span class="badge bg-<%= getPaymentStatusColor(shipment.paymentStatus) %>">
+                                            <%= shipment.paymentStatus %>
+                                        </span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <strong>$<%= shipment.price ? shipment.price.toFixed(2) : '0.00' %></strong>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <%= new Date(shipment.createdAt).toLocaleDateString() %>
+                                            <br><%= new Date(shipment.createdAt).toLocaleTimeString() %>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="/admin/shipments/edit/<%= shipment._id %>" class="btn btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="/track/<%= shipment.trackingId %>" class="btn btn-outline-info" target="_blank">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger" onclick="deleteShipment('<%= shipment._id %>')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                <% } else { %>
+                                <tr>
+                                    <td colspan="9" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                                            <h5>No shipments found</h5>
+                                            <p>Try adjusting your filters or create a new shipment.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (pagination.totalPages > 1) { %>
+                    <nav aria-label="Shipments pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item <%= pagination.page === 1 ? 'disabled' : '' %>">
+                                <a class="page-link" href="?<%= buildPaginationQuery(pagination.page - 1) %>">Previous</a>
+                            </li>
+                            
+                            <% for (let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.totalPages, pagination.page + 2); i++) { %>
+                            <li class="page-item <%= i === pagination.page ? 'active' : '' %>">
+                                <a class="page-link" href="?<%= buildPaginationQuery(i) %>"><%= i %></a>
+                            </li>
+                            <% } %>
+                            
+                            <li class="page-item <%= pagination.page === pagination.totalPages ? 'disabled' : '' %>">
+                                <a class="page-link" href="?<%= buildPaginationQuery(pagination.page + 1) %>">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <% } %>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Pagination -->
-<% if (pagination.totalPages > 1) { %>
-<div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px;">
-    <% if (pagination.page > 1) { %>
-        <a href="/admin/shipments?page=<%= pagination.page-1 %><%= statusFilter ? '&status='+statusFilter : '' %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
-           style="padding: 8px 16px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;">
-            <i class="fas fa-chevron-left"></i> Previous
-        </a>
-    <% } %>
-    
-    <% for(let i = 1; i <= pagination.totalPages; i++) { %>
-        <% if (i === pagination.page) { %>
-            <span style="padding: 8px 12px; background: #032330; color: white; border-radius: 6px; font-weight: 600;"><%= i %></span>
-        <% } else { %>
-            <a href="/admin/shipments?page=<%= i %><%= statusFilter ? '&status='+statusFilter : '' %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
-               style="padding: 8px 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;"><%= i %></a>
-        <% } %>
-    <% } %>
-    
-    <% if (pagination.page < pagination.totalPages) { %>
-        <a href="/admin/shipments?page=<%= pagination.page+1 %><%= statusFilter ? '&status='+statusFilter : '' %><%= searchQuery ? '&search='+encodeURIComponent(searchQuery) : '' %>" 
-           style="padding: 8px 16px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 6px; color: #374151; text-decoration: none; transition: all 0.2s ease;">
-            Next <i class="fas fa-chevron-right"></i>
-        </a>
-    <% } %>
+<!-- Analytics Modal -->
+<div class="modal fade" id="analyticsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Shipment Analytics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Time Period</label>
+                        <select class="form-select" id="analyticsPeriod" onchange="loadAnalytics()">
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d" selected>Last 30 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                            <option value="1y">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="analyticsContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<% } %>
 
 <script>
-function confirmDelete(shipmentId) {
+// Helper functions for status colors
+function getStatusColor(status) {
+    const colors = {
+        'draft': 'secondary',
+        'pending': 'warning',
+        'processing': 'info',
+        'in_transit': 'primary',
+        'delivered': 'success',
+        'cancelled': 'danger',
+        'exception': 'danger'
+    };
+    return colors[status] || 'secondary';
+}
+
+function getPaymentStatusColor(status) {
+    const colors = {
+        'unpaid': 'warning',
+        'paid': 'success',
+        'failed': 'danger',
+        'refunded': 'info'
+    };
+    return colors[status] || 'secondary';
+}
+
+// Build pagination query string
+function buildPaginationQuery(page) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', page);
+    return params.toString();
+}
+
+// User search functionality
+let userSearchTimeout;
+document.getElementById('userSearch').addEventListener('input', function() {
+    const query = this.value;
+    const suggestions = document.getElementById('userSuggestions');
+    
+    clearTimeout(userSearchTimeout);
+    
+    if (query.length < 2) {
+        suggestions.style.display = 'none';
+        return;
+    }
+    
+    userSearchTimeout = setTimeout(() => {
+        fetch(`/admin/api/users/suggestions?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const item = document.createElement('a');
+                        item.className = 'dropdown-item';
+                        item.href = '#';
+                        item.innerHTML = `
+                            <div>
+                                <strong>${user.name}</strong>
+                                <br><small class="text-muted">${user.email}</small>
+                            </div>
+                        `;
+                        item.onclick = (e) => {
+                            e.preventDefault();
+                            document.getElementById('userSearch').value = user.name;
+                            document.querySelector('input[name="userId"]').value = user._id;
+                            suggestions.style.display = 'none';
+                        };
+                        suggestions.appendChild(item);
+                    });
+                    suggestions.style.display = 'block';
+                } else {
+                    suggestions.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user suggestions:', error);
+                suggestions.style.display = 'none';
+            });
+    }, 300);
+});
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.position-relative')) {
+        document.getElementById('userSuggestions').style.display = 'none';
+    }
+});
+
+// Reset filters
+function resetFilters() {
+    window.location.href = '/admin/shipments';
+}
+
+// Export data
+function exportData() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    window.location.href = '/admin/shipments?' + params.toString();
+}
+
+// Delete shipment
+function deleteShipment(shipmentId) {
     if (confirm('Are you sure you want to delete this shipment? This action cannot be undone.')) {
         fetch(`/admin/shipments/delete/${shipmentId}`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
+        .then(response => {
+            if (response.ok) {
+                location.reload();
             } else {
-                alert('Error deleting shipment: ' + (data.message || 'Unknown error'));
+                alert('Failed to delete shipment');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while deleting the shipment.');
+            alert('Failed to delete shipment');
         });
     }
 }
-</script> 
+
+// Analytics functionality
+function showAnalytics() {
+    const modal = new bootstrap.Modal(document.getElementById('analyticsModal'));
+    modal.show();
+    loadAnalytics();
+}
+
+function loadAnalytics() {
+    const period = document.getElementById('analyticsPeriod').value;
+    const content = document.getElementById('analyticsContent');
+    
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    fetch(`/admin/api/shipments/analytics?period=${period}`)
+        .then(response => response.json())
+        .then(data => {
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h5>${data.totalShipments}</h5>
+                                <p class="mb-0">Total Shipments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5>$${data.totalRevenue.toFixed(2)}</h5>
+                                <p class="mb-0">Total Revenue</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Status Breakdown</h6>
+                            </div>
+                            <div class="card-body">
+                                ${data.statusBreakdown.map(item => 
+                                    `<div class="d-flex justify-content-between">
+                                        <span>${item._id}</span>
+                                        <span class="badge bg-secondary">${item.count}</span>
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Carrier Breakdown</h6>
+                            </div>
+                            <div class="card-body">
+                                ${data.carrierBreakdown.map(item => 
+                                    `<div class="d-flex justify-content-between">
+                                        <span>${item._id}</span>
+                                        <span class="badge bg-info">${item.count}</span>
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Top Users</h6>
+                            </div>
+                            <div class="card-body">
+                                ${data.topUsers.slice(0, 5).map(user => 
+                                    `<div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>${user.userName}</strong>
+                                            <br><small class="text-muted">${user.userEmail}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge bg-primary">${user.count} shipments</div>
+                                            <br><small>$${user.revenue.toFixed(2)}</small>
+                                        </div>
+                                    </div><hr>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error loading analytics:', error);
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Failed to load analytics data. Please try again.
+                </div>
+            `;
+        });
+}
+</script>
+

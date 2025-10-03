@@ -858,19 +858,19 @@ exports.getUser = async (req, res) => {
     }
 
     // Get user's shipments
-    const userShipments = await Shipment.find({ customerEmail: user.email })
+    const userShipments = await Shipment.find({ createdBy: user._id })
       .sort({ createdAt: -1 })
       .limit(10);
 
     // User activity stats
     const shipmentStats = {
-      total: await Shipment.countDocuments({ customerEmail: user.email }),
+      total: await Shipment.countDocuments({ createdBy: user._id }),
       pending: await Shipment.countDocuments({
-        customerEmail: user.email,
+        createdBy: user._id,
         status: "pending",
       }),
       delivered: await Shipment.countDocuments({
-        customerEmail: user.email,
+        createdBy: user._id,
         status: "delivered",
       }),
       totalSpent: userShipments.length * 35.5, // Average shipment cost
@@ -951,22 +951,54 @@ exports.getShipments = async (req, res) => {
     const skip = (page - 1) * limit;
     const statusFilter = req.query.status || "";
     const searchQuery = req.query.search || "";
+    const userFilter = req.query.userId || "";
+    const carrierFilter = req.query.carrier || "";
+    const dateFrom = req.query.dateFrom || "";
+    const dateTo = req.query.dateTo || "";
+    const sortBy = req.query.sortBy || "createdAt";
+    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
 
-    // Build filter
+    // Build filter object
     const filter = {};
+    
+    // Status filter
     if (statusFilter) filter.status = statusFilter;
+    
+    // Carrier filter
+    if (carrierFilter) filter.carrier = { $regex: carrierFilter, $options: "i" };
+    
+    // User filter (by ObjectId)
+    if (userFilter) {
+      try {
+        filter.createdBy = new mongoose.Types.ObjectId(userFilter);
+      } catch (e) {
+        // If invalid ObjectId, ignore the filter
+        console.warn('Invalid user filter ObjectId:', userFilter);
+      }
+    }
+    
+    // Date range filter
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) filter.createdAt.$lte = new Date(dateTo + 'T23:59:59.999Z');
+    }
 
-    // Add search functionality
+    // Enhanced search functionality
     if (searchQuery) {
+      const searchRegex = { $regex: searchQuery, $options: "i" };
       filter.$or = [
-        { trackingId: { $regex: searchQuery, $options: "i" } },
-        { customerName: { $regex: searchQuery, $options: "i" } },
-        { customerEmail: { $regex: searchQuery, $options: "i" } },
-        { customerPhone: { $regex: searchQuery, $options: "i" } },
-        { origin: { $regex: searchQuery, $options: "i" } },
-        { destination: { $regex: searchQuery, $options: "i" } },
-        { additionalNotes: { $regex: searchQuery, $options: "i" } },
-        { packageType: { $regex: searchQuery, $options: "i" } },
+        { trackingId: searchRegex },
+        { customerName: searchRegex },
+        { customerEmail: searchRegex },
+        { customerPhone: searchRegex },
+        { 'origin.address': searchRegex },
+        { 'origin.city': searchRegex },
+        { 'destination.address': searchRegex },
+        { 'destination.city': searchRegex },
+        { packageType: searchRegex },
+        { carrier: searchRegex },
+        { carrierService: searchRegex }
       ];
     }
 
@@ -974,12 +1006,21 @@ exports.getShipments = async (req, res) => {
     const totalShipments = await Shipment.countDocuments(filter);
     const totalPages = Math.ceil(totalShipments / limit);
 
-    // Get shipments with pagination
+    // Build sort object
+    const sortObj = {};
+    sortObj[sortBy] = sortOrder;
+
+    // Get shipments with pagination and populate user data
     const shipments = await Shipment.find(filter)
-      .sort({ createdAt: -1 })
+      .populate('createdBy', 'name email phone role')
+      .sort(sortObj)
       .skip(skip)
       .limit(limit);
 
+    // Get unique values for filter dropdowns
+    const uniqueStatuses = await Shipment.distinct('status');
+    const uniqueCarriers = await Shipment.distinct('carrier');
+    
     res.render("admin/shipments", {
       title: "Manage Shipments",
       path: "/admin/shipments",
@@ -991,12 +1032,58 @@ exports.getShipments = async (req, res) => {
         totalPages,
         totalItems: totalShipments,
       },
-      searchQuery,
-      statusFilter,
+      filters: {
+        search: searchQuery,
+        status: statusFilter,
+        userId: userFilter,
+        carrier: carrierFilter,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        sortBy: sortBy,
+        sortOrder: req.query.sortOrder || "desc"
+      },
+      filterOptions: {
+        statuses: uniqueStatuses,
+        carriers: uniqueCarriers
+      },
       req: req,
-      filters: { status: statusFilter },
       stylesheets: "",
       scripts: "",
+      // Helper functions for the template
+      getStatusColor: (status) => {
+        const colors = {
+          'draft': 'secondary',
+          'pending': 'warning', 
+          'processing': 'info',
+          'in_transit': 'primary',
+          'delivered': 'success',
+          'cancelled': 'danger',
+          'exception': 'danger'
+        };
+        return colors[status] || 'secondary';
+      },
+      getPaymentStatusColor: (status) => {
+        const colors = {
+          'unpaid': 'warning',
+          'paid': 'success', 
+          'failed': 'danger',
+          'refunded': 'info'
+        };
+        return colors[status] || 'secondary';
+      },
+      buildPaginationQuery: (page) => {
+        const params = new URLSearchParams();
+        if (searchQuery) params.set('search', searchQuery);
+        if (statusFilter) params.set('status', statusFilter);
+        if (userFilter) params.set('userId', userFilter);
+        if (carrierFilter) params.set('carrier', carrierFilter);
+        if (dateFrom) params.set('dateFrom', dateFrom);
+        if (dateTo) params.set('dateTo', dateTo);
+        if (sortBy) params.set('sortBy', sortBy);
+        if (req.query.sortOrder) params.set('sortOrder', req.query.sortOrder);
+        params.set('page', page);
+        return params.toString();
+      }
     });
   } catch (error) {
     console.error("Get shipments error:", error);
@@ -1131,6 +1218,105 @@ exports.createShipment = async (req, res) => {
       formData: req.body,
       layout: false,
     });
+  }
+};
+
+// API endpoint for user search suggestions
+exports.getUserSuggestions = async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json({ users: [] });
+    }
+    
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    })
+    .select('_id name email')
+    .limit(10);
+    
+    res.json({ users });
+  } catch (error) {
+    console.error('User suggestions error:', error);
+    res.status(500).json({ error: 'Failed to get user suggestions' });
+  }
+};
+
+// API endpoint for shipment analytics
+exports.getShipmentAnalytics = async (req, res) => {
+  try {
+    const { period = '30d' } = req.query;
+    
+    // Calculate date range
+    let dateFilter = {};
+    const now = new Date();
+    
+    switch (period) {
+      case '7d':
+        dateFilter = { createdAt: { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '30d':
+        dateFilter = { createdAt: { $gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '90d':
+        dateFilter = { createdAt: { $gte: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) } };
+        break;
+      case '1y':
+        dateFilter = { createdAt: { $gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000) } };
+        break;
+    }
+    
+    // Get analytics data
+    const [
+      totalShipments,
+      statusBreakdown,
+      carrierBreakdown,
+      revenueData,
+      topUsers
+    ] = await Promise.all([
+      Shipment.countDocuments(dateFilter),
+      
+      Shipment.aggregate([
+        { $match: dateFilter },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]),
+      
+      Shipment.aggregate([
+        { $match: dateFilter },
+        { $group: { _id: '$carrier', count: { $sum: 1 } } }
+      ]),
+      
+      Shipment.aggregate([
+        { $match: { ...dateFilter, paymentStatus: 'paid' } },
+        { $group: { _id: null, totalRevenue: { $sum: '$price' } } }
+      ]),
+      
+      Shipment.aggregate([
+        { $match: dateFilter },
+        { $group: { _id: '$createdBy', count: { $sum: 1 }, revenue: { $sum: '$price' } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+        { $unwind: '$user' },
+        { $project: { userName: '$user.name', userEmail: '$user.email', count: 1, revenue: 1 } }
+      ])
+    ]);
+    
+    res.json({
+      totalShipments,
+      statusBreakdown,
+      carrierBreakdown,
+      totalRevenue: revenueData[0]?.totalRevenue || 0,
+      topUsers,
+      period
+    });
+  } catch (error) {
+    console.error('Analytics error:', error);
+    res.status(500).json({ error: 'Failed to get analytics data' });
   }
 };
 
@@ -1695,6 +1881,146 @@ const getNotificationColor = (type) => {
     system: '#6b7280'
   };
   return colors[type] || '#6b7280';
+};
+
+// Shipment Template API endpoints
+exports.getShipmentTemplates = async (req, res) => {
+  try {
+    const ShipmentTemplate = require('../models/ShipmentTemplate');
+    
+    // Get templates for the current admin user or all templates if super admin
+    const filter = req.user.role === 'super_admin' ? {} : { createdBy: req.user._id };
+    
+    const templates = await ShipmentTemplate.find(filter)
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
+    
+    res.json(templates);
+  } catch (error) {
+    console.error('Error fetching shipment templates:', error);
+    res.status(500).json({ error: 'Failed to fetch templates' });
+  }
+};
+
+exports.getShipmentTemplate = async (req, res) => {
+  try {
+    const ShipmentTemplate = require('../models/ShipmentTemplate');
+    const templateId = req.params.id;
+    
+    const template = await ShipmentTemplate.findById(templateId)
+      .populate('createdBy', 'name email');
+    
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    
+    // Check if user has access to this template
+    if (req.user.role !== 'super_admin' && template.createdBy._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    res.json(template);
+  } catch (error) {
+    console.error('Error fetching shipment template:', error);
+    res.status(500).json({ error: 'Failed to fetch template' });
+  }
+};
+
+exports.createShipmentTemplate = async (req, res) => {
+  try {
+    const ShipmentTemplate = require('../models/ShipmentTemplate');
+    
+    const templateData = {
+      ...req.body,
+      createdBy: req.user._id
+    };
+    
+    const template = new ShipmentTemplate(templateData);
+    await template.save();
+    
+    await template.populate('createdBy', 'name email');
+    
+    res.status(201).json(template);
+  } catch (error) {
+    console.error('Error creating shipment template:', error);
+    res.status(500).json({ error: 'Failed to create template' });
+  }
+};
+
+exports.updateShipmentTemplate = async (req, res) => {
+  try {
+    const ShipmentTemplate = require('../models/ShipmentTemplate');
+    const templateId = req.params.id;
+    
+    const template = await ShipmentTemplate.findById(templateId);
+    
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    
+    // Check if user has access to this template
+    if (req.user.role !== 'super_admin' && template.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    Object.assign(template, req.body);
+    await template.save();
+    
+    await template.populate('createdBy', 'name email');
+    
+    res.json(template);
+  } catch (error) {
+    console.error('Error updating shipment template:', error);
+    res.status(500).json({ error: 'Failed to update template' });
+  }
+};
+
+exports.deleteShipmentTemplate = async (req, res) => {
+  try {
+    const ShipmentTemplate = require('../models/ShipmentTemplate');
+    const templateId = req.params.id;
+    
+    const template = await ShipmentTemplate.findById(templateId);
+    
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    
+    // Check if user has access to this template
+    if (req.user.role !== 'super_admin' && template.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    await ShipmentTemplate.findByIdAndDelete(templateId);
+    
+    res.json({ success: true, message: 'Template deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting shipment template:', error);
+    res.status(500).json({ error: 'Failed to delete template' });
+  }
+};
+
+// API endpoint for saving shipment drafts
+exports.createShipmentDraft = async (req, res) => {
+  try {
+    const Shipment = require('../models/Shipment');
+    
+    const shipmentData = {
+      ...req.body,
+      status: 'draft',
+      createdBy: req.body.createdBy || req.user._id
+    };
+    
+    const shipment = new Shipment(shipmentData);
+    await shipment.save();
+    
+    await shipment.populate('createdBy', 'name email phone role');
+    
+    res.status(201).json({ success: true, shipment });
+  } catch (error) {
+    console.error('Error creating shipment draft:', error);
+    res.status(500).json({ success: false, error: 'Failed to save draft' });
+  }
 };
 
 // Get notifications page

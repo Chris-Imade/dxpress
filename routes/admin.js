@@ -123,6 +123,89 @@ router.get(
   adminController.getNotifications
 );
 
+// API routes for admin functionality
+router.get(
+  "/api/users/suggestions",
+  isAuthenticated,
+  isAdmin,
+  adminController.getUserSuggestions
+);
+
+router.get(
+  "/api/shipments/analytics",
+  isAuthenticated,
+  isAdmin,
+  adminController.getShipmentAnalytics
+);
+
+// Shipment template API routes
+router.get(
+  "/api/shipment-templates",
+  isAuthenticated,
+  isStaff,
+  adminController.getShipmentTemplates
+);
+
+router.get(
+  "/api/shipment-templates/:id",
+  isAuthenticated,
+  isStaff,
+  adminController.getShipmentTemplate
+);
+
+router.post(
+  "/api/shipment-templates",
+  isAuthenticated,
+  isStaff,
+  adminController.createShipmentTemplate
+);
+
+router.put(
+  "/api/shipment-templates/:id",
+  isAuthenticated,
+  isStaff,
+  adminController.updateShipmentTemplate
+);
+
+router.delete(
+  "/api/shipment-templates/:id",
+  isAuthenticated,
+  isStaff,
+  adminController.deleteShipmentTemplate
+);
+
+// Shipment draft API route
+router.post(
+  "/api/shipments/draft",
+  isAuthenticated,
+  isStaff,
+  adminController.createShipmentDraft
+);
+
+// Enhanced shipment creation API
+router.post(
+  "/api/shipments",
+  isAuthenticated,
+  isStaff,
+  adminController.createShipment
+);
+
+// Newsletter API routes
+router.post(
+  "/api/newsletter/send",
+  isAuthenticated,
+  isAdmin,
+  adminController.sendNewsletter
+);
+
+// Notification API routes
+router.post(
+  "/api/notifications/broadcast",
+  isAuthenticated,
+  isAdmin,
+  adminController.broadcastNotification
+);
+
 // Setup route (for initial admin creation) - should be removed or secured in production
 if (process.env.NODE_ENV !== "production") {
   router.post("/setup", authController.createAdminUser);
