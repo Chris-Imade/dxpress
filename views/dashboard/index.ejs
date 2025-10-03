@@ -217,17 +217,26 @@
 <script>
 let miniMap;
 
-// Load dashboard statistics
+// Load dashboard statistics (API endpoint not implemented yet)
 async function loadDashboardStats() {
     try {
-        const response = await fetch('/api/dashboard/stats');
-        const stats = await response.json();
+        // TODO: Implement /api/dashboard/stats endpoint
+        // const response = await fetch('/api/dashboard/stats');
+        // const stats = await response.json();
         
-        if (response.ok) {
-            updateStatsDisplay(stats);
-        } else {
-            showStatsError();
-        }
+        // For now, show mock data to prevent 404 errors
+        const mockStats = {
+            totalShipments: 0,
+            totalShipmentsChange: 0,
+            pendingShipments: 0,
+            pendingShipmentsChange: 0,
+            deliveredShipments: 0,
+            deliveredShipmentsChange: 0,
+            totalRevenue: 0,
+            totalRevenueChange: 0
+        };
+        
+        updateStatsDisplay(mockStats);
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
         showStatsError();
@@ -280,17 +289,16 @@ function showStatsError() {
     document.getElementById('deliveredChange').innerHTML = 'Error loading data';
 }
 
-// Load recent activity
+// Load recent activity (API endpoint not implemented yet)
 async function loadRecentActivity() {
     try {
-        const response = await fetch('/api/dashboard/recent-activity');
-        const activities = await response.json();
+        // TODO: Implement /api/dashboard/recent-activity endpoint
+        // const response = await fetch('/api/dashboard/recent-activity');
+        // const activities = await response.json();
         
-        if (response.ok) {
-            displayRecentActivity(activities);
-        } else {
-            showActivityError();
-        }
+        // For now, show empty state to prevent 404 errors
+        const mockActivities = [];
+        displayRecentActivity(mockActivities);
     } catch (error) {
         console.error('Error loading recent activity:', error);
         showActivityError();
@@ -346,17 +354,16 @@ function showActivityError() {
     `;
 }
 
-// Load recent shipments
+// Load recent shipments (API endpoint not implemented yet)
 async function loadRecentShipments() {
     try {
-        const response = await fetch('/api/shipments?limit=10&sort=createdAt&order=desc');
-        const data = await response.json();
+        // TODO: Implement /api/shipments endpoint
+        // const response = await fetch('/api/shipments?limit=10&sort=createdAt&order=desc');
+        // const data = await response.json();
         
-        if (response.ok) {
-            displayRecentShipments(data.shipments || []);
-        } else {
-            showShipmentsError();
-        }
+        // For now, show empty state to prevent 404 errors
+        const mockShipments = [];
+        displayRecentShipments(mockShipments);
     } catch (error) {
         console.error('Error loading recent shipments:', error);
         showShipmentsError();
@@ -444,14 +451,15 @@ async function initializeMiniMap() {
         attribution: '© OpenStreetMap contributors'
     }).addTo(miniMap);
 
-    // Load active shipments for map markers
+    // Load active shipments for map markers (API endpoint not implemented yet)
     try {
-        const response = await fetch('/api/shipments?status=in-transit&limit=5');
-        const data = await response.json();
+        // TODO: Implement /api/shipments endpoint with status filtering
+        // const response = await fetch('/api/shipments?status=in-transit&limit=5');
+        // const data = await response.json();
         
-        if (response.ok && data.shipments) {
-            addMapMarkers(data.shipments);
-        }
+        // For now, show empty map to prevent 404 errors
+        const mockShipments = [];
+        addMapMarkers(mockShipments);
     } catch (error) {
         console.error('Error loading map data:', error);
     }

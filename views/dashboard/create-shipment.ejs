@@ -19,6 +19,65 @@
 
 <!-- Shipment Form -->
 <form id="shipmentForm" style="display: grid; gap: 24px;">
+    <!-- Provider Selection -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <div>
+                <div class="card-title">Shipping Provider</div>
+                <div class="card-subtitle">Choose your preferred shipping carrier</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <!-- FedEx - Active -->
+            <div class="provider-option active" onclick="selectProvider('fedex')" data-provider="fedex">
+                <input type="radio" name="shippingProvider" value="fedex" id="providerFedex" checked>
+                <div class="provider-content">
+                    <div class="provider-logo-img">
+                        <img src="/assets/images/providers-logo/FedEx-Logo.webp" alt="FedEx" class="provider-image">
+                    </div>
+                    <div class="provider-info">
+                        <div class="provider-name">FedEx</div>
+                        <div class="provider-status active">✓ Available</div>
+                        <div class="provider-features">Express • Ground • International</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DHL - Disabled -->
+            <div class="provider-option disabled" data-provider="dhl">
+                <input type="radio" name="shippingProvider" value="dhl" id="providerDhl" disabled>
+                <div class="provider-content">
+                    <div class="provider-logo-img">
+                        <img src="/assets/images/providers-logo/dhl-logo.jpg" alt="DHL" class="provider-image">
+                    </div>
+                    <div class="provider-info">
+                        <div class="provider-name">DHL</div>
+                        <div class="provider-status disabled">⚠ Coming Soon</div>
+                        <div class="provider-features">Express • International</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- UPS - Disabled -->
+            <div class="provider-option disabled" data-provider="ups">
+                <input type="radio" name="shippingProvider" value="ups" id="providerUps" disabled>
+                <div class="provider-content">
+                    <div class="provider-logo-img">
+                        <img src="/assets/images/providers-logo/ups-logo.webp" alt="UPS" class="provider-image">
+                    </div>
+                    <div class="provider-info">
+                        <div class="provider-name">UPS</div>
+                        <div class="provider-status disabled">⚠ Coming Soon</div>
+                        <div class="provider-features">Ground • Air • International</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sender Information -->
     <div class="dashboard-card">
         <div class="card-header">
@@ -118,34 +177,44 @@
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Email</label>
                 <input type="email" id="recipientEmail" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;">
             </div>
-            <div style="grid-column: 1 / -1;">
+            <div style="grid-column: 1 / -1; position: relative;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Street Address *</label>
-                <input type="text" id="recipientAddress" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
+                <input type="text" id="recipientAddress" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required autocomplete="off">
+                <div id="addressSuggestions" class="address-suggestions" style="display: none;"></div>
             </div>
             <div>
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">City *</label>
                 <input type="text" id="recipientCity" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
             </div>
             <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">State/Province</label>
+                <input type="text" id="recipientState" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" placeholder="e.g. CA, NY, TX">
+            </div>
+            <div>
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Postal Code *</label>
                 <input type="text" id="recipientPostalCode" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
             </div>
-            <div>
+            <div style="position: relative;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Country *</label>
-                <select id="recipientCountry" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" required>
-                    <option value="">Select Country</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Germany">Germany</option>
-                    <option value="France">France</option>
-                    <option value="Italy">Italy</option>
-                    <option value="Spain">Spain</option>
-                    <option value="Netherlands">Netherlands</option>
-                    <option value="Belgium">Belgium</option>
-                    <option value="Canada">Canada</option>
-                    <option value="Australia">Australia</option>
-                </select>
+                <input type="text" id="recipientCountryInput" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px;" placeholder="Search countries..." autocomplete="off">
+                <input type="hidden" id="recipientCountry" required>
+                <div id="countrySuggestions" class="country-suggestions" style="display: none;"></div>
             </div>
+        </div>
+        
+        <!-- Address Verification Section -->
+        <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 10px; border-left: 4px solid #3b82f6;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">Address Verification</div>
+                    <div style="font-size: 14px; color: #6b7280;">Verify recipient address with FedEx to ensure accurate delivery</div>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="verifyRecipientAddress()" id="verifyAddressBtn">
+                    <i class="fas fa-check-circle"></i>
+                    Verify Info
+                </button>
+            </div>
+            <div id="addressVerificationResult" style="margin-top: 12px; display: none;"></div>
         </div>
     </div>
 
@@ -206,8 +275,8 @@
                 <i class="fas fa-shipping-fast"></i>
             </div>
             <div>
-                <div class="card-title">Shipping Options</div>
-                <div class="card-subtitle">Choose your preferred shipping method</div>
+                <div class="card-title">FedEx Shipping Options</div>
+                <div class="card-subtitle">Real-time rates from FedEx API</div>
             </div>
             <div style="margin-left: auto;">
                 <button type="button" class="btn btn-secondary" onclick="calculateRates()">
@@ -366,6 +435,255 @@ input:checked + .slider:before {
     color: #374151;
     font-size: 12px;
 }
+
+/* Provider Selection Styles */
+.provider-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.provider-option.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.provider-option.active:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.provider-option.disabled {
+    border-color: #e5e7eb;
+    background: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.provider-option input[type="radio"] {
+    display: none;
+}
+
+.provider-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.provider-logo-img {
+    width: 80px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 8px;
+    overflow: hidden;
+}
+
+.provider-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: brightness(1);
+    transition: all 0.3s ease;
+}
+
+.provider-option.disabled .provider-image {
+    filter: grayscale(100%) opacity(0.5);
+}
+
+.provider-option.active .provider-logo-img {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Legacy support for icon-based logos in rate display */
+.provider-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+}
+
+.fedex-logo {
+    background: linear-gradient(135deg, #4c1d95, #7c3aed);
+}
+
+.dhl-logo {
+    background: linear-gradient(135deg, #dc2626, #f59e0b);
+}
+
+.ups-logo {
+    background: linear-gradient(135deg, #92400e, #d97706);
+}
+
+.provider-info {
+    flex: 1;
+}
+
+.provider-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.provider-status.active {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.provider-status.disabled {
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.provider-features {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* Address Suggestions Dropdown */
+.address-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #f8fafc;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-address {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.suggestion-details {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.suggestion-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.suggestion-badge.business {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.suggestion-badge.residential {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.suggestion-loading {
+    padding: 12px 16px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.suggestion-empty {
+    padding: 12px 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Country Suggestions Dropdown */
+.country-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.country-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.country-item:hover {
+    background-color: #f8fafc;
+}
+
+.country-item:last-child {
+    border-bottom: none;
+}
+
+.country-flag {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.country-name {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.country-code {
+    font-size: 12px;
+    color: #6b7280;
+    margin-left: auto;
+}
 </style>
 
 <script>
@@ -374,6 +692,36 @@ input:checked + .slider:before {
 </script>
 
 <script>
+/**
+ * Format currency with proper thousand separators and decimal places
+ */
+function formatCurrency(amount) {
+    if (typeof amount !== 'number') {
+        amount = parseFloat(amount) || 0;
+    }
+    
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+}
+
+/**
+ * Format currency for display with currency symbol
+ */
+function formatPrice(amount, currency = 'USD') {
+    if (typeof amount !== 'number') {
+        amount = parseFloat(amount) || 0;
+    }
+    
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Pre-fill from URL parameters if coming from rates page
     const urlParams = new URLSearchParams(window.location.search);
@@ -387,12 +735,528 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('packageWeight').value = urlParams.get('weight');
     }
     
+    // Initialize address autocomplete
+    initializeAddressAutocomplete();
+    
+    // Initialize country autocomplete
+    initializeCountryAutocomplete();
+    
     // Form submission
     document.getElementById('shipmentForm').addEventListener('submit', function(e) {
         e.preventDefault();
         createShipment();
     });
 });
+
+// Country Data with flags and codes
+const countries = [
+    { name: 'United States', code: 'US', flag: '🇺🇸' },
+    { name: 'United Kingdom', code: 'GB', flag: '🇬🇧' },
+    { name: 'Canada', code: 'CA', flag: '🇨🇦' },
+    { name: 'Australia', code: 'AU', flag: '🇦🇺' },
+    { name: 'Germany', code: 'DE', flag: '🇩🇪' },
+    { name: 'France', code: 'FR', flag: '🇫🇷' },
+    { name: 'Italy', code: 'IT', flag: '🇮🇹' },
+    { name: 'Spain', code: 'ES', flag: '🇪🇸' },
+    { name: 'Netherlands', code: 'NL', flag: '🇳🇱' },
+    { name: 'Belgium', code: 'BE', flag: '🇧🇪' },
+    { name: 'Switzerland', code: 'CH', flag: '🇨🇭' },
+    { name: 'Austria', code: 'AT', flag: '🇦🇹' },
+    { name: 'Sweden', code: 'SE', flag: '🇸🇪' },
+    { name: 'Norway', code: 'NO', flag: '🇳🇴' },
+    { name: 'Denmark', code: 'DK', flag: '🇩🇰' },
+    { name: 'Finland', code: 'FI', flag: '🇫🇮' },
+    { name: 'Poland', code: 'PL', flag: '🇵🇱' },
+    { name: 'Czech Republic', code: 'CZ', flag: '🇨🇿' },
+    { name: 'Hungary', code: 'HU', flag: '🇭🇺' },
+    { name: 'Portugal', code: 'PT', flag: '🇵🇹' },
+    { name: 'Greece', code: 'GR', flag: '🇬🇷' },
+    { name: 'Ireland', code: 'IE', flag: '🇮🇪' },
+    { name: 'Luxembourg', code: 'LU', flag: '🇱🇺' },
+    { name: 'Japan', code: 'JP', flag: '🇯🇵' },
+    { name: 'South Korea', code: 'KR', flag: '🇰🇷' },
+    { name: 'China', code: 'CN', flag: '🇨🇳' },
+    { name: 'India', code: 'IN', flag: '🇮🇳' },
+    { name: 'Brazil', code: 'BR', flag: '🇧🇷' },
+    { name: 'Mexico', code: 'MX', flag: '🇲🇽' },
+    { name: 'Argentina', code: 'AR', flag: '🇦🇷' },
+    { name: 'Chile', code: 'CL', flag: '🇨🇱' },
+    { name: 'Colombia', code: 'CO', flag: '🇨🇴' },
+    { name: 'Peru', code: 'PE', flag: '🇵🇪' },
+    { name: 'South Africa', code: 'ZA', flag: '🇿🇦' },
+    { name: 'Egypt', code: 'EG', flag: '🇪🇬' },
+    { name: 'Israel', code: 'IL', flag: '🇮🇱' },
+    { name: 'Turkey', code: 'TR', flag: '🇹🇷' },
+    { name: 'Russia', code: 'RU', flag: '🇷🇺' },
+    { name: 'Ukraine', code: 'UA', flag: '🇺🇦' },
+    { name: 'Singapore', code: 'SG', flag: '🇸🇬' },
+    { name: 'Malaysia', code: 'MY', flag: '🇲🇾' },
+    { name: 'Thailand', code: 'TH', flag: '🇹🇭' },
+    { name: 'Philippines', code: 'PH', flag: '🇵🇭' },
+    { name: 'Indonesia', code: 'ID', flag: '🇮🇩' },
+    { name: 'Vietnam', code: 'VN', flag: '🇻🇳' },
+    { name: 'New Zealand', code: 'NZ', flag: '🇳🇿' }
+];
+
+// Country Autocomplete Functionality
+let countryTimeout;
+let currentCountryQuery = '';
+
+function initializeCountryAutocomplete() {
+    const countryInput = document.getElementById('recipientCountryInput');
+    const countrySuggestions = document.getElementById('countrySuggestions');
+    const hiddenCountryInput = document.getElementById('recipientCountry');
+    
+    // Set default country
+    countryInput.value = 'United States';
+    hiddenCountryInput.value = 'US';
+    
+    countryInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim().toLowerCase();
+        currentCountryQuery = query;
+        
+        if (countryTimeout) {
+            clearTimeout(countryTimeout);
+        }
+        
+        if (query.length === 0) {
+            hideCountrySuggestions();
+            hiddenCountryInput.value = '';
+            return;
+        }
+        
+        countryTimeout = setTimeout(() => {
+            showCountrySuggestions(query);
+        }, 150);
+    });
+    
+    countryInput.addEventListener('focus', function() {
+        if (currentCountryQuery) {
+            showCountrySuggestions(currentCountryQuery);
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!countryInput.contains(e.target) && !countrySuggestions.contains(e.target)) {
+            hideCountrySuggestions();
+        }
+    });
+}
+
+function showCountrySuggestions(query) {
+    const countrySuggestions = document.getElementById('countrySuggestions');
+    
+    const filteredCountries = countries.filter(country => 
+        country.name.toLowerCase().includes(query) || 
+        country.code.toLowerCase().includes(query)
+    ).slice(0, 8); // Limit to 8 results
+    
+    if (filteredCountries.length === 0) {
+        countrySuggestions.innerHTML = '<div class="suggestion-empty">No countries found</div>';
+    } else {
+        const suggestionsHTML = filteredCountries.map((country, index) => `
+            <div class="country-item" onclick="selectCountry('${country.code}', '${country.name}')">
+                <span class="country-flag">${country.flag}</span>
+                <span class="country-name">${country.name}</span>
+                <span class="country-code">${country.code}</span>
+            </div>
+        `).join('');
+        
+        countrySuggestions.innerHTML = suggestionsHTML;
+    }
+    
+    countrySuggestions.style.display = 'block';
+}
+
+function selectCountry(code, name) {
+    document.getElementById('recipientCountryInput').value = name;
+    document.getElementById('recipientCountry').value = code;
+    hideCountrySuggestions();
+}
+
+function hideCountrySuggestions() {
+    document.getElementById('countrySuggestions').style.display = 'none';
+}
+
+// Address Autocomplete Functionality
+let addressSuggestionTimeout;
+let currentSuggestions = [];
+
+function initializeAddressAutocomplete() {
+    const addressInput = document.getElementById('recipientAddress');
+    const suggestionsDiv = document.getElementById('addressSuggestions');
+    
+    // Handle input events
+    addressInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        
+        // Clear previous timeout
+        if (addressSuggestionTimeout) {
+            clearTimeout(addressSuggestionTimeout);
+        }
+        
+        // Hide suggestions if query is too short
+        if (query.length < 3) {
+            hideSuggestions();
+            return;
+        }
+        
+        // Show loading state
+        showLoadingSuggestions();
+        
+        // Debounce API calls
+        addressSuggestionTimeout = setTimeout(() => {
+            fetchAddressSuggestions(query);
+        }, 300);
+    });
+    
+    // Handle focus events
+    addressInput.addEventListener('focus', function() {
+        if (currentSuggestions.length > 0) {
+            suggestionsDiv.style.display = 'block';
+        }
+    });
+    
+    // Handle click outside to hide suggestions
+    document.addEventListener('click', function(e) {
+        if (!addressInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+    
+    // Handle keyboard navigation
+    addressInput.addEventListener('keydown', function(e) {
+        const suggestions = suggestionsDiv.querySelectorAll('.suggestion-item');
+        const currentActive = suggestionsDiv.querySelector('.suggestion-item.active');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentActive) {
+                currentActive.classList.remove('active');
+                const next = currentActive.nextElementSibling;
+                if (next) {
+                    next.classList.add('active');
+                } else {
+                    suggestions[0]?.classList.add('active');
+                }
+            } else {
+                suggestions[0]?.classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentActive) {
+                currentActive.classList.remove('active');
+                const prev = currentActive.previousElementSibling;
+                if (prev) {
+                    prev.classList.add('active');
+                } else {
+                    suggestions[suggestions.length - 1]?.classList.add('active');
+                }
+            } else {
+                suggestions[suggestions.length - 1]?.classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            if (currentActive) {
+                e.preventDefault();
+                selectSuggestion(currentActive.dataset.index);
+            }
+        } else if (e.key === 'Escape') {
+            hideSuggestions();
+        }
+    });
+}
+
+async function fetchAddressSuggestions(query) {
+    try {
+        // Get country code from hidden input (more reliable)
+        const countryCode = document.getElementById('recipientCountry').value || 'US';
+        console.log('📍 [DEBUG] Fetching suggestions for:', query, 'in country:', countryCode);
+        
+        const response = await fetch(`/api/shipments/address-suggestions?query=${encodeURIComponent(query)}&country=${countryCode}`);
+        const data = await response.json();
+        
+        console.log('📍 [DEBUG] API response:', data);
+        
+        if (data.success) {
+            currentSuggestions = data.suggestions || [];
+            displaySuggestions(currentSuggestions);
+        } else {
+            showEmptySuggestions();
+        }
+    } catch (error) {
+        console.error('Error fetching address suggestions:', error);
+        showEmptySuggestions();
+    }
+}
+
+function displaySuggestions(suggestions) {
+    const suggestionsDiv = document.getElementById('addressSuggestions');
+    
+    if (suggestions.length === 0) {
+        showEmptySuggestions();
+        return;
+    }
+    
+    const suggestionsHTML = suggestions.map((suggestion, index) => {
+        const badgeClass = suggestion.classification === 'BUSINESS' ? 'business' : 
+                          suggestion.classification === 'RESIDENTIAL' ? 'residential' : '';
+        const badge = suggestion.classification !== 'UNKNOWN' ? 
+            `<span class="suggestion-badge ${badgeClass}">${suggestion.classification}</span>` : '';
+        
+        return `
+            <div class="suggestion-item" data-index="${index}" onclick="selectSuggestion(${index})">
+                <div class="suggestion-address">
+                    ${suggestion.address}${badge}
+                </div>
+                <div class="suggestion-details">
+                    ${suggestion.city}, ${suggestion.state} ${suggestion.postalCode}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    suggestionsDiv.innerHTML = suggestionsHTML;
+    suggestionsDiv.style.display = 'block';
+}
+
+function selectSuggestion(index) {
+    const suggestion = currentSuggestions[index];
+    if (!suggestion) return;
+    
+    console.log('📍 [DEBUG] Selecting suggestion:', suggestion);
+    
+    // Fill in the form fields
+    if (suggestion.address) {
+        document.getElementById('recipientAddress').value = suggestion.address;
+        console.log('✅ Filled address:', suggestion.address);
+    }
+    if (suggestion.city) {
+        document.getElementById('recipientCity').value = suggestion.city;
+        console.log('✅ Filled city:', suggestion.city);
+    }
+    if (suggestion.state) {
+        document.getElementById('recipientState').value = suggestion.state;
+        console.log('✅ Filled state:', suggestion.state);
+    }
+    if (suggestion.postalCode) {
+        document.getElementById('recipientPostalCode').value = suggestion.postalCode;
+        console.log('✅ Filled postal code:', suggestion.postalCode);
+    }
+    
+    // Handle country selection - but don't override user's country choice with wrong FedEx data
+    if (suggestion.country && suggestion.country !== 'CL') {
+        const countryCode = suggestion.country;
+        const country = countries.find(c => c.code === countryCode || c.name === countryCode);
+        
+        if (country) {
+            document.getElementById('recipientCountryInput').value = country.name;
+            document.getElementById('recipientCountry').value = country.code;
+            console.log('✅ Filled country:', country.name, '(' + country.code + ')');
+        }
+    } else {
+        console.log('⚠️ Skipping country auto-fill - wrong country code:', suggestion.country);
+    }
+    
+    // Hide suggestions
+    hideSuggestions();
+    
+    // Show success message with details
+    const filledFields = [];
+    if (suggestion.address) filledFields.push('address');
+    if (suggestion.city) filledFields.push('city');
+    if (suggestion.state) filledFields.push('state');
+    if (suggestion.postalCode) filledFields.push('postal code');
+    if (suggestion.country && suggestion.country !== 'CL') filledFields.push('country');
+    
+    if (filledFields.length > 0) {
+        showNotification(`Auto-filled: ${filledFields.join(', ')} from FedEx!`, 'success');
+    } else {
+        showNotification('Address suggestion selected', 'info');
+    }
+}
+
+function showLoadingSuggestions() {
+    const suggestionsDiv = document.getElementById('addressSuggestions');
+    suggestionsDiv.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching addresses...</div>';
+    suggestionsDiv.style.display = 'block';
+}
+
+function showEmptySuggestions() {
+    const suggestionsDiv = document.getElementById('addressSuggestions');
+    suggestionsDiv.innerHTML = '<div class="suggestion-empty">No address suggestions found</div>';
+    suggestionsDiv.style.display = 'block';
+    
+    // Hide after 2 seconds
+    setTimeout(() => {
+        hideSuggestions();
+    }, 2000);
+}
+
+function hideSuggestions() {
+    const suggestionsDiv = document.getElementById('addressSuggestions');
+    suggestionsDiv.style.display = 'none';
+    currentSuggestions = [];
+}
+
+// Provider Selection
+function selectProvider(provider) {
+    // Remove active class from all providers
+    document.querySelectorAll('.provider-option').forEach(option => {
+        option.classList.remove('active');
+    });
+    
+    // Add active class to selected provider (only if not disabled)
+    const selectedOption = document.querySelector(`[data-provider="${provider}"]`);
+    if (!selectedOption.classList.contains('disabled')) {
+        selectedOption.classList.add('active');
+        document.getElementById(`provider${provider.charAt(0).toUpperCase() + provider.slice(1)}`).checked = true;
+        
+        // Update UI based on selected provider
+        updateUIForProvider(provider);
+    }
+}
+
+function updateUIForProvider(provider) {
+    const shippingTitle = document.querySelector('.card-title');
+    const shippingSubtitle = document.querySelector('.card-subtitle');
+    
+    if (provider === 'fedex') {
+        shippingTitle.textContent = 'FedEx Shipping Options';
+        shippingSubtitle.textContent = 'Real-time rates from FedEx API';
+    } else if (provider === 'dhl') {
+        shippingTitle.textContent = 'DHL Shipping Options';
+        shippingSubtitle.textContent = 'Coming soon - DHL integration';
+    } else if (provider === 'ups') {
+        shippingTitle.textContent = 'UPS Shipping Options';
+        shippingSubtitle.textContent = 'Coming soon - UPS integration';
+    }
+}
+
+// Address Verification
+async function verifyRecipientAddress() {
+    const btn = document.getElementById('verifyAddressBtn');
+    const resultDiv = document.getElementById('addressVerificationResult');
+    
+    // Get recipient address data
+    const countryInput = document.getElementById('recipientCountryInput');
+    const countryHidden = document.getElementById('recipientCountry');
+    
+    console.log('🔍 [DEBUG] Country field values:');
+    console.log('  - Country Input (visible):', countryInput?.value);
+    console.log('  - Country Hidden (code):', countryHidden?.value);
+    
+    const address = {
+        address: document.getElementById('recipientAddress').value,
+        city: document.getElementById('recipientCity').value,
+        state: document.getElementById('recipientState')?.value || '',
+        postalCode: document.getElementById('recipientPostalCode').value,
+        country: countryHidden?.value || 'US'  // Use country code from hidden field, fallback to US
+    };
+    
+    console.log('🔍 [DEBUG] Final address being verified:', address);
+    
+    // Validate required fields
+    if (!address.address || !address.city || !address.postalCode || !address.country) {
+        showNotification('Please fill in all recipient address fields before verification', 'warning');
+        return;
+    }
+    
+    // Show loading state
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/shipments/validate-address', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ address })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.validation) {
+            const validation = data.validation;
+            
+            // Update form fields with validated address
+            if (validation.formattedAddress) {
+                document.getElementById('recipientAddress').value = validation.formattedAddress.address;
+                document.getElementById('recipientCity').value = validation.formattedAddress.city;
+                document.getElementById('recipientPostalCode').value = validation.formattedAddress.postalCode;
+                if (validation.formattedAddress.country) {
+                    document.getElementById('recipientCountry').value = validation.formattedAddress.country;
+                }
+            }
+            
+            // Show verification result - be more accurate about validation status
+            const isActuallyValid = validation.isValid && validation.confidence !== 'NOT_VALIDATED' && validation.classification !== 'UNKNOWN';
+            const isPartiallyValid = validation.isValid && (validation.confidence === 'NOT_VALIDATED' || validation.classification === 'UNKNOWN');
+            
+            let bgColor, iconColor, icon, title, notificationType, notificationMessage;
+            
+            if (isActuallyValid) {
+                bgColor = '#dcfce7';
+                iconColor = '#10b981';
+                icon = 'fa-check-circle';
+                title = 'Address Verified ✓';
+                notificationType = 'success';
+                notificationMessage = 'Address verified successfully with FedEx!';
+            } else if (isPartiallyValid) {
+                bgColor = '#fef3c7';
+                iconColor = '#f59e0b';
+                icon = 'fa-exclamation-triangle';
+                title = 'Address Validation Incomplete ⚠';
+                notificationType = 'warning';
+                notificationMessage = 'Address could not be fully validated with FedEx';
+            } else {
+                bgColor = '#fee2e2';
+                iconColor = '#ef4444';
+                icon = 'fa-times-circle';
+                title = 'Address Validation Failed ✗';
+                notificationType = 'error';
+                notificationMessage = 'Address validation failed - please check the address';
+            }
+            
+            resultDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: ${bgColor}; border-radius: 8px;">
+                    <i class="fas ${icon}" style="color: ${iconColor};"></i>
+                    <div>
+                        <div style="font-weight: 600; color: #374151;">
+                            ${title}
+                        </div>
+                        <div style="font-size: 12px; color: #6b7280;">
+                            Classification: ${validation.classification} | Confidence: ${validation.confidence}
+                        </div>
+                        ${!isActuallyValid ? '<div style="font-size: 11px; color: #6b7280; margin-top: 4px;">You can still proceed, but delivery may be delayed</div>' : ''}
+                    </div>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+            
+            showNotification(notificationMessage, notificationType);
+        } else {
+            throw new Error(data.message || 'Address verification failed');
+        }
+    } catch (error) {
+        console.error('Address verification error:', error);
+        resultDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #fee2e2; border-radius: 8px;">
+                <i class="fas fa-times-circle" style="color: #ef4444;"></i>
+                <div>
+                    <div style="font-weight: 600; color: #374151;">Verification Failed</div>
+                    <div style="font-size: 12px; color: #6b7280;">${error.message}</div>
+                </div>
+            </div>
+        `;
+        resultDiv.style.display = 'block';
+        showNotification('Address verification failed. Please check the address manually.', 'error');
+    } finally {
+        // Reset button
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Verify Info';
+        btn.disabled = false;
+    }
+}
 
 function toggleProfileData() {
     const useProfile = document.getElementById('useProfile').checked;
@@ -473,12 +1337,20 @@ function loadFromAddressBook() {
 }
 
 async function calculateRates() {
+    // Check if FedEx is selected
+    const selectedProvider = document.querySelector('input[name="shippingProvider"]:checked');
+    if (!selectedProvider || selectedProvider.value !== 'fedex') {
+        showNotification('Please select FedEx as your shipping provider', 'warning');
+        return;
+    }
+    
     const weight = document.getElementById('packageWeight').value;
     const length = document.getElementById('packageLength').value;
     const width = document.getElementById('packageWidth').value;
     const height = document.getElementById('packageHeight').value;
     const packageType = document.getElementById('packageType').value;
     const packageValue = document.getElementById('packageValue').value;
+    
     // Collect structured address data
     const senderAddress = document.getElementById('senderAddress').value;
     const senderCity = document.getElementById('senderCity').value;
@@ -498,52 +1370,162 @@ async function calculateRates() {
     
     // Show loading
     const optionsContainer = document.getElementById('shippingOptions');
-    optionsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Fetching real-time shipping rates...</p></div>';
+    optionsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading-spinner"></div><p style="margin-top: 16px; color: #6b7280;">Fetching real-time FedEx rates...</p></div>';
     
     try {
-        // Build query parameters for API call with structured addresses
-        const params = new URLSearchParams({
-            'origin.address': senderAddress,
-            'origin.city': senderCity,
-            'origin.postalCode': senderPostalCode,
-            'origin.country': senderCountry,
-            'destination.address': recipientAddress,
-            'destination.city': recipientCity,
-            'destination.postalCode': recipientPostalCode,
-            'destination.country': recipientCountry,
-            weight: weight,
-            length: length,
-            width: width,
-            height: height,
-            packageType: packageType,
-            declaredValue: packageValue || '100'
+        // Get state fields
+        const senderState = document.getElementById('senderState')?.value || '';
+        const recipientState = document.getElementById('recipientState')?.value || '';
+        
+        // Build request body for FedEx API
+        const requestBody = {
+            origin: {
+                address: senderAddress,
+                city: senderCity,
+                state: senderState,
+                postalCode: senderPostalCode,
+                country: senderCountry
+            },
+            destination: {
+                address: recipientAddress,
+                city: recipientCity,
+                state: recipientState,
+                postalCode: recipientPostalCode,
+                country: recipientCountry
+            },
+            weight: parseFloat(weight),
+            dimensions: {
+                length: parseFloat(length),
+                width: parseFloat(width),
+                height: parseFloat(height)
+            }
+        };
+
+        console.log('📦 [DEBUG] Fetching FedEx rates with data:', requestBody);
+
+        // Call the new FedEx API endpoint
+        console.log('📦 [DEBUG] Sending request to /api/shipments/rates:', requestBody);
+        
+        const response = await fetch('/api/shipments/rates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
-
-        console.log('📦 [DEBUG] Fetching dashboard rates with params:', params.toString());
-
-        // Call the API endpoint
-        const response = await fetch(`/dashboard/api/rates?${params}`);
+        
+        console.log('📦 [DEBUG] Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('📦 [DEBUG] Response error:', errorText);
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
         const data = await response.json();
+        console.log('📦 [DEBUG] Response data:', data);
 
         if (!data.success) {
-            throw new Error(data.message || 'Failed to calculate rates');
+            throw new Error(data.message || 'Failed to calculate FedEx rates');
         }
 
-        // Display the real-time rates
-        displayRealTimeShippingOptions(data.rates);
+        // Display the real-time FedEx rates
+        displayFedExShippingOptions(data.rates);
 
     } catch (error) {
         console.error('💥 [DEBUG] Rate calculation error:', error);
+        console.error('💥 [DEBUG] Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        
+        // Show more detailed error message
+        const errorMessage = error.message || 'Unknown error occurred';
         optionsContainer.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #ef4444;">
                 <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                <p>Failed to calculate shipping rates. Please try again.</p>
+                <p>Failed to calculate shipping rates</p>
+                <p style="font-size: 14px; color: #6b7280; margin: 8px 0;">${errorMessage}</p>
                 <button class="btn btn-secondary" onclick="calculateRates()" style="margin-top: 16px;">
                     <i class="fas fa-redo"></i> Retry
                 </button>
             </div>
         `;
     }
+}
+
+function displayFedExShippingOptions(rates) {
+    const optionsContainer = document.getElementById('shippingOptions');
+    
+    if (!rates || rates.length === 0) {
+        optionsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>No FedEx rates available for this route.</p>
+                <p style="font-size: 14px; margin-top: 8px;">Please verify your addresses and try again.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    optionsContainer.innerHTML = rates.map((rate, index) => {
+        // Determine icon based on service type
+        let serviceIcon = '<i class="fas fa-plane"></i>'; // Default FedEx icon
+        if (rate.serviceLevel && rate.serviceLevel.toLowerCase().includes('ground')) {
+            serviceIcon = '<i class="fas fa-truck"></i>';
+        } else if (rate.serviceLevel && rate.serviceLevel.toLowerCase().includes('overnight')) {
+            serviceIcon = '<i class="fas fa-rocket"></i>';
+        } else if (rate.serviceLevel && rate.serviceLevel.toLowerCase().includes('express')) {
+            serviceIcon = '<i class="fas fa-shipping-fast"></i>';
+        }
+
+        return `
+            <div class="shipping-option" onclick="selectShippingOption(${index})">
+                <input type="radio" name="shippingOption" value="${index}" id="option${index}">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="provider-logo-img" style="width: 60px; height: 40px;">
+                            <img src="/assets/images/providers-logo/FedEx-Logo.webp" alt="FedEx" class="provider-image">
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #032330; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                ${rate.serviceLevel || rate.serviceType}
+                                <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px;">
+                                    <i class="fas fa-wifi"></i> LIVE API
+                                </span>
+                            </div>
+                            <div style="color: #6b7280; font-size: 14px;">
+                                Delivery: ${rate.estimatedDays} ${rate.estimatedDelivery ? '• ' + new Date(rate.estimatedDelivery).toLocaleDateString() : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 24px; font-weight: 700; color: #10b981;">
+                            ${rate.currency || 'USD'} $${formatCurrency(rate.cost)}
+                        </div>
+                        <div style="font-size: 12px; color: #10b981;">Real-time FedEx rate</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; display: flex; flex-wrap: gap: 8px;">
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Address Validated</span>
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Real-time Tracking</span>
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 11px;">✓ Insurance Available</span>
+                    ${rate.originValidation && rate.originValidation.classification ? 
+                        `<span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 12px; font-size: 11px;">Origin: ${rate.originValidation.classification}</span>` : ''
+                    }
+                    ${rate.destValidation && rate.destValidation.classification ? 
+                        `<span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 12px; font-size: 11px;">Dest: ${rate.destValidation.classification}</span>` : ''
+                    }
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Store rate data for form submission
+    window.availableRates = rates;
+    
+    showNotification(`Found ${rates.length} FedEx shipping options!`, 'success');
 }
 
 function displayRealTimeShippingOptions(rates) {
@@ -878,12 +1860,19 @@ function createShipment() {
     const selectedIndex = parseInt(selectedOption.value);
     const selectedRate = window.availableRates ? window.availableRates[selectedIndex] : null;
     
+    console.log('🔍 [DEBUG] Rate selection:', {
+        selectedIndex: selectedIndex,
+        availableRates: window.availableRates,
+        selectedRate: selectedRate,
+        selectedRateProperties: selectedRate ? Object.keys(selectedRate) : null
+    });
+    
     if (selectedRate) {
         formData.selectedCarrier = selectedRate.carrier;
-        formData.selectedService = selectedRate.service;
-        // Use totalRate (includes admin fees) instead of baseRate
-        formData.shippingCost = parseFloat(selectedRate.totalRate || selectedRate.baseRate).toFixed(2);
-        formData.serviceCode = selectedRate.serviceCode;
+        formData.selectedService = selectedRate.serviceLevel || selectedRate.service;
+        // Use FedEx cost or fallback to other rate properties
+        formData.shippingCost = parseFloat(selectedRate.cost || selectedRate.totalRate || selectedRate.baseRate).toFixed(2);
+        formData.serviceCode = selectedRate.serviceType || selectedRate.serviceCode;
     } else {
         formData.selectedCarrier = 'DHL Express';
         formData.selectedService = 'Express Worldwide';
@@ -956,15 +1945,41 @@ function showPaymentModal(formData, selectedRate) {
         animation: slideIn 0.3s ease;
     `;
     
-    const shippingCost = selectedRate ? parseFloat(selectedRate.totalRate || selectedRate.baseRate).toFixed(2) : parseFloat(formData.shippingCost).toFixed(2);
-    const serviceName = selectedRate ? selectedRate.service : formData.selectedService;
+    // Extract shipping cost with multiple fallbacks
+    let shippingCost;
+    if (selectedRate) {
+        // Try different rate properties that might exist
+        shippingCost = selectedRate.totalRate || selectedRate.baseRate || selectedRate.cost || selectedRate.price || selectedRate.amount;
+        console.log('📦 [DEBUG] Selected rate object:', selectedRate);
+        console.log('📦 [DEBUG] Available rate properties:', Object.keys(selectedRate));
+    } else {
+        shippingCost = formData.shippingCost;
+    }
+    
+    // Ensure we have a valid number
+    const parsedCost = parseFloat(shippingCost);
+    if (isNaN(parsedCost) || parsedCost <= 0) {
+        console.error('❌ [ERROR] Invalid shipping cost:', shippingCost);
+        showNotification('Invalid shipping cost. Please recalculate rates.', 'error');
+        return;
+    }
+    
+    const finalShippingCost = parsedCost.toFixed(2);
+    const serviceName = selectedRate ? (selectedRate.service || selectedRate.serviceLevel) : formData.selectedService;
     const carrierName = selectedRate ? selectedRate.carrier : formData.selectedCarrier;
     
     // Store payment amount globally for easy access
-    window.currentPaymentAmount = parseFloat(shippingCost);
+    window.currentPaymentAmount = parsedCost;
     
-    console.log('Payment modal - shipping cost:', shippingCost, typeof shippingCost);
-    console.log('Payment modal - stored amount:', window.currentPaymentAmount, typeof window.currentPaymentAmount);
+    console.log('💰 [DEBUG] Payment modal data:', {
+        selectedRate: selectedRate,
+        rawShippingCost: shippingCost,
+        parsedCost: parsedCost,
+        finalShippingCost: finalShippingCost,
+        storedAmount: window.currentPaymentAmount,
+        serviceName: serviceName,
+        carrierName: carrierName
+    });
     
     modalContent.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
@@ -995,7 +2010,7 @@ function showPaymentModal(formData, selectedRate) {
                 <hr style="margin: 12px 0; border: none; border-top: 1px solid #e5e7eb;">
                 <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; color: #032330;">
                     <span>Total:</span>
-                    <span>£${shippingCost}</span>
+                    <span>£${finalShippingCost}</span>
                 </div>
             </div>
         </div>
@@ -1165,7 +2180,7 @@ async function processPayment(method) {
                 </div>
                 
                 <div style="margin-bottom: 20px;">
-                    <p style="margin: 0; color: #374151;">Amount: <strong>£${window.currentPaymentAmount.toFixed(2)}</strong></p>
+                    <p style="margin: 0; color: #374151;">Amount: <strong>${formatPrice(window.currentPaymentAmount, 'USD')}</strong></p>
                 </div>
                 
                 <div id="stripe-payment-element" style="margin-bottom: 20px;"></div>
@@ -1209,7 +2224,7 @@ async function processPayment(method) {
                         const submitBtn = document.getElementById('stripe-submit-btn');
                         submitBtn.disabled = false;
                         submitBtn.style.opacity = '1';
-                        submitBtn.innerHTML = `Pay £${window.currentPaymentAmount.toFixed(2)}`;
+                        submitBtn.innerHTML = `Pay ${formatPrice(window.currentPaymentAmount, 'USD')}`;
                     });
                     
                     paymentElement.on('change', (event) => {
@@ -1304,7 +2319,7 @@ async function processPayment(method) {
                         </div>
                     `;
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = `Pay £${window.currentPaymentAmount.toFixed(2)}`;
+                    submitBtn.innerHTML = `Pay ${formatPrice(window.currentPaymentAmount, 'USD')}`;
                 }
             });
             

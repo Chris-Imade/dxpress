@@ -62,6 +62,16 @@ const shipmentSchema = new mongoose.Schema(
     carrier: {
       type: String,
       required: true,
+      enum: ["FedEx", "DHL", "UPS", "Other"],
+      default: "FedEx"
+    },
+    carrierService: {
+      type: String,
+      required: true,
+    },
+    carrierTrackingNumber: {
+      type: String,
+      // This will store the carrier's actual tracking number if different from our internal one
     },
     service: {
       type: String,

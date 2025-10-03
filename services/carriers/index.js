@@ -4,32 +4,42 @@ const UPSService = require("./ups");
 
 class CarrierServiceManager {
   constructor() {
-    // Initialize carriers only if API keys are available
+    // Initialize carriers - FedEx is now the primary carrier
     this.carriers = {};
 
-    if (process.env.DHL_API_KEY && process.env.DHL_API_SECRET) {
-      this.carriers.dhl = new DHLService(
-        process.env.DHL_API_KEY,
-        process.env.DHL_API_SECRET
-      );
-    }
-
+    // FedEx - Primary carrier
     if (process.env.FEDEX_API_KEY && process.env.FEDEX_API_SECRET) {
       this.carriers.fedex = new FedExService(
         process.env.FEDEX_API_KEY,
-        process.env.FEDEX_API_SECRET
+        process.env.FEDEX_API_SECRET,
+        process.env.FEDEX_ACCOUNT_NUMBER
       );
+      console.log("✅ FedEx service initialized (Primary Carrier)");
+    } else {
+      console.warn("⚠️  FedEx credentials not found - using mock data");
     }
 
-    if (process.env.UPS_API_KEY && process.env.UPS_API_SECRET) {
-      this.carriers.ups = new UPSService(
-        process.env.UPS_API_KEY,
-        process.env.UPS_API_SECRET
-      );
-    }
+    // DHL - Disabled for now (commented out in .env)
+    // if (process.env.DHL_CLIENT_ID && process.env.DHL_CLIENT_SECRET) {
+    //   this.carriers.dhl = new DHLService(
+    //     process.env.DHL_CLIENT_ID,
+    //     process.env.DHL_CLIENT_SECRET
+    //   );
+    // }
+
+    // UPS - Disabled for now (commented out in .env)
+    // if (process.env.UPS_API_KEY && process.env.UPS_API_SECRET) {
+    //   this.carriers.ups = new UPSService(
+    //     process.env.UPS_API_KEY,
+    //     process.env.UPS_API_SECRET
+    //   );
+    // }
 
     // Log available carriers
     console.log("Available carriers:", Object.keys(this.carriers));
+    if (Object.keys(this.carriers).length === 0) {
+      console.warn("⚠️  No carrier services initialized - will use mock data");
+    }
   }
 
   async calculateRates(
@@ -37,7 +47,7 @@ class CarrierServiceManager {
     destination,
     weight,
     dimensions,
-    selectedCarriers = ["dhl", "fedex", "ups"]
+    selectedCarriers = ["fedex"] // FedEx only by default
   ) {
     try {
       // Filter out carriers that aren't initialized
@@ -46,10 +56,9 @@ class CarrierServiceManager {
       );
 
       if (availableCarriers.length === 0) {
-        console.warn(
-          "No carriers available with valid API keys. Using mock data."
+        throw new Error(
+          "No carriers available with valid API keys. Please configure FedEx API credentials."
         );
-        return this.getMockRates();
       }
 
       const ratePromises = availableCarriers.map((carrier) =>
@@ -75,47 +84,68 @@ class CarrierServiceManager {
         }
       });
 
-      // If no rates were successfully retrieved, return mock data
+      // If no rates were successfully retrieved, throw error
       if (rates.length === 0) {
-        console.warn("No rates retrieved from carriers. Using mock data.");
-        return this.getMockRates();
+        throw new Error("No shipping rates available. All carrier services failed to respond.");
       }
 
       return rates;
     } catch (error) {
       console.error("Error calculating rates:", error);
-      return this.getMockRates();
+      throw new Error(`Failed to calculate shipping rates: ${error.message}`);
     }
   }
 
-  // Mock rates for development/testing
-  getMockRates() {
-    return [
-      {
-        carrier: "DHL",
-        serviceLevel: "Express",
-        cost: 45.99,
-        currency: "GBP",
-        estimatedDays: 2,
-        selected: false,
-      },
-      {
-        carrier: "FedEx",
-        serviceLevel: "Standard",
-        cost: 35.5,
-        currency: "GBP",
-        estimatedDays: 3,
-        selected: false,
-      },
-      {
-        carrier: "UPS",
-        serviceLevel: "Express Saver",
-        cost: 40.75,
-        currency: "GBP",
-        estimatedDays: 2,
-        selected: false,
-      },
-    ];
+
+  /**
+   * Validate address using FedEx service
+   */
+  async validateAddress(address) {
+    if (this.carriers.fedex) {
+      return await this.carriers.fedex.validateAddress(address);
+    }
+    
+    // Return mock validation if FedEx not available
+    return {
+      isValid: true,
+      formattedAddress: address,
+      classification: 'UNKNOWN',
+      confidence: 'NOT_VALIDATED'
+    };
+  }
+
+  /**
+   * Track shipment using appropriate carrier
+   */
+  async trackShipment(trackingNumber, carrier = 'fedex') {
+    const carrierService = this.carriers[carrier.toLowerCase()];
+    
+    if (!carrierService) {
+      throw new Error(`Carrier ${carrier} not available`);
+    }
+
+    if (typeof carrierService.trackShipment === 'function') {
+      return await carrierService.trackShipment(trackingNumber);
+    }
+    
+    throw new Error(`Tracking not supported for carrier ${carrier}`);
+  }
+
+  /**
+   * Create shipment using appropriate carrier
+   */
+  async createShipment(shipmentData, carrier = 'fedex') {
+    const carrierService = this.carriers[carrier.toLowerCase()];
+    
+    if (!carrierService) {
+      throw new Error(`Carrier ${carrier} not available`);
+    }
+
+    if (typeof carrierService.createShipment === 'function') {
+      return await carrierService.createShipment(shipmentData);
+    }
+    
+    throw new Error(`Shipment creation not supported for carrier ${carrier}`);
   }
 }
 

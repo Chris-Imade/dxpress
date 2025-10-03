@@ -1,5 +1,5 @@
 const Shipment = require("../models/Shipment");
-const dhlService = require("../services/dhlService");
+const carrierService = require("../services/carriers");
 const AuditLog = require("../models/AuditLog");
 
 // Get live tracking data for user dashboard
@@ -15,41 +15,44 @@ exports.getLiveTracking = async (req, res) => {
 
     let trackingData = null;
     
-    // Get live tracking from DHL if it's a DHL shipment
-    if (shipment.carrier === 'dhl' && shipment.dhlShipmentId) {
-      try {
-        trackingData = await dhlService.trackShipment(shipment.dhlShipmentId);
+    // Get live tracking data based on carrier
+    const carrierTrackingNumber = shipment.carrierTrackingNumber || shipment.trackingId;
+    
+    try {
+      // Try to get live tracking from the carrier service
+      if (shipment.carrier && shipment.carrier.toLowerCase() === 'fedex') {
+        trackingData = await carrierService.trackShipment(carrierTrackingNumber, 'fedex');
         
         // Update shipment status if different
         if (trackingData.status !== shipment.status) {
           shipment.status = trackingData.status;
-          shipment.statusHistory = trackingData.events.map(event => ({
+          shipment.trackingHistory = trackingData.events.map(event => ({
             status: event.status,
             location: event.location,
             timestamp: event.timestamp,
-            note: event.description,
+            description: event.description,
           }));
           await shipment.save();
         }
-      } catch (error) {
-        console.error("DHL tracking error:", error);
-        // Fall back to database data
+      } else {
+        // Use database data for other carriers or fallback
         trackingData = {
           trackingNumber: shipment.trackingId,
           status: shipment.status,
-          currentLocation: shipment.statusHistory?.[0]?.location || "Unknown",
+          location: shipment.trackingHistory?.[0]?.location || "Unknown",
           estimatedDelivery: shipment.estimatedDelivery,
-          events: shipment.statusHistory || [],
+          events: shipment.trackingHistory || [],
         };
       }
-    } else {
-      // Use database data for non-DHL shipments
+    } catch (error) {
+      console.error(`${shipment.carrier} tracking error:`, error);
+      // Fall back to database data
       trackingData = {
         trackingNumber: shipment.trackingId,
         status: shipment.status,
-        currentLocation: shipment.statusHistory?.[0]?.location || "Unknown",
+        location: shipment.trackingHistory?.[0]?.location || "Unknown",
         estimatedDelivery: shipment.estimatedDelivery,
-        events: shipment.statusHistory || [],
+        events: shipment.trackingHistory || [],
       };
     }
 
@@ -83,10 +86,10 @@ exports.updateTrackingStatus = async (req, res) => {
     }
 
     // Add new status to history
-    shipment.statusHistory.unshift({
+    shipment.trackingHistory.unshift({
       status,
       location,
-      note: note || "",
+      description: note || "",
       timestamp: new Date(),
     });
 
@@ -117,30 +120,35 @@ exports.updateTrackingStatus = async (req, res) => {
   }
 };
 
-// Sync all DHL shipments with live data
-exports.syncDHLShipments = async (req, res) => {
+// Sync all carrier shipments with live data
+exports.syncCarrierShipments = async (req, res) => {
   try {
-    const dhlShipments = await Shipment.find({ 
-      carrier: 'dhl', 
-      dhlShipmentId: { $exists: true },
+    const { carrier = 'fedex' } = req.query;
+    
+    const activeShipments = await Shipment.find({ 
+      carrier: { $regex: new RegExp(carrier, 'i') },
+      carrierTrackingNumber: { $exists: true },
       status: { $nin: ['delivered', 'cancelled'] }
     });
 
     let syncedCount = 0;
     let errorCount = 0;
 
-    for (const shipment of dhlShipments) {
+    for (const shipment of activeShipments) {
       try {
-        const trackingData = await dhlService.trackShipment(shipment.dhlShipmentId);
+        const trackingData = await carrierService.trackShipment(
+          shipment.carrierTrackingNumber || shipment.trackingId, 
+          carrier.toLowerCase()
+        );
         
         // Update if status changed
         if (trackingData.status !== shipment.status) {
           shipment.status = trackingData.status;
-          shipment.statusHistory = trackingData.events.map(event => ({
+          shipment.trackingHistory = trackingData.events.map(event => ({
             status: event.status,
             location: event.location,
             timestamp: event.timestamp,
-            note: event.description,
+            description: event.description,
           }));
           await shipment.save();
           syncedCount++;
@@ -157,8 +165,8 @@ exports.syncDHLShipments = async (req, res) => {
       action: "API_CALL",
       resource: "shipment",
       details: {
-        operation: "dhl_sync",
-        totalShipments: dhlShipments.length,
+        operation: `${carrier}_sync`,
+        totalShipments: activeShipments.length,
         syncedCount,
         errorCount,
       },
@@ -168,12 +176,24 @@ exports.syncDHLShipments = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Synced ${syncedCount} shipments, ${errorCount} errors`,
+      message: `Synced ${syncedCount} ${carrier} shipments, ${errorCount} errors`,
       syncedCount,
       errorCount,
     });
   } catch (error) {
-    console.error("Sync DHL shipments error:", error);
-    res.status(500).json({ error: "Failed to sync DHL shipments" });
+    console.error(`Sync ${req.query.carrier || 'carrier'} shipments error:`, error);
+    res.status(500).json({ error: `Failed to sync ${req.query.carrier || 'carrier'} shipments` });
   }
+};
+
+// Legacy DHL sync endpoint (for backward compatibility)
+exports.syncDHLShipments = async (req, res) => {
+  req.query.carrier = 'dhl';
+  return exports.syncCarrierShipments(req, res);
+};
+
+// New FedEx sync endpoint
+exports.syncFedExShipments = async (req, res) => {
+  req.query.carrier = 'fedex';
+  return exports.syncCarrierShipments(req, res);
 };

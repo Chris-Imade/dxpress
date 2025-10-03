@@ -287,17 +287,30 @@ exports.saveShipmentData = async (req, res) => {
     // Calculate final price including admin fees if shipping cost is provided
     let finalPrice = 45.99; // Default fallback price
     
-    if (req.body.shippingCost) {
+    console.log('💰 [DEBUG] Shipping cost from request:', req.body.shippingCost);
+    
+    if (req.body.shippingCost && !isNaN(parseFloat(req.body.shippingCost))) {
       finalPrice = parseFloat(req.body.shippingCost);
+      console.log('💰 [DEBUG] Using provided shipping cost:', finalPrice);
     } else if (req.body.selectedCarrier === "DHL Express") {
       // If no shipping cost provided, calculate with admin fees
       try {
         const globalSettings = await GlobalSettings.findOne();
         const dhlAdditionalFees = globalSettings?.carrierSettings?.dhl?.additionalFees || 0;
         finalPrice = 45.99 + dhlAdditionalFees; // Base DHL rate + admin fees
+        console.log('💰 [DEBUG] Using DHL rate with admin fees:', finalPrice);
       } catch (error) {
         console.error("Error getting admin fees:", error);
+        finalPrice = 45.99; // Fallback
       }
+    } else {
+      console.log('💰 [DEBUG] Using default fallback price:', finalPrice);
+    }
+    
+    // Ensure finalPrice is never NaN
+    if (isNaN(finalPrice)) {
+      console.error('💰 [ERROR] Final price is NaN, using fallback');
+      finalPrice = 45.99;
     }
 
     const shipmentData = {
@@ -325,8 +338,9 @@ exports.saveShipmentData = async (req, res) => {
       },
       declaredValue: parseFloat(packageValue) || 100,
       // Add required fields with calculated price including admin fees
-      carrier: req.body.selectedCarrier || "DHL Express",
-      service: req.body.selectedService || "Express Worldwide", 
+      carrier: req.body.selectedCarrier || "fedex", // Use fedex as primary carrier
+      carrierService: req.body.selectedService || "FEDEX_GROUND", // Add required carrierService field
+      service: req.body.selectedService || "FedEx Ground", 
       price: finalPrice, // Total price including admin fees
       estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
       status: "draft", // Draft status until payment

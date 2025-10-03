@@ -224,13 +224,14 @@ app.use("/dxpress-journal", journalRoutes);
 app.use("/journal", journalRoutes);
 app.use("/international-shipping", shippingRoutes);
 app.use("/admin/rates", ratesRoutes);
-app.use("/admin/users", require("./routes/users"));
+app.use("/admin/rates", require("./routes/rates"));
+app.use("/admin/carrier-rates", require("./routes/admin/carrierRates"));
 app.use("/admin/audit-logs", require("./routes/auditLogs"));
 app.use("/api/tracking", require("./routes/tracking"));
 app.use("/", require("./routes/notifications"));
 
 // 404 handler
-app.use((req, res) => {
+app.use((req, res, next) => {
   if (req.path.startsWith("/admin")) {
     return res.status(404).render("admin/404", {
       title: "404 - Page Not Found",
